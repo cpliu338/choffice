@@ -6,10 +6,21 @@
         <title>Facelet Title</title>
     </h:head>
     <h:body>
-        Hello from Facelets
         <p:panel>
-            <h:link outcome="welcomePrimefaces" value="Primefaces welcome page" />
+            <h:outputText rendered="#{not empty userBean.user['sn']}" value="#{userBean.user['sn']} "/>
+            <h:outputText rendered="#{not empty userBean.user['givenName']}" value="#{userBean.user['givenName']}"/>
+            is one of the
+            <h:outputText rendered="#{not empty userBean.user['role:deacons']}" value="deacons"/>
+            <h:outputText rendered="#{not empty userBean.user['role:staff']}" value="staff"/>
         </p:panel>
+        <h:form>
+            Principal: <h:inputText value="#{userBean.name}"/><br/>
+            Credential: 
+            <h:inputSecret value="#{userBean.pwd}"/><br/>
+            <h:commandButton action="#{userBean.action}" value="Login"/>
+        </h:form>
+        <h:outputText value="#{userBean.debug}"/>
+        <h:messages showDetail="true" />
     </h:body>
 </html>
 

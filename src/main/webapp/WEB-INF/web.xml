@@ -5,6 +5,31 @@
         <param-name>javax.faces.PROJECT_STAGE</param-name>
         <param-value>Development</param-value>
     </context-param>
+    <context-param>
+        <description>The principal used for ldap lookup</description>
+        <param-name>ldap.principal</param-name>
+        <param-value>cn=manager,ou=Internal,dc=system,dc=lan</param-value>
+    </context-param>
+    <context-param>
+        <description>The credential used for ldap lookup</description>
+        <param-name>ldap.credential</param-name>
+        <param-value>jMSL5KNZtM+O8RB+</param-value>
+    </context-param>
+    <context-param>
+        <description>The url of the ldap server</description>
+        <param-name>ldap.url</param-name>
+        <param-value>ldaps://192.168.11.224:636</param-value>
+    </context-param>
+    <context-param>
+        <description>The base DN used for ldap lookup</description>
+        <param-name>ldap.base</param-name>
+        <param-value>dc=system,dc=lan</param-value>
+    </context-param>
+    <context-param>
+        <description>A list of groups defined</description>
+        <param-name>ldap.roles</param-name>
+        <param-value>deacons,librarians,staff</param-value>
+    </context-param>
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>
         <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
