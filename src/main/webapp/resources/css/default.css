@@ -1,0 +1,83 @@
+body {
+    background-color: #ffffff;
+    font-size: 12px;
+    font-family: Verdana, "Verdana CE",  Arial, "Arial CE", "Lucida Grande CE", lucida, "Helvetica CE", sans-serif;
+    color: #000000;  
+    margin: 10px;
+}
+
+h1 {
+    font-family: Arial, "Arial CE", "Lucida Grande CE", lucida, "Helvetica CE", sans-serif;
+    border-bottom: 1px solid #AFAFAF; 
+    font-size:  16px;
+    font-weight: bold;
+    margin: 0px;
+    padding: 0px;
+    color: #D20005;
+}
+
+a:link, a:visited {
+  color: #045491;
+  font-weight : bold;
+  text-decoration: none;
+}
+
+a:link:hover, a:visited:hover  {
+  color: #045491;
+  font-weight : bold;
+  text-decoration : underline;
+}
+
+.choffice-widget {
+    font-family: Verdana,Arial,sans-serif; font-size: 1.1em;
+}
+
+.choffice-widget .choffice-widget { font-size: 1em; }
+
+.choffice-widget-widget-content {
+    border: 1px solid #aaaaaa/*{borderColorContent}*/;
+    background: #ffffff/*{bgColorContent}*/ ;
+    color: #222222/*{fcContent}*/;
+}
+
+.choffice-state-default {
+    border: 1px solid #d3d3d3/*{borderColorDefault}*/;
+    background:url("/choffice/javax.faces.resource/themes/sam/images/ui-default.png.jsf?ln=primefaces&amp;v=2.2.1") repeat-x scroll 0 0 #D8D8D8;
+    font-weight: normal/*{fwDefault}*/;
+    color: #000000/*{fcDefault}*/;
+}
+
+.choffice-datatable table {
+    border-collapse:collapse;
+    width:100%;
+    background-color:#fff
+}
+
+.choffice-datatable .choffice-datatable-header,
+.choffice-datatable .choffice-datatable-footer {
+    text-align:center;
+    padding:4px 10px 4px 10px;
+}
+
+.choffice-datatable .choffice-datatable-header {
+    border-bottom: 0px none;
+}
+
+.choffice-datatable .choffice-datatable-footer {
+    border-top: 0px none;
+}
+
+.choffice-datatable th, .choffice-datatable tfoot td {
+    text-align:center;
+    white-space:nowrap;
+    padding:4px 10px 4px 10px;
+}
+
+.choffice-datatable .choffice-datatable-data td,
+.choffice-datatable .choffice-datatable-data-empty td {
+    border-width: 1px;
+    border-style: solid;
+    border-color: inherit;
+    padding:4px 10px 4px 10px;
+}
+

@@ -1,5 +1,6 @@
 package org.therismos.web;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -7,8 +8,13 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.naming.NamingException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.therismos.authen.LoginBean;
 
 /**
@@ -23,7 +29,7 @@ public class UserBean implements java.io.Serializable {
     private String name;
     private String pwd;
     private String debug;
-    private java.util.Map<String,Object> user;
+    private final java.util.Map<String,Object> user;
 
     public Map<String, Object> getUser() {
         return user;
@@ -33,6 +39,27 @@ public class UserBean implements java.io.Serializable {
     public UserBean() {
         user = new java.util.HashMap<String, Object>();
     }
+    
+    public String getTarget() {
+        FacesContext fc = FacesContext.getCurrentInstance();
+        HttpSession session = (HttpSession)fc.getExternalContext().getSession(true);
+        return (String)session.getAttribute("target");
+    }
+    
+    public void logout() {
+        ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+        HttpSession session = (HttpSession)ec.getSession(true);
+        session.removeAttribute("user");
+        user.clear();
+        HttpServletRequest req = (HttpServletRequest)ec.getRequest();
+        try {
+            req.getSession().getServletContext().getRequestDispatcher("/index.jsf").forward(req, (HttpServletResponse)ec.getResponse());
+        } catch (ServletException ex) {
+            Logger.getLogger(UserBean.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(UserBean.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
     public void action() {
         user.put("uid", name);
@@ -41,11 +68,19 @@ public class UserBean implements java.io.Serializable {
         FacesMessage msg = new FacesMessage();
         try {
             loginBean.authenticate(user);
+            HttpSession session = (HttpSession)fc.getExternalContext().getSession(true);
+            session.removeAttribute("user");
             if (user.containsKey("dn")) {
                 debug = user.get("dn").toString();
                 loginBean.setGroups(user, groups);
+                session.setAttribute("user", user);
                 msg.setSeverity(FacesMessage.SEVERITY_INFO);
                 msg.setDetail("Logged in");
+                String target = this.getTarget();
+                if (target != null && target.endsWith(".jsf"))
+                    fc.getExternalContext().redirect(target);
+                else
+                    fc.getExternalContext().redirect("/choffice");
             }
             else {
                 debug = loginBean.getDebug();
