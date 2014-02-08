@@ -10,12 +10,17 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.therismos.authen.LoginBean;
+import org.therismos.entity.Account;
 
 /**
  *
@@ -38,6 +43,24 @@ public class UserBean implements java.io.Serializable {
     
     public UserBean() {
         user = new java.util.HashMap<String, Object>();
+        name = "";
+        try {
+            name = InitialContext.doLookup("java:/comp/env/jdbc/churchDB").getClass().toString();
+            if (name.length()>0) {
+                EntityManagerFactory emf = Persistence.createEntityManagerFactory("churchPU");
+                if (emf == null) 
+                    throw new RuntimeException("cannot create PU");
+                EntityManager em = emf.createEntityManager();
+                if (em == null) 
+                    throw new RuntimeException("cannot create Entity Manager");
+                Account ac = em.createNamedQuery("Account.findById", Account.class).setParameter("id", 11001).setMaxResults(1).getSingleResult();
+                name = ac.getNameChi();
+                emf.close();
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(UserBean.class.getName()).log(Level.SEVERE, null, ex);
+            name = String.format("%s:%s",ex.getClass().getName(), ex.getMessage());
+        }
     }
     
     public String getTarget() {
