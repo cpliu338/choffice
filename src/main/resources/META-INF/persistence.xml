@@ -5,9 +5,9 @@
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/church?zeroDateTimeBehavior=convertToNull&amp;useUnicode=yes&amp;characterEncoding=UTF-8"/>
-      <property name="javax.persistence.jdbc.password" value="user2"/>
+      <property name="javax.persistence.jdbc.password" value="Jbz7dX3dR6SKXmVx"/>
       <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
-      <property name="javax.persistence.jdbc.user" value="user1"/>
+      <property name="javax.persistence.jdbc.user" value="webapp"/>
     </properties>
   </persistence-unit>
 </persistence>
