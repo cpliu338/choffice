@@ -27,6 +27,16 @@
             <h:commandButton action="#{userBean.action}" value="Login"/>
         </h:form>
         <h:outputText value="#{userBean.debug}"/>
+        <h:dataTable value="#{offerBean.offers}" var="offer">
+            <h:column>
+                <f:facet name="header">Name</f:facet>
+                <h:outputText value="#{offer[0]}"/>
+            </h:column>
+            <h:column>
+                <f:facet name="header">Amount</f:facet>
+                <h:outputText value="#{offer[1]}"/>
+            </h:column>
+        </h:dataTable>
         <h:messages showDetail="true" />
             </ui:define>
 

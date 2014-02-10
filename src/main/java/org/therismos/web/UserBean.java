@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.therismos.authen.LoginBean;
 import org.therismos.entity.Account;
+import org.therismos.entity.Offer;
 
 /**
  *
@@ -53,8 +54,6 @@ public class UserBean implements java.io.Serializable {
                 EntityManager em = emf.createEntityManager();
                 if (em == null) 
                     throw new RuntimeException("cannot create Entity Manager");
-                Account ac = em.createNamedQuery("Account.findById", Account.class).setParameter("id", 11001).setMaxResults(1).getSingleResult();
-                name = ac.getNameChi();
                 emf.close();
             }
         } catch (Exception ex) {
