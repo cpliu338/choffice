@@ -1,6 +1,7 @@
 package org.therismos.web;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -158,6 +159,18 @@ public class UserBean implements java.io.Serializable {
      * @return the debug
      */
     public String getDebug() {
+        HttpServletRequest req = (HttpServletRequest)FacesContext.getCurrentInstance().getExternalContext().getRequest();
+        Principal p = req.getUserPrincipal();
+        if (p == null)
+            debug = "No user";
+        else {
+            if (req.isUserInRole("deacons"))
+                debug = "deacons";
+            else if (req.isUserInRole("librarians"))
+                debug = "librarians";
+            else if (req.isUserInRole("staff"))
+                debug = "staff";
+        }
         return debug;
     }
 }
