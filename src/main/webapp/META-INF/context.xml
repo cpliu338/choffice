@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Detail see
+http://www.byteslounge.com/tutorials/jaas-authentication-in-tomcat-example
+-->
 <Context antiJARLocking="true" path="/choffice">
       <Realm className="org.apache.catalina.realm.JAASRealm" 
     appName="LdapLogin"

@@ -41,10 +41,11 @@ public class LdapLoginModule implements LoginModule {
   private RolePrincipal rolePrincipal;
   private String login;
   private List<String> userGroups;
-    private String principal;
-    private String credential;
-    private String url ;
-    private String base;
+  java.util.Properties props;
+//    private String principal;
+//    private String credential;
+//    private String url ;
+//    private String base;
     private DirContext ctx;
 //    private String[] roles;
 
@@ -53,25 +54,42 @@ public class LdapLoginModule implements LoginModule {
       CallbackHandler callbackHandler,
       Map<String, ?> sharedState,
       Map<String, ?> options) {
-        principal="cn=manager,ou=Internal,dc=system,dc=lan";
-        credential = "jMSL5KNZtM+O8RB+";
-        url ="ldaps://192.168.11.224:636";
-        base="dc=system,dc=lan";
-        userGroups = new ArrayList<String>();
-    handler = callbackHandler;
-    this.subject = subject;
+        userGroups = new ArrayList();
+        handler = callbackHandler;
+        this.subject = subject;
+        props = new java.util.Properties();
+        try (java.io.InputStream is = LdapLoginModule.class.getResourceAsStream("/ldap.properties")) {
+            if (is == null) {
+                Logger.getLogger(LdapLoginModule.class.getName()).log(Level.WARNING, "Cannot read properties");
+            }
+            else {
+                Logger.getLogger(LdapLoginModule.class.getName()).log(Level.INFO, "Read properties");
+            }
+            props.load(is);
+            if (!props.containsKey("url")) {
+                Logger.getLogger(LdapLoginModule.class.getName()).log(Level.WARNING, "Cannot read property url");
+            }
+            props.getProperty("principal", "cn=manager,ou=Internal,dc=system,dc=lan");
+            props.getProperty("credential", "jMSL5KNZtM+O8RB+");
+            props.getProperty("url", "ldaps://192.168.11.224:636");
+            props.getProperty("base", "dc=system,dc=lan");
+        }
+        catch (IOException ex) {
+            Logger.getLogger(LdapLoginModule.class.getName()).log(Level.SEVERE, null, ex);
+        }
+            
   }
     private void refreshContext() {
 	// Set up environment for creating initial context
 	Hashtable env = new Hashtable(11);
 	env.put(Context.INITIAL_CONTEXT_FACTORY,
 	    "com.sun.jndi.ldap.LdapCtxFactory");
-	env.put(Context.PROVIDER_URL, url);
 
 	// Authenticate as S. User and password "mysecret"
 	env.put(Context.SECURITY_AUTHENTICATION, "simple");
-	env.put(Context.SECURITY_PRINCIPAL, principal);
-	env.put(Context.SECURITY_CREDENTIALS, credential);
+	env.put(Context.SECURITY_PRINCIPAL, props.getProperty("principal"));
+	env.put(Context.SECURITY_CREDENTIALS, props.getProperty("credential"));
+	env.put(Context.PROVIDER_URL, props.getProperty("url"));
         env.put("java.naming.ldap.factory.socket", BlindTrustSSLFactory.class.getName());
         try {
             ctx = new InitialLdapContext(env,null);
@@ -97,7 +115,7 @@ public class LdapLoginModule implements LoginModule {
         this.refreshContext();
         SearchControls searchControls = new SearchControls();
         searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-        NamingEnumeration<SearchResult> results = ctx.search(base, 
+        NamingEnumeration<SearchResult> results = ctx.search(props.getProperty("base"), 
             "uid="+name, // search filter
             searchControls);
         SearchResult searchResult;
@@ -171,7 +189,7 @@ public class LdapLoginModule implements LoginModule {
         searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
         SearchResult searchResult = null;
         for (String r : groups) {
-            NamingEnumeration<SearchResult> results = ctx.search(base, 
+            NamingEnumeration<SearchResult> results = ctx.search(props.getProperty("base"), 
                 "cn="+r, // search filter
                 searchControls);
             if(results.hasMoreElements()) {
