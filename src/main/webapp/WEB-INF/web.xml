@@ -21,14 +21,8 @@
         <param-value>ldaps://192.168.11.224:636</param-value>
     </context-param>
     <context-param>
-        <description>The base DN used for ldap lookup</description>
-        <param-name>ldap.base</param-name>
-        <param-value>dc=system,dc=lan</param-value>
-    </context-param>
-    <context-param>
-        <description>A list of groups defined</description>
-        <param-name>ldap.roles</param-name>
-        <param-value>deacons,librarians,staff</param-value>
+        <param-name>datapath</param-name>
+        <param-value>/var/barcode</param-value>
     </context-param>
     <filter>
         <filter-name>AuthFilter</filter-name>
@@ -36,16 +30,24 @@
     </filter>
     <filter-mapping>
         <filter-name>AuthFilter</filter-name>
-        <url-pattern>*.jsf</url-pattern>
+        <url-pattern>*.jsfx</url-pattern>
     </filter-mapping>
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>
         <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
+    <servlet>
+        <servlet-name>WeeklyOfferServlet</servlet-name>
+        <servlet-class>org.therismos.servlet.WeeklyOfferServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>Faces Servlet</servlet-name>
         <url-pattern>*.jsf</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>WeeklyOfferServlet</servlet-name>
+        <url-pattern>/WeeklyOffer</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
@@ -56,7 +58,26 @@
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
     <security-constraint>
-        <display-name>Offers</display-name>
+        <display-name>Users</display-name>
+        <web-resource-collection>
+            <web-resource-name>Offers</web-resource-name>
+            <description/>
+            <url-pattern>/users/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <description/>
+            <role-name>deacons</role-name>
+            <role-name>staff</role-name>
+            <role-name>librarians</role-name>
+        </auth-constraint>
+    </security-constraint>
+    <security-constraint>
+        <display-name>Staff</display-name>
+        <web-resource-collection>
+            <web-resource-name>Staff and deacons</web-resource-name>
+            <description/>
+            <url-pattern>/staff/*</url-pattern>
+        </web-resource-collection>
         <web-resource-collection>
             <web-resource-name>Offers</web-resource-name>
             <description/>
@@ -64,12 +85,29 @@
         </web-resource-collection>
         <auth-constraint>
             <description/>
-            <role-name>deacons</role-name>
             <role-name>staff</role-name>
+            <role-name>deacons</role-name>
+        </auth-constraint>
+    </security-constraint>
+    <security-constraint>
+        <display-name>Librarians</display-name>
+        <web-resource-collection>
+            <web-resource-name>Librarians and staff</web-resource-name>
+            <description/>
+            <url-pattern>/librarians/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <description/>
+            <role-name>librarians</role-name>
+            <role-name>deacons</role-name>
         </auth-constraint>
     </security-constraint>
     <login-config>
-        <auth-method>BASIC</auth-method>
+        <auth-method>FORM</auth-method>
+        <form-login-config>
+            <form-login-page>/login.jsf</form-login-page>
+            <form-error-page>/login-failed.jsf</form-error-page>
+        </form-login-config>
     </login-config>
     <security-role>
         <description/>

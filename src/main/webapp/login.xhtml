@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.prime.com.tr/ui" xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                template="./simpleTemplate.xhtml">
+
+    <ui:define name="top">
+        <h:outputText value="#{msg['login.welcome']}" ></h:outputText>
+    </ui:define>
+
+    <ui:define name="content">
+<form method="POST" action="j_security_check">
+    <h:panelGrid columns="2">
+		<h:outputText value="#{msg['login.name']}" />:
+		<input type="text" name="j_username" />
+		<h:outputText value="#{msg['login.password']}" />:
+                <input type="password" name="j_password"/>
+		<h:outputText value="" />
+		<input type="submit" value="#{msg['login.submit']}" />
+    </h:panelGrid>
+</form>
+    </ui:define>
+
+</ui:composition>

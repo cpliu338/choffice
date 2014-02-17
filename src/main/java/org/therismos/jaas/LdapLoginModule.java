@@ -41,13 +41,9 @@ public class LdapLoginModule implements LoginModule {
   private RolePrincipal rolePrincipal;
   private String login;
   private List<String> userGroups;
+  private java.util.HashMap<String,String> map;
   java.util.Properties props;
-//    private String principal;
-//    private String credential;
-//    private String url ;
-//    private String base;
     private DirContext ctx;
-//    private String[] roles;
 
   @Override
   public void initialize(Subject subject,
@@ -55,16 +51,11 @@ public class LdapLoginModule implements LoginModule {
       Map<String, ?> sharedState,
       Map<String, ?> options) {
         userGroups = new ArrayList();
+        map = new java.util.HashMap<>();
         handler = callbackHandler;
         this.subject = subject;
         props = new java.util.Properties();
         try (java.io.InputStream is = LdapLoginModule.class.getResourceAsStream("/ldap.properties")) {
-            if (is == null) {
-                Logger.getLogger(LdapLoginModule.class.getName()).log(Level.WARNING, "Cannot read properties");
-            }
-            else {
-                Logger.getLogger(LdapLoginModule.class.getName()).log(Level.INFO, "Read properties");
-            }
             props.load(is);
             if (!props.containsKey("url")) {
                 Logger.getLogger(LdapLoginModule.class.getName()).log(Level.WARNING, "Cannot read property url");
@@ -136,6 +127,8 @@ public class LdapLoginModule implements LoginModule {
             if (!loggedIn)
                 throw new LoginException("Wrong password");
         login = searchResult.getNameInNamespace();
+        map.put("sn", searchResult.getAttributes().get("sn").get().toString());
+        map.put("givenName", searchResult.getAttributes().get("givenName").get().toString());
 //                searchResult.getAttributes().get("sn").get()+" "+
 //                searchResult.getAttributes().get("givenName").get();
         String[] roles = {"staff","deacons","librarians"};
@@ -159,6 +152,7 @@ public class LdapLoginModule implements LoginModule {
   public boolean commit() throws LoginException {
 
     userPrincipal = new UserPrincipal(login);
+    userPrincipal.setMap(map);
     subject.getPrincipals().add(userPrincipal);
 
     if (userGroups != null && userGroups.size() > 0) {
@@ -204,13 +198,11 @@ public class LdapLoginModule implements LoginModule {
             NamingEnumeration members = attr.getAll();
             while (members.hasMore()) {
                 String s = members.next().toString();
-                Logger.getLogger(LdapLoginModule.class.getName()).log(Level.INFO, "{0}",
-                s);
+//                Logger.getLogger(LdapLoginModule.class.getName()).log(Level.INFO, "{0}", s);
                 if (s.equals(login)) {
 //                    user1.put("role:"+r, true);
                     userGroups.add(r);
-                Logger.getLogger(LdapLoginModule.class.getName()).log(Level.INFO, "{0}",
-                        "found");
+                Logger.getLogger(LdapLoginModule.class.getName()).log(Level.FINE, "found: {0}", r);
                     break;
                 }
             }

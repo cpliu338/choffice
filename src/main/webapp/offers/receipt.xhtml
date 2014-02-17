@@ -7,6 +7,7 @@
     </h:head>
     <h:body>
         <h:form>
+            <p:growl id="growl" showDetail="true"/>
             <h:panelGrid columns="2">
                 <h:outputLabel value="From"/>
                 <p:calendar pattern="yyyyMMdd" value="#{offerBean.begin}"/>
@@ -15,9 +16,9 @@
                 <h:outputLabel value="Batch"/>
                 <h:inputText value="#{offerBean.batch}"/>
             </h:panelGrid>
-            <h:commandButton value="Print" action="#{offerBean.print}"/>
+            <p:commandButton update="link growl" value="Print" action="#{offerBean.print}"/>
+            <p:commandLink disabled="#{not offerBean.done}" id="link" action="filelist">Receipts list</p:commandLink>
         </h:form>
-        <h:messages showDetail="true" />
     </h:body>
 </html>
 

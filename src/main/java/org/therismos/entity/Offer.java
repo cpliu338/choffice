@@ -40,7 +40,7 @@ public class Offer implements Serializable {
     private int memberId;
     */
         private Date date1;
-        private int accountId;
+        private Account account;
         private double amount;
         private boolean posted;
         private int receipt;
@@ -52,11 +52,11 @@ public class Offer implements Serializable {
         this.id = id;
     }
 
-    public Offer(Integer id, Date date1, int accountId, double amount, boolean posted, int receipt) {
+    public Offer(Integer id, Date date1, Account account, double amount, boolean posted, int receipt) {
         // Missing member1
         this.id = id;
         this.date1 = date1;
-        this.accountId = accountId;
+        this.account = account;
         this.amount = amount;
         this.posted = posted;
         this.receipt = receipt;
@@ -81,16 +81,8 @@ public class Offer implements Serializable {
     public void setMember1(Member1 member1) {
         this.member1 = member1;
     }
-/*
-    public int getMemberId() {
-        return memberId;
-    }
 
-    public void setMemberId(int memberId) {
-        this.memberId = memberId;
-    }
-*/
-@Basic(optional = false)
+    @Basic(optional = false)
     @Temporal(TemporalType.DATE)
     public Date getDate1() {
         return date1;
@@ -100,14 +92,14 @@ public class Offer implements Serializable {
         this.date1 = date1;
     }
 
-@Basic(optional = false)
-    @Column(name = "account_id")
-    public int getAccountId() {
-        return accountId;
+    @ManyToOne
+    @JoinColumn(name="account_id")
+    public Account getAccount() {
+        return account;
     }
 
-    public void setAccountId(int accountId) {
-        this.accountId = accountId;
+    public void setAccount(Account account) {
+        this.account = account;
     }
 
 @Basic(optional = false)

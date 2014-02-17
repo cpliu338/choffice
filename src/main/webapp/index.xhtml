@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://xmlns.jcp.org/jsf/core"
+<html xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:p="http://primefaces.org/ui" xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
@@ -8,41 +8,25 @@
 
         <ui:composition template="simpleTemplate.xhtml">
 
-            <ui:define name="title">
-                title
-            </ui:define>
-
             <ui:define name="content">
-        <p:panel>
-            <h:outputText rendered="#{not empty userBean.user['sn']}" value="#{userBean.user['sn']} "/>
-            <h:outputText rendered="#{not empty userBean.user['givenName']}" value="#{userBean.user['givenName']}"/>
-            is one of the
-            <h:outputText rendered="#{not empty userBean.user['role:deacons']}" value="deacons"/>
-            <h:outputText rendered="#{not empty userBean.user['role:staff']}" value="staff"/>
-        </p:panel>
-        <h:form>
-            Principal: <h:inputText value="#{userBean.name}"/><br/>
-            Credential: 
-            <h:inputSecret value="#{userBean.pwd}"/><br/>
-            <h:commandButton action="#{userBean.action}" value="Login"/>
-        </h:form>
-        <h:outputText value="#{userBean.debug}"/>
-        <h:form>
-            <h:panelGrid columns="2">
-                <h:outputLabel value="From"/>
-                <p:calendar value="#{offerBean.begin}"/>
-                <h:outputLabel value="To"/>
-                <p:calendar value="#{offerBean.end}"/>
-                <h:outputLabel value="Batch"/>
-                <h:inputText value="#{offerBean.batch}"/>
-            </h:panelGrid>
-            <h:commandButton value="Print" action="#{offerBean.print}"/>
-        </h:form>
+                <p:panel rendered="#{not userBean.loggedIn}">
+                    <h:form>
+                        <h:commandLink action="/users/secure?faces-redirect=true">
+                            <h:outputText value="#{msg['login.submit']}"/>
+                        </h:commandLink>
+                    </h:form>
+                </p:panel>
+                <p:panel rendered="#{userBean.loggedIn}">
+                    <h:form>
+                        <h:commandLink action="#{userBean.logout()}">Log out</h:commandLink>
+                    </h:form>
+                </p:panel>
+                <h:outputText value="#{userBean.userMap['sn']}" />
+                <h:outputText value="#{userBean.userMap['givenName']}" />
+                <h:outputText value="#{userBean.name}"/>
+                <h:outputText rendered="#{userBean.isInRole('deacons')}" value="deacon"/>,
+                <h:outputText rendered="#{userBean.isInRole('staff')}" value="staff"/>,
         <h:messages showDetail="true" />
-            </ui:define>
-
-            <ui:define name="bottom">
-                bottom
             </ui:define>
 
         </ui:composition>

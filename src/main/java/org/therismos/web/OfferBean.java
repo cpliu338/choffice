@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ViewScoped;
+import javax.faces.context.FacesContext;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -20,23 +23,27 @@ import org.therismos.entity.Offer;
  * @author cpliu
  */
 @ManagedBean
+@ViewScoped
 public class OfferBean {
     
     private int batch;
     private List offers;
     private Date begin;
     private Date end;
+    private boolean done;
 
     public OfferBean() {
         offers = java.util.Collections.EMPTY_LIST;
         batch = 1;
         end = new Date();
         begin = new Date(end.getTime()-365*86400000L);
+        done = false;
     }
     
     //@PostConstruct 
     public void print() {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("churchPU");
+        FacesMessage msg = new FacesMessage();
         if (emf != null) {
             EntityManager em = emf.createEntityManager();
             offers = em.createQuery("SELECT o.member1.id, o.member1.name, SUM(o.amount) FROM Offer o WHERE o.receipt=:batch"
@@ -61,14 +68,20 @@ public class OfferBean {
                 worker.setBatch(batch);
                 worker.setItems(items);
                 worker.run();
+                done = true;
+                msg.setDetail("Done");
+                msg.setSeverity(FacesMessage.SEVERITY_INFO);
             }
             else {
-                Logger.getLogger(OfferBean.class.getName()).log(Level.WARNING, "No offers found");
+                msg.setDetail("No offers found");
+                msg.setSeverity(FacesMessage.SEVERITY_WARN);
             }
         }
         else {
-            throw new RuntimeException("cannot create PU");
+            msg.setDetail("cannot create PU");
+            msg.setSeverity(FacesMessage.SEVERITY_ERROR);            
         }
+        FacesContext.getCurrentInstance().addMessage(null, msg);
     }
 
     /**
@@ -125,6 +138,13 @@ public class OfferBean {
      */
     public void setEnd(Date end) {
         this.end = end;
+    }
+
+    /**
+     * @return the done
+     */
+    public boolean isDone() {
+        return done;
     }
     
 }
