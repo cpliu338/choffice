@@ -23,11 +23,9 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Member1.findById", query = "SELECT m FROM Member1 m WHERE m.id = :id"),
     @NamedQuery(name = "Member1.findByNickname", query = "SELECT m FROM Member1 m WHERE m.nickname = :nickname"),
     @NamedQuery(name = "Member1.findByName", query = "SELECT m FROM Member1 m WHERE m.name = :name"),
-    @NamedQuery(name = "Member1.findByLevel", query = "SELECT m FROM Member1 m WHERE m.level = :level"),
-    @NamedQuery(name = "Member1.findByPwd", query = "SELECT m FROM Member1 m WHERE m.pwd = :pwd"),
-    @NamedQuery(name = "Member1.findByGroupname", query = "SELECT m FROM Member1 m WHERE m.groupname = :groupname"),
-    @NamedQuery(name = "Member1.findByPhoto", query = "SELECT m FROM Member1 m WHERE m.photo = :photo"),
-    @NamedQuery(name = "Member1.findByPrint", query = "SELECT m FROM Member1 m WHERE m.print = :print")})
+    @NamedQuery(name = "Member1.findAllGroupname", query = "SELECT DISTINCT m.groupname FROM Member1 m"),
+    @NamedQuery(name = "Member1.findByGroupname", query = "SELECT m FROM Member1 m WHERE m.groupname = :groupname")
+})
 public class Member1 implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -150,6 +148,10 @@ public class Member1 implements Serializable {
     @Override
     public String toString() {
         return "org.therismos.entity.Member1[ id=" + id + " ]";
+    }
+    
+    public int getBarcode() {
+        return 10000000+107*this.id;
     }
     
 }

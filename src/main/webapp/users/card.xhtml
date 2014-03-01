@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+     xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:p="http://primefaces.org/ui" xmlns:h="http://xmlns.jcp.org/jsf/html"
+    template="../simpleTemplate.xhtml"
+                >
+    <ui:define name="title">
+        <h:outputText value="#{msg.app}" ></h:outputText>
+    </ui:define>
+
+    <ui:define name="content">
+            <p:panel id="card">
+        <p:growl id="notify" showDetail="true"/>
+    <table width="330" height="200" border="1" cellpadding="0" cellspacing="0" ><tr>
+            <td class="watermark2" style="background-image: url(#{request.requestURL.substring(0, request.requestURL.lastIndexOf(':'))}/photos/wheat.jpg)" >
+    <table cellpadding="0" cellspacing="0">
+    <tr><td align="left" colspan="2" height="30"><img src="#{request.requestURL.substring(0, request.requestURL.lastIndexOf(':'))}/photos/logo1.jpg" /></td></tr>
+    <tr><td width="160" align="center" height="115">
+            <p:graphicImage id="photo" value="#{streamedBean.photo}" width="101">
+                <f:param name="id" value="#{streamedBean.memberId}"/>
+            </p:graphicImage>
+    </td><td valign="top" width="170"><font size="2" style="line-height:35px"><b>姓 名 :</b></font><font size="3" style="line-height:35px">
+            <h:outputText value="#{memberBean.member.name}" style="font-weight:bold"/></font><br/>
+        <font size="2" style="line-height:35px"><b>稱 呼 :</b></font><font size="3" style="line-height:35px">
+            <h:outputText value="#{memberBean.member.nickname}" style="font-weight:bold"/>
+        </font><br/>
+        <font size="2" style="line-height:35px"><b>團 契 :</b></font><font size="3" style="line-height:35px"><b>
+                <h:outputText value="#{memberBean.member.groupname}"/>
+            </b></font></td></tr>
+        <tr><td height="46" colspan="2" align="center">
+                <p:graphicImage alt="barcode" value="#{streamedBean.barcode}">
+                    <f:param name="id" value="#{memberBean.id}"/>
+                </p:graphicImage>
+            </td></tr>
+    </table>
+    </td></tr></table>
+            </p:panel>
+        <h:form style="margin: 20px">
+            <p:selectOneMenu value="#{memberBean.group}">
+                <f:selectItem itemLabel="Select Group" itemValue="" />
+                <f:selectItems value="#{memberBean.selectItems}"/>
+                <p:ajax update="member" listener="#{memberBean.handleGroupChange()}"/>
+            </p:selectOneMenu>
+            <br/>
+            <p:selectOneMenu id="member" value="#{memberBean.id}">
+                <f:selectItem itemLabel="Select Member" itemValue="" />
+                <f:selectItems value="#{memberBean.members}"/>
+            </p:selectOneMenu>
+            <br/>
+            <h:commandButton action="#{memberBean.init()}" value="update"/>
+        </h:form>
+    </ui:define>
+</ui:composition>

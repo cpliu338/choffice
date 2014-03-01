@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:ui="http://java.sun.com/jsf/facelets"
+      >
+    <h:head>
+        <title>Cards</title>
+    </h:head>
+<h:body>
+        <h:form prependId="false">
+            <p:commandButton update=":cards" value="Refresh" action="#{memberBean.setMembers()}"/>
+        </h:form>
+    <ui:repeat id="cards" value="#{memberBean.members}" var="member">
+            <div class="card">
+                <div><img src="http://localhost/photos/logo1.jpg"/></div>
+                <div>
+                    <div style="float:left;">
+                        <div class="photo"><img width="101" src="http://localhost/photos/#{member.id}.jpg"/></div>
+                        <div style="float:left;">
+                                <p>姓 名 : 廖仲平</p>
+                                <p>稱 呼 : chungping</p>
+                                <p>團 契 : 茶傾</p>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-left:59px"><img src="http://localhost/photos/codes/#{member.barcode}.gif"/></div>
+            </div>
+            <p></p>
+        </ui:repeat>
+
+</h:body>
+</html>

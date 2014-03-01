@@ -5,6 +5,7 @@
     <class>org.therismos.entity.Member1</class>
     <class>org.therismos.entity.Entry</class>
     <class>org.therismos.entity.Offer</class>
+    <class>org.therismos.entity.Publisher</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/church?zeroDateTimeBehavior=convertToNull&amp;useUnicode=yes&amp;characterEncoding=UTF-8"/>

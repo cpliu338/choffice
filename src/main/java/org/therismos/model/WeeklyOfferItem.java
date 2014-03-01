@@ -20,9 +20,9 @@ public class WeeklyOfferItem {
     
     static public WeeklyOfferItem fromOffer(Offer o) {
         WeeklyOfferItem w = new WeeklyOfferItem();
-        w.setAccount(o.getAccount().getNameChi());
+        w.setAccount(o.getAccount()==null ? "??" : o.getAccount().getNameChi());
         w.setAmount(o.getAmount());
-        w.setName(o.getMember1().getName());
+        w.setName(o.getMember1()==null? "???":o.getMember1().getName());
         w.setAnonymous(false);
         return w;
     }

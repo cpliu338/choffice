@@ -2,6 +2,7 @@ package org.therismos.web;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,6 +32,10 @@ public class UserBean implements java.io.Serializable {
 
     public Map getUserMap() {
         return userMap;
+    }
+    
+    public Locale getLocale() {
+        return Locale.TRADITIONAL_CHINESE;
     }
     
     public static final String[] groups = {"deacons","librarians","staff"};

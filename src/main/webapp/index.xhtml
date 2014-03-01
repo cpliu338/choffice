@@ -9,12 +9,15 @@
         <ui:composition template="simpleTemplate.xhtml">
 
             <ui:define name="content">
-                <p:panel rendered="#{not userBean.loggedIn}">
-                    <h:form>
-                        <h:commandLink action="/users/secure?faces-redirect=true">
-                            <h:outputText value="#{msg['login.submit']}"/>
-                        </h:commandLink>
-                    </h:form>
+                <p:panel>
+                    <ul>
+                        <li><h:outputLink value="users/card.jsf">
+                            Member card
+                        </h:outputLink></li>
+                        <li><h:outputLink value="library/books.jsf">
+                            <h:outputText value="#{msg['legend.selfservice']}"/>
+                        </h:outputLink></li>
+                    </ul>
                 </p:panel>
                 <p:panel rendered="#{userBean.loggedIn}">
                     <h:form>
