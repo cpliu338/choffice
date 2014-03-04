@@ -20,10 +20,6 @@
         <param-name>ldap.url</param-name>
         <param-value>ldaps://192.168.11.224:636</param-value>
     </context-param>
-    <context-param>
-        <param-name>datapath</param-name>
-        <param-value>/var/barcode</param-value>
-    </context-param>
     <filter>
         <filter-name>AuthFilter</filter-name>
         <filter-class>org.therismos.authen.AuthFilter</filter-class>
@@ -121,10 +117,8 @@
         <description/>
         <role-name>staff</role-name>
     </security-role>
-    <resource-ref>
-        <res-ref-name>jdbc/churchDB</res-ref-name>
-        <res-type>javax.sql.DataSource</res-type>
-        <res-auth>Container</res-auth>
-        <res-sharing-scope>Shareable</res-sharing-scope>
-    </resource-ref>
+    <resource-env-ref>
+        <resource-env-ref-name>datapath</resource-env-ref-name>
+        <resource-env-ref-type>java.lang.String</resource-env-ref-type>
+    </resource-env-ref>
 </web-app>
