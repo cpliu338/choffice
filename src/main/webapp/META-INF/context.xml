@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Detail see
-http://www.byteslounge.com/tutorials/jaas-authentication-in-tomcat-example
+<!-- JAAS Detail see: http://www.byteslounge.com/tutorials/jaas-authentication-in-tomcat-example
+In server.xml, define non-jta-datasource by
+ <GlobalNamingResources>
+      <Resource name="jdbc/churchDB" auth="Container" type="javax.sql.DataSource"
+               maxActive="100" maxIdle="30" maxWait="10000"
+               useUnicode="yes" characterEncoding="UTF-8" zeroDateTimeBehavior="convertToNull"
+               username="user1" password="user2" driverClassName="com.mysql.jdbc.Driver"
+               url="jdbc:mysql://localhost...?"/>
+In $CATALINA_BASE/conf/context.xml add
+<Environment name="datapath" type="java.lang.String" value="path/to/var/barcode"/>
 -->
 <Context antiJARLocking="true" path="/choffice">
   <Realm appName="LdapLogin" className="org.apache.catalina.realm.JAASRealm" roleClassNames="org.therismos.jaas.RolePrincipal" userClassNames="org.therismos.jaas.UserPrincipal"/>
+  <ResourceLink global='jdbc/churchDB' name='jdbc/churchDB' type="javax.sql.Datasource"/>
 </Context>

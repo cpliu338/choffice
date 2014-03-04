@@ -25,9 +25,16 @@ public class StreamedBean implements java.io.Serializable {
 
     public StreamedBean() {
         FacesContext fc = FacesContext.getCurrentInstance();
-//        Configuration config = (Configuration)fc.getApplication().evaluateExpressionGet(fc, "#{config}", Configuration.class);
-//        if (config != null) {
-            basePath = "/var/barcode";
+        basePath = "/var/barcode";
+javax.naming.Context initCtx, envCtx;
+        try {
+            initCtx = new javax.naming.InitialContext();
+            envCtx = (javax.naming.Context) initCtx.lookup("java:comp/env");
+            basePath = envCtx.lookup("datapath").toString();//
+            Logger.getLogger(BookBean.class.getName()).log(Level.INFO, "datapath {0}", basePath);
+        } catch (javax.naming.NamingException ex) {
+            Logger.getLogger(BookBean.class.getName()).log(Level.SEVERE, null, ex);
+        }
             photospath = new File(this.basePath, "photos");
 //        }
     }
