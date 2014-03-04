@@ -3,8 +3,5 @@
 http://www.byteslounge.com/tutorials/jaas-authentication-in-tomcat-example
 -->
 <Context antiJARLocking="true" path="/choffice">
-      <Realm className="org.apache.catalina.realm.JAASRealm" 
-    appName="LdapLogin"
-    userClassNames="org.therismos.jaas.UserPrincipal"
-    roleClassNames="org.therismos.jaas.RolePrincipal" />
+  <Realm appName="LdapLogin" className="org.apache.catalina.realm.JAASRealm" roleClassNames="org.therismos.jaas.RolePrincipal" userClassNames="org.therismos.jaas.UserPrincipal"/>
 </Context>
