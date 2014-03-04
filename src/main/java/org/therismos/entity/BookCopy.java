@@ -49,6 +49,12 @@ public class BookCopy implements Serializable {
     @ManyToOne
     @JoinColumn(name="call_no", insertable=false, updatable=false)
     private Book book;
+    
+    public static final int WRITTENOFF=0;
+    public static final int ONSHELF=1;
+    public static final int LOANED=2;
+    public static final int STOCKTAKING=3;
+    public static final int MISSING=6;
 
     public Book getBook() {
         return book;

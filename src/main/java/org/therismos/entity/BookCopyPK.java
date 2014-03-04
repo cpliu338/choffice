@@ -1,9 +1,12 @@
 package org.therismos.entity;
 
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import org.therismos.web.BookBean;
 
 /**
  *
@@ -26,6 +29,19 @@ public class BookCopyPK implements Serializable {
         this.copyNo = copyNo;
     }
 
+    public BookCopyPK(String code) {
+        try {
+            callNo = Integer.parseInt(code.trim());
+            copyNo = callNo % 100;
+            callNo = callNo / 100 - 9000000;
+        }
+        catch (NumberFormatException ex) {
+            Logger.getLogger(BookCopyPK.class.getName()).log(Level.WARNING, "Invalid code: {0}", code);
+            callNo = 1;
+            copyNo = 1;
+        }
+    }
+    
     public int getCallNo() {
         return callNo;
     }
