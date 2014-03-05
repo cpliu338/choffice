@@ -1,6 +1,7 @@
 package org.therismos.web;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,8 +12,7 @@ import javax.faces.context.FacesContext;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import org.therismos.entity.Book;
-import org.therismos.entity.BookCopy;
+import org.therismos.entity.*;
 
 /**
  *
@@ -40,7 +40,7 @@ public class BookBean implements java.io.Serializable {
     public BookBean() {
         crit = "";
         book = new Book();
-        foundBooks = new ArrayList<Book>();
+        foundBooks = new ArrayList<>();
     }
     
     public void save() {
@@ -114,5 +114,17 @@ public class BookBean implements java.io.Serializable {
     public void setBook(Book book) {
         this.book = book;
     }
-
+    public List<String> suggestPublisher(String query) {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("churchPU");
+        if (emf==null) return Collections.EMPTY_LIST;
+        EntityManager em = emf.createEntityManager();
+        if (em==null) return Collections.EMPTY_LIST;
+        try {
+            return em.createNamedQuery("Publisher.suggest", String.class).setParameter("nameFrag", "%"+query.trim()+"%").getResultList();
+        }
+        finally {
+            em.close();
+            emf.close();
+        }
+    }
 }

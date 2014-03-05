@@ -66,10 +66,10 @@ public class DummyModule  implements LoginModule {
       String name = ((NameCallback) callbacks[0]).getName();
       String password = String.valueOf(((PasswordCallback) callbacks[1])
           .getPassword());
-
         if(!name.equals(password)) {
                 throw new LoginException("Wrong password");
         }
+        login = name;
         map.put("givenName", name);
         map.put("sn", "Mr");
         if (name.contains("staff"))

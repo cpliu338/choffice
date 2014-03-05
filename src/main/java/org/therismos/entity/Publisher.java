@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package org.therismos.entity;
 
 import java.io.Serializable;
@@ -28,8 +22,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "Publisher.findAll", query = "SELECT p FROM Publisher p"),
     @NamedQuery(name = "Publisher.findById", query = "SELECT p FROM Publisher p WHERE p.id = :id"),
-    @NamedQuery(name = "Publisher.findByNameChi", query = "SELECT p FROM Publisher p WHERE p.nameChi = :nameChi"),
-    @NamedQuery(name = "Publisher.findByNameEng", query = "SELECT p FROM Publisher p WHERE p.nameEng = :nameEng")})
+    @NamedQuery(name = "Publisher.suggest", query = "SELECT p.nameChi FROM Publisher p WHERE p.nameChi LIKE :nameFrag ORDER BY p.nameChi")
+})
 public class Publisher implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
