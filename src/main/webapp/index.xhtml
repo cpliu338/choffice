@@ -6,8 +6,15 @@
 
     <body>
 
-        <ui:composition template="simpleTemplate.xhtml">
-
+        <ui:composition template="WEB-INF/mainTemplate.xhtml">
+            <ui:define name="left">
+                <h:outputLink value="#{facesContext.externalContext.requestContextPath}/secure.jsf" >
+                    Log in
+                </h:outputLink>
+                <h:form>
+                    <h:commandLink action="#{userBean.logout()}">Log out</h:commandLink>
+                </h:form>
+            </ui:define>
             <ui:define name="content">
                 <p:panel>
                     <ul>

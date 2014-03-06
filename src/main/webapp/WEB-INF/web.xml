@@ -56,9 +56,9 @@
     <security-constraint>
         <display-name>Users</display-name>
         <web-resource-collection>
-            <web-resource-name>Offers</web-resource-name>
+            <web-resource-name>Any internal stuff</web-resource-name>
             <description/>
-            <url-pattern>/users/*</url-pattern>
+            <url-pattern>/secure.jsf</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <description/>
@@ -78,6 +78,11 @@
             <web-resource-name>Offers</web-resource-name>
             <description/>
             <url-pattern>/offers/*</url-pattern>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Member cards</web-resource-name>
+            <description/>
+            <url-pattern>/users/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <description/>
