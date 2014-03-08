@@ -40,18 +40,21 @@ public class UserBean implements java.io.Serializable {
     
     public static final String[] groups = {"deacons","librarians","staff"};
    
-    public void logout() {
+    public String logout() {
         user = null;
         userMap = Collections.EMPTY_MAP;
         ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
         HttpSession session = (HttpSession)ec.getSession(true);
-        session.invalidate();
-        HttpServletRequest req = (HttpServletRequest)ec.getRequest();
-        try {
-            req.getSession().getServletContext().getRequestDispatcher("/index.jsp").forward(req, (HttpServletResponse)ec.getResponse());
-        } catch (ServletException | IOException ex) {
-            Logger.getLogger(UserBean.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        session.invalidate(); 
+        this.user = null;
+        this.userMap.clear();
+        return "/index?faces-redirect=true";
+//        HttpServletRequest req = (HttpServletRequest)ec.getRequest();
+//        try {
+//            req.getSession().getServletContext().getRequestDispatcher("/index.jsf").forward(req, (HttpServletResponse)ec.getResponse());
+//        } catch (ServletException | IOException ex) {
+//            Logger.getLogger(UserBean.class.getName()).log(Level.SEVERE, null, ex);
+//        }
     }
     
     public boolean isInRole(String r) {
@@ -78,7 +81,7 @@ public class UserBean implements java.io.Serializable {
      * @return the name
      */
     public String getName() {
-        return user == null ? "Guest" : user.getName();
+        return user == null ? "" : user.getName();
     }
 
 }

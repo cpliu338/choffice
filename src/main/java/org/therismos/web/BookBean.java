@@ -80,12 +80,12 @@ public class BookBean implements java.io.Serializable {
         if (em==null) return;
         int callno;
         try {
-            callno = Integer.parseInt(crit.trim());
+            callno = Integer.parseInt(crit.trim())/ 100 - 9000000;
             foundBooks.add(
                 em.createNamedQuery("Book.findByCallNo", Book.class).setParameter("callNo", callno).getSingleResult()
             );
         }
-        catch (NumberFormatException ex) {
+        catch (NumberFormatException | javax.persistence.NoResultException ex) {
         }
         String crit_trim = crit.trim();
         Logger.getLogger(BookBean.class.getName()).log(Level.INFO, "Crit: {0}", crit_trim);
@@ -95,7 +95,12 @@ public class BookBean implements java.io.Serializable {
         }
         if (foundBooks ==null || foundBooks.isEmpty()) {
             book = new Book();
-            Logger.getLogger(BookBean.class.getName()).log(Level.WARNING, "Books not found");
+//            Logger.getLogger(BookBean.class.getName()).log(Level.WARNING, "Books not found");
+            FacesMessage msg = new FacesMessage();
+            msg.setDetail("Books not found");
+            msg.setSummary("Alert");
+            msg.setSeverity(FacesMessage.SEVERITY_WARN);
+            FacesContext.getCurrentInstance().addMessage("form1", msg);
         }
         em.close();
         emf.close();
