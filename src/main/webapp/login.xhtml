@@ -3,12 +3,11 @@
 <ui:composition  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:p="http://primefaces.prime.com.tr/ui" xmlns:h="http://java.sun.com/jsf/html"
                 xmlns:f="http://java.sun.com/jsf/core"
-                template="./simpleTemplate.xhtml">
+                template="WEB-INF/mainTemplate.xhtml">
 
-    <ui:define name="top">
-        <h:outputText value="#{msg['login.welcome']}" ></h:outputText>
-    </ui:define>
-
+            <ui:define name="left">
+                    Logging in
+            </ui:define>
     <ui:define name="content">
 <form method="POST" action="j_security_check">
     <h:panelGrid columns="2">
