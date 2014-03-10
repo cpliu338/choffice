@@ -20,8 +20,7 @@ import org.therismos.entity.*;
  */
 @ManagedBean
 @ViewScoped
-public class BookBean implements java.io.Serializable {
-    private Book book;
+public class BookBean extends BookBaseBean implements java.io.Serializable {
     private String crit;
     ArrayList<Book> foundBooks;
 
@@ -95,7 +94,6 @@ public class BookBean implements java.io.Serializable {
         }
         if (foundBooks ==null || foundBooks.isEmpty()) {
             book = new Book();
-//            Logger.getLogger(BookBean.class.getName()).log(Level.WARNING, "Books not found");
             FacesMessage msg = new FacesMessage();
             msg.setDetail("Books not found");
             msg.setSummary("Alert");
@@ -106,19 +104,6 @@ public class BookBean implements java.io.Serializable {
         emf.close();
     }
 
-    /**
-     * @return the book
-     */
-    public Book getBook() {
-        return book;
-    }
-
-    /**
-     * @param book the book to set
-     */
-    public void setBook(Book book) {
-        this.book = book;
-    }
     public List<String> suggestPublisher(String query) {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("churchPU");
         if (emf==null) return Collections.EMPTY_LIST;

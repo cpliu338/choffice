@@ -36,9 +36,8 @@ public class BookCopyPK implements Serializable {
             callNo = callNo / 100 - 9000000;
         }
         catch (NumberFormatException ex) {
-            Logger.getLogger(BookCopyPK.class.getName()).log(Level.WARNING, "Invalid code: {0}", code);
-            callNo = 1;
-            copyNo = 1;
+            callNo = -1;
+            copyNo = -1;
         }
     }
     

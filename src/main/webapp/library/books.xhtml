@@ -8,7 +8,14 @@
         <ui:composition template="../WEB-INF/mainTemplate.xhtml">
             <ui:define name="left">
                 <h:form>
-                    <h:commandLink action="#{userBean.logout()}"><h:outputText value="#{msg['menu.logout']}"/></h:commandLink>
+                    <p><h:commandLink action="#{userBean.logout()}"><h:outputText value="#{msg['menu.logout']}"/></h:commandLink></p>
+                        <p><h:outputLink value="books.jsf">
+                            <h:outputText value="#{msg['legend.book']}"/>
+                        </h:outputLink></p>
+                    <p><h:outputLink value="home.jsf">
+                        <h:outputText value="#{msg['legend.borrow']}"/> /
+                        <h:outputText value="#{msg['legend.return']}"/>
+                    </h:outputLink></p>
                 </h:form>
             </ui:define>
             <ui:define name="content">
@@ -30,7 +37,7 @@
                 </p:column>
             </p:dataTable>
         </h:form>
-        <h:form id="form2">
+                <h:form id="form2" rendered="#{userBean.isInRole('deacons')==true}">
             <p:message id="msg2" for="form2" showDetail="#{true}" showSummary="#{true}" />
             <h:panelGrid columns="2" id="book">
                 <h:outputLabel value="Call no"/>
@@ -42,6 +49,29 @@
             </h:panelGrid>
             <p:commandButton process="@form" action="#{bookBean.save()}" update="form2" icon="ui-icon-disk"/>
         </h:form>
+                <h:form id="borrowForm">
+                    <p:messages id="borrowmsg" showDetail="#{true}" showSummary="#{true}" />
+                    <h:panelGrid columns="3">
+                        <h:outputLabel value="Book" for="bookcode"/>
+                        <p:inputText id="bookcode" value="#{bookCopyBean.bookCode}"/>
+                        <p:commandButton update="borrowmsg" icon="ui-icon-search" action="#{bookCopyBean.searchByBookCode()}"/>
+                        <h:outputLabel value="Member" for="membercode"/>
+                        <p:inputText id="membercode" value="#{bookCopyBean.memberCode}"/>
+                        <p:commandButton update="borrowmsg" icon="ui-icon-search" action="#{bookCopyBean.searchByMemberCode()}"/>
+                        <h:outputText value=""/>
+                        <p:commandButton value="Update" update="borrowmsg" action="#{bookCopyBean.updateStatus}"/>
+                        <h:outputText value=""/>
+                    </h:panelGrid>
+                    <p:panelGrid columns="2" id="bcopy" >
+                        <h:outputLabel value="Title"/>
+                        <h:outputText value="#{bookCopyBean.copy.book.title}"/>
+                        <h:outputLabel value="Copy"/>
+                        <h:outputText value="#{bookCopyBean.copy.bookCopyPK.copyNo}"/>
+                        <h:outputLabel value="Status"/>
+                        <h:outputText value="#{msg[bookCopyBean.statusText]}" />
+                    </p:panelGrid>
+                </h:form>
+
                             </ui:define>
         </ui:composition>
     </body>

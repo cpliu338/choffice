@@ -46,9 +46,7 @@
         <url-pattern>/WeeklyOffer</url-pattern>
     </servlet-mapping>
     <session-config>
-        <session-timeout>
-            30
-        </session-timeout>
+        <session-timeout>300</session-timeout>
     </session-config>
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
@@ -70,9 +68,9 @@
     <security-constraint>
         <display-name>Staff</display-name>
         <web-resource-collection>
-            <web-resource-name>Staff and deacons</web-resource-name>
+            <web-resource-name>Staff (member card)</web-resource-name>
             <description/>
-            <url-pattern>/staff/*</url-pattern>
+            <url-pattern>/members/*</url-pattern>
         </web-resource-collection>
         <web-resource-collection>
             <web-resource-name>Offers</web-resource-name>

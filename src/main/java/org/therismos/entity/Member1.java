@@ -150,6 +150,10 @@ public class Member1 implements Serializable {
         return "org.therismos.entity.Member1[ id=" + id + " ]";
     }
     
+    public static int getIdFromBarcode(int code) {
+        return (code-10000000)/107;
+    }
+    
     public int getBarcode() {
         return 10000000+107*this.id;
     }
