@@ -59,12 +59,19 @@ public class MemberBean implements java.io.Serializable {
         }
         return items;
     }
-
+    
+    private SelectItem[] items;
+    
     public SelectItem[] getSelectItems() {
+        return items;
+    }
+    
+    @PostConstruct
+    public void init() {
         emf = Persistence.createEntityManagerFactory("churchPU");
         EntityManager em = emf.createEntityManager();
-        SelectItem[] items = new SelectItem[0];
-        if (em==null) return items;  
+        items = new SelectItem[0];
+        if (em==null) return;  
         try {
             List l = em.createNamedQuery("Member1.findAllGroupname").getResultList();
             int size = l.size();
@@ -80,10 +87,8 @@ public class MemberBean implements java.io.Serializable {
             em.close();
         }
         emf.close();
-        return items;
     }
     
-//    @PostConstruct
     public void handleGroupChange() { 
         emf = Persistence.createEntityManagerFactory("churchPU");
         EntityManager em = emf.createEntityManager();
@@ -100,7 +105,7 @@ public class MemberBean implements java.io.Serializable {
         emf.close();
     }
 
-    public void init() {
+    public void init3() {
         emf = Persistence.createEntityManagerFactory("churchPU");
         EntityManager em = emf.createEntityManager();
         if (em==null) return;

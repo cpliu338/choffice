@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.faces.application.FacesMessage;
+import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.DefaultStreamedContent;
@@ -38,8 +39,6 @@ javax.naming.Context initCtx, envCtx;
             photospath = new File(this.basePath, "photos");
 //        }
     }
-
-
 
     public DefaultStreamedContent getWheat() {
         File bkg = new File(this.basePath, "photos/wheat.jpg");
@@ -136,7 +135,7 @@ javax.naming.Context initCtx, envCtx;
         catch (java.io.IOException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE,null, ex);
         }
-        Logger.getLogger(getClass().getName()).info(event.getFile().getContentType());
+        Logger.getLogger(getClass().getName()).fine(event.getFile().getContentType());
         FacesMessage msg = new FacesMessage("Succesful", event.getFile().getFileName() + " is uploaded.");
         FacesContext.getCurrentInstance().addMessage(null, msg);
     }
