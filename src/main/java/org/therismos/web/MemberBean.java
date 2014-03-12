@@ -31,6 +31,8 @@ public class MemberBean implements java.io.Serializable {
     public MemberBean() {
         group = "";
         members = java.util.Collections.EMPTY_LIST;
+        this.membersInCart = new java.util.ArrayList<>();
+        this.idsInCart = new java.util.ArrayList<>();
     }
     
     public void setMembers() {
@@ -48,6 +50,30 @@ public class MemberBean implements java.io.Serializable {
         }
         emf.close();
         
+    }
+    
+    public java.util.List<Member1> getMembersInCart() {
+        return membersInCart;
+    }
+    
+    public void refreshCart() {
+        membersInCart.clear();
+        emf = Persistence.createEntityManagerFactory("churchPU");
+        EntityManager em = emf.createEntityManager();
+        if (em==null) return;  
+        try {
+            membersInCart.addAll(
+                em.createQuery("select m FROM Member1 m where m.id IN :ids", Member1.class)
+                    .setParameter("ids", idsInCart).getResultList()
+            );
+        }
+        catch (Exception ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        }
+        finally {
+            em.close();
+        }
+        emf.close();
     }
     
     public SelectItem[] getMembers() {
@@ -105,22 +131,12 @@ public class MemberBean implements java.io.Serializable {
         emf.close();
     }
 
-    public void init3() {
-        emf = Persistence.createEntityManagerFactory("churchPU");
-        EntityManager em = emf.createEntityManager();
-        if (em==null) return;
-        try {
-            members = em.createNamedQuery("Member1.findAll", Member1.class).setMaxResults(10).getResultList();
-        }
-        catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        }
-        finally {
-            em.close();
-        }
-        emf.close();
-    }
+    private java.util.List<Member1> membersInCart;
+    private java.util.List<Integer> idsInCart;
 
+    public List<Integer> getIdsInCart() {
+        return idsInCart;
+    }
     /**
      * @return the id
      */

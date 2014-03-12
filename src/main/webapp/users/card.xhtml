@@ -9,7 +9,11 @@
         <ui:composition template="../WEB-INF/mainTemplate.xhtml">
             <ui:define name="left">
                 <h:form>
+                    <p>
                     <h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">Log out</h:commandLink>
+                    </p><p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="cards">Print cards</h:commandLink>
+                    </p>
                 </h:form>
             </ui:define>
             <ui:define name="content">
