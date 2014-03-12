@@ -9,28 +9,25 @@
         <ui:composition template="WEB-INF/mainTemplate.xhtml">
             <ui:define name="left">
                 <h:form>
-                    <h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">Log out</h:commandLink>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">
+                        <h:outputText value="#{msg['menu.logout']}"/>
+                    </h:commandLink>
                 </h:form>
             </ui:define>
             <ui:define name="content">
                 <p:panel>
                     <ul>
                         <li><h:outputLink value="users/card.jsf">
-                                Member card
+                                <h:outputText value="#{msg['legend.membercard']}"/>
                             </h:outputLink></li>
                         <li><h:outputLink value="library/home.jsf">
                             <h:outputText value="#{msg['legend.library']}"/>
                         </h:outputLink></li>
                     </ul>
                 </p:panel>
-                <p:panel rendered="#{userBean.loggedIn}">
-                    <h:form>
-                        <h:commandLink action="#{userBean.logout()}">Log out</h:commandLink>
-                    </h:form>
-                </p:panel>
-                <h:outputText value="#{userBean.userMap['sn']}" />
-                <h:outputText value="#{userBean.userMap['givenName']}" />
-                <h:outputText value="#{userBean.name}"/>
+                <h:outputText value="#{userBean.userMap['sn']} " />
+                <h:outputText value="#{userBean.userMap['givenName']}" /> :
+                <!--h:outputText value="#{userBean.name}"/ -->
                 <h:outputText rendered="#{userBean.isInRole('deacons')}" value="deacon"/>,
                 <h:outputText rendered="#{userBean.isInRole('staff')}" value="staff"/>,
                 <h:messages showDetail="true" />

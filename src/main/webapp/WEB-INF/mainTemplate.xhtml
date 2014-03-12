@@ -15,7 +15,11 @@
     <h:body>
 
         <div id="top">
-            <ui:insert name="top">CHOFFICE</ui:insert>
+            <ui:insert name="top">
+                <h:outputLink value="#{facesContext.externalContext.requestContextPath}/index.jsf">
+                    <h:outputText value="#{msg['app']}"/>
+                </h:outputLink>
+            </ui:insert>
         </div>
         <div>
             <div id="left">

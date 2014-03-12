@@ -20,25 +20,29 @@
             </ui:define>
             <ui:define name="content">
                 <h:form id="borrowForm">
-                    <p:messages id="borrowmsg" showDetail="#{true}" showSummary="#{true}" />
+                    <p:growl id="borrowmsg" showDetail="#{true}" showSummary="#{true}" />
                     <h:panelGrid columns="3">
                         <h:outputLabel value="Book" for="bookcode"/>
                         <p:inputText id="bookcode" value="#{bookCopyBean.bookCode}"/>
-                        <p:commandButton icon="ui-icon-search" update="borrowmsg bcopy actionString confirm" action="#{bookCopyBean.searchByBookCode()}"/>
+                        <p:commandButton icon="ui-icon-search" update="borrowmsg bcopy actionString" action="#{bookCopyBean.searchByBookCode()}"/>
                         <h:outputLabel value="Member" for="membercode"/>
                         <p:inputText id="membercode" value="#{bookCopyBean.memberCode}"/>
-                        <p:commandButton icon="ui-icon-search" update="borrowmsg bcopy actionString confirm" action="#{bookCopyBean.searchByMemberCode()}"/>
+                        <p:commandButton icon="ui-icon-search" update="borrowmsg bcopy actionString" action="#{bookCopyBean.searchByMemberCode()}"/>
                     </h:panelGrid>
                     <p:panelGrid columns="2" id="bcopy" >
                         <h:outputLabel value="Book"/>
                         <h:outputText rendered="#{not empty bookCopyBean.copy}" value="#{bookCopyBean.copy.book.title}"/>
                         <h:outputLabel value="Member"/>
-                        <h:outputText rendered="#{not empty bookCopyBean.member}" value="#{bookCopyBean.member.id}"/>
+                        <h:outputText rendered="#{not empty bookCopyBean.member}" value="#{bookCopyBean.member.name}"/>
+                        <h:outputText rendered="#{empty bookCopyBean.member}" value=" "/>
+                        <h:outputLabel value="Status"/>
+                        <h:outputText value="#{msg[bookCopyBean.statusText]}"/>
+                        <p:commandButton update="borrowForm" value="#{msg['legend.borrow']}"
+                                         disabled="#{not bookCopyBean.borrowable}" action="#{bookCopyBean.borrow()}"/>
+                        <p:commandButton update="borrowForm" value="#{msg['legend.return']}"
+                                         disabled="#{not bookCopyBean.returnable}" action="#{bookCopyBean.return1()}"/>
                     </p:panelGrid>
-                        <h:outputLabel value="#{msg[bookCopyBean.statusText]}"/>
                         <h:outputText id="actionString" value="#{bookCopyBean.actionString}"/>
-                        <p:commandButton update="borrowForm" value="#{msg['cmd.confirm']}" id="confirm"
-                             disabled="#{empty bookCopyBean.actionString}" action="#{bookCopyBean.updateStatus}"/>
                 </h:form>
             </ui:define>
         </ui:composition>

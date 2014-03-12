@@ -32,6 +32,18 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
         this.member = member;
     }
     
+    private boolean borrowable;
+
+    public boolean isBorrowable() {
+        return borrowable;
+    }
+
+    public boolean isReturnable() {
+        return returnable;
+    }
+    
+    private boolean returnable;
+    
     public BookCopyBean() {
         super();
         blankCopy();
@@ -78,8 +90,68 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
         logger.log(Level.INFO, "Returning {0}", actionString);
     }
     
-    public void updateStatus() {
+    public void return1() {
+        FacesMessage msg = new FacesMessage();
+        try {
+            if (copy == null || copy.getStatus()!=BookCopy.LOANED)
+                throw new RuntimeException("Cannot return");
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("churchPU");
+            if (emf==null) throw new RuntimeException("Cannot create EntityManagerFactory");
+            EntityManager em = emf.createEntityManager();
+            if (em==null) throw new RuntimeException("Cannot create EntityManager");
+            javax.persistence.EntityTransaction tx = em.getTransaction();
+            tx.begin();
+            copy.setStatus(BookCopy.ONSHELF);
+            copy.setStartdate(new java.util.Date());
+            em.merge(copy);
+            tx.commit();
+            em.close();
+            emf.close();
+            msg.setSeverity(FacesMessage.SEVERITY_INFO);
+            msg.setSummary("Returned");
+            msg.setDetail(this.actionString);
+        }
+        catch (RuntimeException ex) {
+            logger.log(Level.WARNING, "Database error");
+            msg.setSeverity(FacesMessage.SEVERITY_WARN);
+            msg.setDetail(ex.getMessage());
+            msg.setSummary(ex.getClass().getName());
+        }
+        FacesContext.getCurrentInstance().addMessage(null, msg);
     }
+    
+    public void borrow() {
+        FacesMessage msg = new FacesMessage();
+        try {
+            if (copy == null || copy.getStatus()!=BookCopy.ONSHELF || member ==null)
+                throw new RuntimeException("Cannot borrow");
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("churchPU");
+            if (emf==null) throw new RuntimeException("Cannot create EntityManagerFactory");
+            EntityManager em = emf.createEntityManager();
+            if (em==null) throw new RuntimeException("Cannot create EntityManager");
+            javax.persistence.EntityTransaction tx = em.getTransaction();
+            tx.begin();
+            copy.setStatus(BookCopy.LOANED);
+            copy.setUserId(member.getId());
+            copy.setStartdate(new java.util.Date());
+            copy.setEnddate(new java.util.Date(System.currentTimeMillis()+14*86400000L));
+            em.merge(copy);
+            tx.commit();
+            em.close();
+            emf.close();
+            msg.setSeverity(FacesMessage.SEVERITY_INFO);
+            msg.setSummary("Borrowed");
+            msg.setDetail(this.actionString);
+        }
+        catch (RuntimeException ex) {
+            logger.log(Level.WARNING, "Database error");
+            msg.setSeverity(FacesMessage.SEVERITY_WARN);
+            msg.setDetail(ex.getMessage());
+            msg.setSummary(ex.getClass().getName());
+        }
+        FacesContext.getCurrentInstance().addMessage(null, msg);
+    }
+    
     private static Logger logger = Logger.getLogger(BookCopyBean.class.getName());
     
     public void search() {
@@ -111,24 +183,27 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
             member = super.findMemberByCode(Integer.parseInt(memberCode));
             if (member == null) {
                 msg.setSeverity(FacesMessage.SEVERITY_WARN);
-                msg.setSummary("Not found");
+                msg.setSummary(super.bundle.getString("legend.notfound"));
                 msg.setDetail(memberCode);
                 blankCopy();
             }
             else {
-                msg.setSeverity(FacesMessage.SEVERITY_INFO);
-                msg.setSummary("Found");
-                msg.setDetail(member.getGroupname());
+                returnable = copy != null && (copy.getStatus() == BookCopy.LOANED);
+                borrowable = (copy.getStatus() == BookCopy.ONSHELF);
+//                msg.setSeverity(FacesMessage.SEVERITY_INFO);
+//                msg.setSummary("Found");
+//                msg.setDetail(member.getGroupname());
             }
         }
         catch (RuntimeException ex) {
             msg.setSeverity(FacesMessage.SEVERITY_WARN);
-            msg.setSummary("Invalid code");
+            msg.setSummary("Invalid member code");
             msg.setDetail(memberCode);
             blankCopy();
         }
         this.updateActionString();
-        FacesContext.getCurrentInstance().addMessage("borrowForm", msg);
+        if (copy == null)
+            FacesContext.getCurrentInstance().addMessage(null, msg);
     }
     
     public void searchByBookCode() {
@@ -144,25 +219,28 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
             copy = em.find(BookCopy.class, pk);
             if (copy == null) {
                 msg.setSeverity(FacesMessage.SEVERITY_WARN);
-                msg.setSummary("Not found");
-                msg.setDetail(pk.toString());
+                msg.setSummary(super.bundle.getString("legend.notfound"));
+                msg.setDetail(""+pk.getCallNo()+":"+pk.getCopyNo());
                 blankCopy();
             }
             else {
-                msg.setSeverity(FacesMessage.SEVERITY_INFO);
-                msg.setSummary("Found");
-                msg.setDetail(copy.getBook().getTitle());
+                returnable = (copy.getStatus() == BookCopy.LOANED);
+                borrowable = (copy.getStatus() == BookCopy.ONSHELF && this.member!=null);
+//                msg.setSeverity(FacesMessage.SEVERITY_INFO);
+//                msg.setSummary("Found");
+//                msg.setDetail(copy.getBook().getTitle());
             }
         }
         catch (NumberFormatException ex) {
             msg.setSeverity(FacesMessage.SEVERITY_WARN);
-            msg.setSummary("Invalid code");
+            msg.setSummary("Invalid book code");
             msg.setDetail(this.bookCode);
         }
         em.close();
         emf.close();
         this.updateActionString();
-        FacesContext.getCurrentInstance().addMessage("borrowForm", msg);
+        if (copy == null)
+            FacesContext.getCurrentInstance().addMessage(null, msg);
     }
 
     /**

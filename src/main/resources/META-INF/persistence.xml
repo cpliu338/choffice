@@ -9,7 +9,7 @@
     <class>org.therismos.entity.Publisher</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
-      <property name="eclipselink.logging.level" value="FINE"/>
+      <property name="eclipselink.logging.level" value="WARNING"/>
     </properties>
   </persistence-unit>
 </persistence>
