@@ -3,16 +3,11 @@ package org.therismos.web;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.persistence.TemporalType;
 import org.therismos.bean.Record;
 import org.therismos.bean.Worker2;
@@ -42,10 +37,9 @@ public class OfferBean {
     
     //@PostConstruct 
     public void print() {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("churchPU");
+        EntityManager em = org.therismos.EMF.createEntityManager();;
         FacesMessage msg = new FacesMessage();
-        if (emf != null) {
-            EntityManager em = emf.createEntityManager();
+        if (em != null) {
             offers = em.createQuery("SELECT o.member1.id, o.member1.name, SUM(o.amount) FROM Offer o WHERE o.receipt=:batch"
                 + " AND o.date1 BETWEEN :d1 AND :d2" +
                 " GROUP BY o.member1.id").
@@ -60,10 +54,9 @@ public class OfferBean {
                 items.add(r);
             }
             em.close();
-            emf.close();
             if (items.size() > 0) {
                 Worker2 worker = new Worker2();
-                worker.setFolder(new java.io.File("/var/barcode/receipts"));
+                worker.setFolder(new java.io.File(org.therismos.EMF.getBasePath(), "receipts"));
                 worker.setYear(end.getYear()+1900);
                 worker.setBatch(batch);
                 worker.setItems(items);

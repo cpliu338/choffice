@@ -8,7 +8,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -26,8 +28,6 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Book.findAll", query = "SELECT b FROM Book b"),
     @NamedQuery(name = "Book.findByCallNo", query = "SELECT b FROM Book b WHERE b.callNo = :callNo"),
     @NamedQuery(name = "Book.findLikeTitle", query = "SELECT b FROM Book b WHERE b.title LIKE :title"),
-    @NamedQuery(name = "Book.findByAuthorNo", query = "SELECT b FROM Book b WHERE b.authorNo = :authorNo"),
-    @NamedQuery(name = "Book.findByPublisherNo", query = "SELECT b FROM Book b WHERE b.publisherNo = :publisherNo"),
     @NamedQuery(name = "Book.findByCatId", query = "SELECT b FROM Book b WHERE b.catId = :catId"),
     @NamedQuery(name = "Book.findByOwnerId", query = "SELECT b FROM Book b WHERE b.ownerId = :ownerId"),
     @NamedQuery(name = "Book.findLikeIndexStr", query = "SELECT b FROM Book b WHERE b.indexStr LIKE :indexStr")})
@@ -40,12 +40,12 @@ public class Book implements Serializable {
     private Integer callNo;
     @Basic(optional = false)
     private String title;
-    @Basic(optional = false)
-    @Column(name = "author_no")
-    private int authorNo;
-    @Basic(optional = false)
-    @Column(name = "publisher_no")
-    private int publisherNo;
+    @ManyToOne
+    @JoinColumn(name="author_no")
+    private Author author;
+    @ManyToOne
+    @JoinColumn(name="publisher_no")
+    private Publisher publisher;
     @Basic(optional = false)
     @Lob
     private String remark;
@@ -73,11 +73,11 @@ public class Book implements Serializable {
         this.callNo = callNo;
     }
 
-    public Book(Integer callNo, String title, int authorNo, int publisherNo, String remark, int catId, int ownerId, String indexStr) {
+    public Book(Integer callNo, String title, Author author, Publisher publisher, String remark, int catId, int ownerId, String indexStr) {
         this.callNo = callNo;
         this.title = title;
-        this.authorNo = authorNo;
-        this.publisherNo = publisherNo;
+        this.author = author;
+        this.publisher = publisher;
         this.remark = remark;
         this.catId = catId;
         this.ownerId = ownerId;
@@ -100,20 +100,20 @@ public class Book implements Serializable {
         this.title = title;
     }
 
-    public int getAuthorNo() {
-        return authorNo;
+    public Author getAuthor() {
+        return author;
     }
 
-    public void setAuthorNo(int authorNo) {
-        this.authorNo = authorNo;
+    public void setAuthor(Author author) {
+        this.author = author;
     }
 
-    public int getPublisherNo() {
-        return publisherNo;
+    public Publisher getPublisher() {
+        return publisher;
     }
 
-    public void setPublisherNo(int publisherNo) {
-        this.publisherNo = publisherNo;
+    public void setPublisher(Publisher publisher) {
+        this.publisher = publisher;
     }
 
     public String getRemark() {

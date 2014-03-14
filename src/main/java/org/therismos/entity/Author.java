@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Author.findAll", query = "SELECT a FROM Author a"),
     @NamedQuery(name = "Author.findById", query = "SELECT a FROM Author a WHERE a.id = :id"),
     @NamedQuery(name = "Author.findByNameChi", query = "SELECT a FROM Author a WHERE a.nameChi = :nameChi"),
-    @NamedQuery(name = "Author.findByNameEng", query = "SELECT a FROM Author a WHERE a.nameEng = :nameEng")})
+    @NamedQuery(name = "Author.suggest", query = "SELECT a.nameChi FROM Author a WHERE a.nameChi LIKE :nameFrag ORDER BY a.nameChi")})
 public class Author implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id

@@ -36,6 +36,10 @@
         <filter-name>PrimeFaces FileUpload Filter</filter-name>
         <servlet-name>Faces Servlet</servlet-name>
     </filter-mapping>
+    <listener>
+        <description>Provider of EntityManager</description>
+        <listener-class>org.therismos.EMF</listener-class>
+    </listener>
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>
         <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
@@ -59,20 +63,6 @@
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
-    <security-constraint>
-        <display-name>Users</display-name>
-        <web-resource-collection>
-            <web-resource-name>Any internal stuff</web-resource-name>
-            <description/>
-            <url-pattern>/secure.jsf</url-pattern>
-        </web-resource-collection>
-        <auth-constraint>
-            <description/>
-            <role-name>deacons</role-name>
-            <role-name>staff</role-name>
-            <role-name>librarians</role-name>
-        </auth-constraint>
-    </security-constraint>
     <security-constraint>
         <display-name>Staff</display-name>
         <web-resource-collection>

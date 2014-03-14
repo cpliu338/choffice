@@ -25,19 +25,8 @@ public class StreamedBean implements java.io.Serializable {
     private File photospath;
 
     public StreamedBean() {
-        FacesContext fc = FacesContext.getCurrentInstance();
-        basePath = "/var/barcode";
-javax.naming.Context initCtx, envCtx;
-        try {
-            initCtx = new javax.naming.InitialContext();
-            envCtx = (javax.naming.Context) initCtx.lookup("java:comp/env");
-            basePath = envCtx.lookup("datapath").toString();//
-            Logger.getLogger(BookBean.class.getName()).log(Level.INFO, "datapath {0}", basePath);
-        } catch (javax.naming.NamingException ex) {
-            Logger.getLogger(BookBean.class.getName()).log(Level.SEVERE, null, ex);
-        }
-            photospath = new File(this.basePath, "photos");
-//        }
+        basePath = org.therismos.EMF.getBasePath();
+        photospath = new File(this.basePath, "photos");
     }
 
     public DefaultStreamedContent getWheat() {

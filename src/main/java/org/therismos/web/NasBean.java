@@ -36,9 +36,7 @@ public class NasBean {
     private String path;
 
     public NasBean() {
-        base = new File(
-        FacesContext.getCurrentInstance().getExternalContext().getInitParameter("datapath"));
-        currentPath = new File(base, "receipts");
+        currentPath = new File(org.therismos.EMF.getBasePath(), "receipts");
         files = new ArrayList<>();
 //        subdirs = new ArrayList<FolderModel>();
         content = null;
