@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui" xmlns:f="http://java.sun.com/jsf/core" 
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+    <body>
+
+        <ui:composition template="./../WEB-INF/mainTemplate.xhtml">
+            <f:metadata>
+                <f:viewParam name="id" value="#{bookBean.bookid}" />
+            </f:metadata>
+            <ui:define name="left">
+                <h:form>
+                    <p><h:commandLink action="#{userBean.logout()}"><h:outputText value="#{msg['menu.logout']}"/></h:commandLink></p>
+                        <p><h:outputLink value="books.jsf">
+                            <h:outputText value="#{msg['legend.book']}"/>
+                        </h:outputLink></p>
+                    <p><h:outputLink value="home.jsf">
+                        <h:outputText value="#{msg['legend.borrow']}"/> /
+                        <h:outputText value="#{msg['legend.return']}"/>
+                    </h:outputLink></p>
+                </h:form>
+            </ui:define>
+
+            <ui:define name="content">
+                <h:form>
+                    <h:panelGrid columns="3" id="book">
+                        <h:outputLabel value="Call no"/>
+                        <h:inputText id="bookid" readonly="#{false}" value="#{bookBean.bookid}"/>
+                        <p:messages id="msg" showDetail="#{true}" showSummary="#{true}" />
+                        <h:outputLabel value="Index"/>
+                        <h:inputText id="indexStr" value="#{bookBean.indexStr}"/>
+                        <p:commandButton update="@form" process="bookid indexStr" action="#{bookBean.saveIndexStr()}" value="Update"/>
+                        <h:outputLabel value="Title"/>
+                        <h:inputText readonly="#{true}" value="#{bookBean.book.title}"/>
+                        <p:commandButton action="#{bookBean.init()}" value="Update"/>
+                        <h:outputLabel value="Author"/>
+                        <h:inputText readonly="#{true}" value="#{bookBean.book.author.nameChi}"/>
+                        <p:commandButton action="#{bookBean.init()}" value="Update"/>
+                    </h:panelGrid>
+                </h:form>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>

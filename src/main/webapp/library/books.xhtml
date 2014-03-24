@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:p="http://primefaces.org/ui" xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
 
     <body>
         <ui:composition template="../WEB-INF/mainTemplate.xhtml">
@@ -24,36 +24,19 @@
             <h:outputLabel for="crit" value="#{msg['legend.barcode']}, #{msg['legend.book']}, #{msg['legend.indexStr']} (part)"/>
             <br/>
             <p:inputText id="crit" value="#{bookBean.crit}"/>
-            <p:commandButton process="@form" update="data msg1" icon="ui-icon-search" action="#{bookBean.search()}"/>
+            <p:commandButton process="@form" update="data msg1" icon="ui-icon-search" action="#{bookBean.fullTextSearch()}"/>
             <p:dataTable id="data" emptyMessage="#{msg['legend.notfound']}" value="#{bookBean.foundBooks}" var="book" scrollable="true" scrollHeight="150">
                 <p:column>
                     <f:facet name="header">#{msg['legend.book']}</f:facet>
                     <h:outputText value="#{book.title}"/>
                 </p:column>
                 <p:column>
-                    <p:commandButton update=":form2:book" icon="ui-icon-search">
-                        <f:setPropertyActionListener value="#{book}" target="#{bookBean.book}" />
-                    </p:commandButton>
+                    <h:outputLink value="book.jsf">
+                        <f:param name="id" value="#{book.callNo}"/>
+                        Edit
+                    </h:outputLink>
                 </p:column>
             </p:dataTable>
-        </h:form>
-                <h:form id="form2" rendered="#{userBean.isInRole('deacons')==true}">
-            <p:growl id="msg2" for="form2" showDetail="#{true}" showSummary="#{true}" />
-            <h:panelGrid columns="2" id="book">
-                <h:outputLabel value="Call no"/>
-                <h:inputText readonly="#{true}" value="#{bookBean.book.callNo}"/>
-                <h:outputLabel value="#{msg['legend.book']}"/>
-                <h:outputText value="#{bookBean.book.title}" />
-                <h:outputLabel value="#{msg['legend.indexStr']}"/>
-                <h:inputText value="#{bookBean.book.indexStr}"/>
-                <h:outputLabel value="#{msg['legend.author']}"/>
-                <p:autoComplete completeMethod="#{bookBean.suggestAuthor}" value="#{bookBean.book.author.nameChi}"/>
-                <h:outputLabel value="#{msg['legend.publisher']}"/>
-                <p:autoComplete completeMethod="#{bookBean.suggestPublisher}" value="#{bookBean.book.publisher.nameChi}"/>
-            </h:panelGrid>
-            <h:commandButton action="#{bookBean.save()}" value="#{msg['cmd.confirm']}">
-                <f:ajax execute="@form" render=":form1 @form"/>
-            </h:commandButton>
         </h:form>
             </ui:define>
         </ui:composition>

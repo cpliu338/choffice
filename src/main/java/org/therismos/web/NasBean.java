@@ -35,8 +35,12 @@ public class NasBean {
     private StreamedContent content;
     private String path;
 
-    public NasBean() {
-        currentPath = new File(org.therismos.EMF.getBasePath(), "receipts");
+    @javax.inject.Inject
+    UserBean userBean;
+    
+    @javax.annotation.PostConstruct
+    public void init() {
+        currentPath = userBean.getBasePath();
         files = new ArrayList<>();
 //        subdirs = new ArrayList<FolderModel>();
         content = null;

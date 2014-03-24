@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">
+  <persistence-unit name="churchPU">
+    <exclude-unlisted-classes>false</exclude-unlisted-classes>
+    <jta-data-source>churchDB</jta-data-source>
+    <!-- non-jta-data-source > churchDBUnmanaged < / non-jta-data-source -->
+    <properties>
+      <property name="openjpa.jdbc.DBDictionary" value="mysql" />
+      <property name="openjpa.Log" value="DefaultLevel=WARN, Tool=INFO" />
+    </properties>
+  </persistence-unit>
+</persistence>

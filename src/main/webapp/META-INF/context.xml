@@ -12,5 +12,4 @@ In $CATALINA_BASE/conf/context.xml add
 -->
 <Context antiJARLocking="true" path="/choffice">
   <Realm appName="LdapLogin" className="org.apache.catalina.realm.JAASRealm" roleClassNames="org.therismos.jaas.RolePrincipal" userClassNames="org.therismos.jaas.UserPrincipal"/>
-  <ResourceLink global='jdbc/churchDB' name='jdbc/churchDB' type="javax.sql.Datasource"/>
 </Context>

@@ -27,7 +27,11 @@ public class OfferBean {
     private Date end;
     private boolean done;
 
-    public OfferBean() {
+    @javax.inject.Inject
+    UserBean userBean;
+    
+    @javax.annotation.PostConstruct
+    public void init() {
         offers = java.util.Collections.EMPTY_LIST;
         batch = 1;
         end = new Date();
@@ -35,9 +39,11 @@ public class OfferBean {
         done = false;
     }
     
+    @javax.persistence.PersistenceContext
+    EntityManager em;
     //@PostConstruct 
     public void print() {
-        EntityManager em = org.therismos.EMF.createEntityManager();;
+//        EntityManager em = org.therismos.EMF.createEntityManager();;
         FacesMessage msg = new FacesMessage();
         if (em != null) {
             offers = em.createQuery("SELECT o.member1.id, o.member1.name, SUM(o.amount) FROM Offer o WHERE o.receipt=:batch"
@@ -53,10 +59,10 @@ public class OfferBean {
                 Record r = new Record(begin, end, (Integer)objs[0], (String)objs[1], (Double)objs[2], batch);
                 items.add(r);
             }
-            em.close();
+//            em.close();
             if (items.size() > 0) {
                 Worker2 worker = new Worker2();
-                worker.setFolder(new java.io.File(org.therismos.EMF.getBasePath(), "receipts"));
+                worker.setFolder(new java.io.File(userBean.getBasePath(), "receipts"));
                 worker.setYear(end.getYear()+1900);
                 worker.setBatch(batch);
                 worker.setItems(items);

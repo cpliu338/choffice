@@ -1,18 +1,13 @@
 package org.therismos.web;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.therismos.jaas.UserPrincipal;
 
@@ -28,6 +23,20 @@ public class UserBean implements java.io.Serializable {
     
     public UserBean() {
         userMap = Collections.EMPTY_MAP;
+    }
+
+    public File getBasePath() {
+        javax.naming.Context initCtx;
+        String base1;
+        try {
+            initCtx = new javax.naming.InitialContext();
+            javax.naming.Context envCtx = (javax.naming.Context) initCtx.lookup("java:comp/env");
+            base1 = envCtx.lookup("datapath").toString();
+            return new File(base1);
+        } catch (javax.naming.NamingException ex) {
+            Logger.getLogger(PublisherBean.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
     }
 
     public Map getUserMap() {

@@ -21,12 +21,15 @@ import org.primefaces.model.DefaultStreamedContent;
 public class StreamedBean implements java.io.Serializable {
 
     private DefaultStreamedContent barcode;
-    private String basePath;
+    private File basePath;
     private File photospath;
+    @javax.inject.Inject
+    UserBean userBean;
 
-    public StreamedBean() {
-        basePath = org.therismos.EMF.getBasePath();
-        photospath = new File(this.basePath, "photos");
+    @javax.annotation.PostConstruct
+    public void init() {
+        basePath = userBean.getBasePath();
+        photospath = new File(basePath, "photos");
     }
 
     public DefaultStreamedContent getWheat() {

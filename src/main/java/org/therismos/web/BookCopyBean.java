@@ -3,9 +3,9 @@ package org.therismos.web;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import java.util.logging.*;
+import javax.ejb.EJB;
+import org.therismos.ejb.BookDao;
 import org.therismos.entity.Book;
 import org.therismos.entity.BookCopy;
 import org.therismos.entity.BookCopyPK;
@@ -23,6 +23,8 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
     private String bookCode;
     private String memberCode;
     private Member1 member;
+    @EJB
+    private BookDao dao;
 
     public Member1 getMember() {
         return member;
@@ -95,18 +97,9 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
         try {
             if (copy == null || copy.getStatus()!=BookCopy.LOANED)
                 throw new RuntimeException("Cannot return");
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory("churchPU");
-            if (emf==null) throw new RuntimeException("Cannot create EntityManagerFactory");
-            EntityManager em = emf.createEntityManager();
-            if (em==null) throw new RuntimeException("Cannot create EntityManager");
-            javax.persistence.EntityTransaction tx = em.getTransaction();
-            tx.begin();
             copy.setStatus(BookCopy.ONSHELF);
             copy.setStartdate(new java.util.Date());
             em.merge(copy);
-            tx.commit();
-            em.close();
-            emf.close();
             msg.setSeverity(FacesMessage.SEVERITY_INFO);
             msg.setSummary("Returned");
             msg.setDetail(this.actionString);
@@ -120,25 +113,20 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
         FacesContext.getCurrentInstance().addMessage(null, msg);
     }
     
+    @javax.persistence.PersistenceContext
+    private EntityManager em;
+    
     public void borrow() {
         FacesMessage msg = new FacesMessage();
         try {
             if (copy == null || copy.getStatus()!=BookCopy.ONSHELF || member ==null)
                 throw new RuntimeException("Cannot borrow");
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory("churchPU");
-            if (emf==null) throw new RuntimeException("Cannot create EntityManagerFactory");
-            EntityManager em = emf.createEntityManager();
             if (em==null) throw new RuntimeException("Cannot create EntityManager");
-            javax.persistence.EntityTransaction tx = em.getTransaction();
-            tx.begin();
             copy.setStatus(BookCopy.LOANED);
             copy.setUserId(member.getId());
             copy.setStartdate(new java.util.Date());
             copy.setEnddate(new java.util.Date(System.currentTimeMillis()+14*86400000L));
             em.merge(copy);
-            tx.commit();
-            em.close();
-            emf.close();
             msg.setSeverity(FacesMessage.SEVERITY_INFO);
             msg.setSummary("Borrowed");
             msg.setDetail(this.actionString);
@@ -156,25 +144,7 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
     
     public void search() {
         logger.log(Level.INFO, "book code {0}", bookCode);
-        if (bookCode.length()>0) {
-            // TODO check for wrong book code format
-            BookCopyPK pk = new BookCopyPK(bookCode.trim());
-            if (pk.getCallNo()!=-1 && (pk.getCallNo()!=copy.getBookCopyPK().getCallNo() || pk.getCopyNo()!=copy.getBookCopyPK().getCopyNo())) {
-                // need to update book copy
-                logger.log(Level.INFO, "Searching");
-                this.searchByBookCode();
-            }
-        }
-        logger.log(Level.INFO, "member code {0}", memberCode);
-        if (memberCode.length()>0) {
-            try {
-                int id = Integer.parseInt(memberCode.trim());
-                if (id != copy.getUserId())
-                    this.searchByMemberCode();
-            }
-            catch (NumberFormatException ex) {
-            }
-        }
+        this.copy = dao.searchCopyByCode(bookCode);
     }
     
     public void searchByMemberCode() {
@@ -208,12 +178,6 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
     
     public void searchByBookCode() {
         FacesMessage msg = new FacesMessage();
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("churchPU");
-        if (emf==null) return;
-        EntityManager em = emf.createEntityManager();
-        if (em==null) {
-            emf.close(); return;
-        }
         try {
             BookCopyPK pk = new BookCopyPK(bookCode.trim());
             copy = em.find(BookCopy.class, pk);
@@ -236,8 +200,6 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
             msg.setSummary("Invalid book code");
             msg.setDetail(this.bookCode);
         }
-        em.close();
-        emf.close();
         this.updateActionString();
         if (copy == null)
             FacesContext.getCurrentInstance().addMessage(null, msg);
