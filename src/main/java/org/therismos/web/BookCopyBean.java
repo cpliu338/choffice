@@ -18,7 +18,7 @@ import org.therismos.entity.Member1;
  * @author cpliu
  */
 @javax.faces.bean.ManagedBean
-@javax.faces.bean.SessionScoped
+@javax.faces.bean.ViewScoped
 public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
 
     private BookCopy copy;
@@ -81,7 +81,7 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
         if (copy != null && copy.getBookCopyPK().getCallNo()!=0) {
             switch (copy.getStatus()) {
                 case BookCopy.LOANED:
-                    actionString = super.findMemberById(copy.getUserId()).getName() + "->" + copy.getBook().getTitle() 
+                    actionString = memberDao.findMemberById(copy.getUserId()).getName() + "->" + copy.getBook().getTitle() 
                         + "(" + copy.getBookCopyPK().getCopyNo() + ")";
                     break;
                 case BookCopy.ONSHELF:
@@ -104,6 +104,7 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
             msg.setSeverity(FacesMessage.SEVERITY_INFO);
             msg.setSummary("Returned");
             msg.setDetail(this.actionString);
+            this.blankCopy();
         }
         catch (PersistenceException ex) {
             logger.log(Level.WARNING, "Database error");
@@ -122,6 +123,7 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
             msg.setSeverity(FacesMessage.SEVERITY_INFO);
             msg.setSummary("Borrowed");
             msg.setDetail(this.actionString);
+            this.blankCopy();
         }
         catch (PersistenceException ex) {
             logger.log(Level.WARNING, null, ex);
@@ -162,8 +164,10 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
             copy = bookDao.searchCopyByCode(bookCode);
             returnable = (copy.getStatus() == BookCopy.LOANED);
             borrowable = (copy.getStatus() == BookCopy.ONSHELF && this.member!=null);
+            logger.log(Level.INFO, "Copy found: {0}", copy.getBook().getTitle());
         }
         catch (NumberFormatException | PersistenceException | NullPointerException ex) {
+            logger.log(Level.SEVERE, null, ex);
             msg.setSeverity(FacesMessage.SEVERITY_WARN);
             msg.setSummary("Invalid book code");
             msg.setDetail(this.bookCode);
