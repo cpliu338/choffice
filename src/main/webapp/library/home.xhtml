@@ -24,7 +24,7 @@
                     <h:panelGrid columns="3">
                         <h:outputLabel value="Book" for="bookcode"/>
                         <p:inputText id="bookcode" value="#{bookCopyBean.bookCode}"/>
-                        <p:commandButton icon="ui-icon-search" update="borrowmsg bcopy actionString" action="#{bookCopyBean.search}"/>
+                        <p:commandButton icon="ui-icon-search" update="borrowmsg bcopy actionString" action="#{bookCopyBean.searchByBookCode()}"/>
                         <h:outputLabel value="Member" for="membercode"/>
                         <p:inputText id="membercode" value="#{bookCopyBean.memberCode}"/>
                         <p:commandButton icon="ui-icon-search" update="borrowmsg bcopy actionString" action="#{bookCopyBean.searchByMemberCode()}"/>

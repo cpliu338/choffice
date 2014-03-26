@@ -44,6 +44,8 @@ public class Member1 implements Serializable {
     private char photo;
     @Basic(optional = false)
     private char print;
+    
+    public static final int XXXid = 801;
 
     public Member1() {
     }

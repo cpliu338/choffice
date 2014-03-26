@@ -1,11 +1,13 @@
 package org.therismos.web;
 
+import java.util.Date;
+import java.util.logging.*;
+import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.persistence.EntityManager;
-import java.util.logging.*;
-import javax.ejb.EJB;
-import org.therismos.ejb.BookDao;
+import javax.persistence.PersistenceException;
+import org.therismos.ejb.*;
 import org.therismos.entity.Book;
 import org.therismos.entity.BookCopy;
 import org.therismos.entity.BookCopyPK;
@@ -16,7 +18,7 @@ import org.therismos.entity.Member1;
  * @author cpliu
  */
 @javax.faces.bean.ManagedBean
-@javax.faces.bean.ViewScoped
+@javax.faces.bean.SessionScoped
 public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
 
     private BookCopy copy;
@@ -24,7 +26,9 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
     private String memberCode;
     private Member1 member;
     @EJB
-    private BookDao dao;
+    private BookDao bookDao;
+    @EJB
+    private MemberDao memberDao;
 
     public Member1 getMember() {
         return member;
@@ -95,16 +99,13 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
     public void return1() {
         FacesMessage msg = new FacesMessage();
         try {
-            if (copy == null || copy.getStatus()!=BookCopy.LOANED)
-                throw new RuntimeException("Cannot return");
-            copy.setStatus(BookCopy.ONSHELF);
-            copy.setStartdate(new java.util.Date());
-            em.merge(copy);
+            bookDao.updateBookCopyStatus(new BookCopyPK(this.bookCode.trim()), BookCopy.ONSHELF, null, 
+                    null, null, "");
             msg.setSeverity(FacesMessage.SEVERITY_INFO);
             msg.setSummary("Returned");
             msg.setDetail(this.actionString);
         }
-        catch (RuntimeException ex) {
+        catch (PersistenceException ex) {
             logger.log(Level.WARNING, "Database error");
             msg.setSeverity(FacesMessage.SEVERITY_WARN);
             msg.setDetail(ex.getMessage());
@@ -112,97 +113,64 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
         }
         FacesContext.getCurrentInstance().addMessage(null, msg);
     }
-    
-    @javax.persistence.PersistenceContext
-    private EntityManager em;
     
     public void borrow() {
         FacesMessage msg = new FacesMessage();
         try {
-            if (copy == null || copy.getStatus()!=BookCopy.ONSHELF || member ==null)
-                throw new RuntimeException("Cannot borrow");
-            if (em==null) throw new RuntimeException("Cannot create EntityManager");
-            copy.setStatus(BookCopy.LOANED);
-            copy.setUserId(member.getId());
-            copy.setStartdate(new java.util.Date());
-            copy.setEnddate(new java.util.Date(System.currentTimeMillis()+14*86400000L));
-            em.merge(copy);
+            bookDao.updateBookCopyStatus(new BookCopyPK(this.bookCode.trim()), BookCopy.LOANED, member, 
+                    new Date(), new Date(System.currentTimeMillis()+14*86400000L), "");
             msg.setSeverity(FacesMessage.SEVERITY_INFO);
             msg.setSummary("Borrowed");
             msg.setDetail(this.actionString);
         }
-        catch (RuntimeException ex) {
-            logger.log(Level.WARNING, "Database error");
+        catch (PersistenceException ex) {
+            logger.log(Level.WARNING, null, ex);
             msg.setSeverity(FacesMessage.SEVERITY_WARN);
-            msg.setDetail(ex.getMessage());
+            msg.setDetail("Database error");
             msg.setSummary(ex.getClass().getName());
         }
         FacesContext.getCurrentInstance().addMessage(null, msg);
     }
     
-    private static Logger logger = Logger.getLogger(BookCopyBean.class.getName());
+    private static final Logger logger = Logger.getLogger(BookCopyBean.class.getName());
     
     public void search() {
         logger.log(Level.INFO, "book code {0}", bookCode);
-        this.copy = dao.searchCopyByCode(bookCode);
+        this.copy = bookDao.searchCopyByCode(bookCode);
     }
     
     public void searchByMemberCode() {
         FacesMessage msg = new FacesMessage();
         try {
-            member = super.findMemberByCode(Integer.parseInt(memberCode));
-            if (member == null) {
-                msg.setSeverity(FacesMessage.SEVERITY_WARN);
-                msg.setSummary(super.bundle.getString("legend.notfound"));
-                msg.setDetail(memberCode);
-                blankCopy();
-            }
-            else {
-                returnable = copy != null && (copy.getStatus() == BookCopy.LOANED);
-                borrowable = (copy.getStatus() == BookCopy.ONSHELF);
-//                msg.setSeverity(FacesMessage.SEVERITY_INFO);
-//                msg.setSummary("Found");
-//                msg.setDetail(member.getGroupname());
-            }
+            member = memberDao.findMemberByCode(Integer.parseInt(memberCode));
+            returnable = copy != null && (copy.getStatus() == BookCopy.LOANED);
+            borrowable = (copy.getStatus() == BookCopy.ONSHELF);
         }
-        catch (RuntimeException ex) {
+        catch (NumberFormatException | PersistenceException ex) {
             msg.setSeverity(FacesMessage.SEVERITY_WARN);
             msg.setSummary("Invalid member code");
             msg.setDetail(memberCode);
             blankCopy();
+            FacesContext.getCurrentInstance().addMessage(null, msg);
         }
         this.updateActionString();
-        if (copy == null)
-            FacesContext.getCurrentInstance().addMessage(null, msg);
     }
     
     public void searchByBookCode() {
         FacesMessage msg = new FacesMessage();
         try {
-            BookCopyPK pk = new BookCopyPK(bookCode.trim());
-            copy = em.find(BookCopy.class, pk);
-            if (copy == null) {
-                msg.setSeverity(FacesMessage.SEVERITY_WARN);
-                msg.setSummary(super.bundle.getString("legend.notfound"));
-                msg.setDetail(""+pk.getCallNo()+":"+pk.getCopyNo());
-                blankCopy();
-            }
-            else {
-                returnable = (copy.getStatus() == BookCopy.LOANED);
-                borrowable = (copy.getStatus() == BookCopy.ONSHELF && this.member!=null);
-//                msg.setSeverity(FacesMessage.SEVERITY_INFO);
-//                msg.setSummary("Found");
-//                msg.setDetail(copy.getBook().getTitle());
-            }
+            copy = bookDao.searchCopyByCode(bookCode);
+            returnable = (copy.getStatus() == BookCopy.LOANED);
+            borrowable = (copy.getStatus() == BookCopy.ONSHELF && this.member!=null);
         }
-        catch (NumberFormatException ex) {
+        catch (NumberFormatException | PersistenceException | NullPointerException ex) {
             msg.setSeverity(FacesMessage.SEVERITY_WARN);
             msg.setSummary("Invalid book code");
             msg.setDetail(this.bookCode);
+            blankCopy();
+            FacesContext.getCurrentInstance().addMessage(null, msg);
         }
         this.updateActionString();
-        if (copy == null)
-            FacesContext.getCurrentInstance().addMessage(null, msg);
     }
 
     /**

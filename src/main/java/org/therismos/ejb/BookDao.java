@@ -1,6 +1,7 @@
 package org.therismos.ejb;
 
 import java.util.ArrayList;
+import java.util.Date;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
@@ -9,6 +10,7 @@ import javax.persistence.PersistenceException;
 import org.therismos.entity.Book;
 import org.therismos.entity.BookCopy;
 import org.therismos.entity.BookCopyPK;
+import org.therismos.entity.Member1;
 
 /**
  *
@@ -29,8 +31,36 @@ public class BookDao {
         return em.find(Book.class, id);
     }
     
+    /**
+     * 
+     * @param pk the primary key of the copy to be updated
+     * @param status2 the new status
+     * @param member the member involved, or null if nil
+     * @param startDate the start time specified, defaults to now
+     * @param endDate the end time specified, defaults to now
+     * @param remark the new remark
+     * @throws PersistenceException 
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void updateBookCopy(BookCopy c) throws PersistenceException {
+    public void updateBookCopyStatus(BookCopyPK pk, int status2, Member1 member, Date startDate, Date endDate, String remark) throws PersistenceException {
+        BookCopy c = em.find(BookCopy.class, pk);
+        switch (status2) {
+            case BookCopy.LOANED:
+                if (member == null) throw new java.lang.IllegalArgumentException("No member provided");
+                c.setUserId(member.getId());
+                c.setStartdate(startDate);
+                c.setEnddate(endDate);
+                break;
+            case BookCopy.ONSHELF:
+                c.setUserId(Member1.XXXid);
+                break;
+            default:
+                throw new java.lang.UnsupportedOperationException("Unsupported status: "+status2);
+        }
+        if (startDate==null) c.setStartdate(new Date());
+        if (endDate==null) c.setEnddate(new Date());
+        c.setStatus(status2);
+        c.setRemark(remark);
         em.merge(c);
     }
     
