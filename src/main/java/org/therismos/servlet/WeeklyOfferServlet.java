@@ -3,13 +3,10 @@ package org.therismos.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -28,24 +25,14 @@ import org.therismos.model.WeeklyOfferList;
 public class WeeklyOfferServlet extends HttpServlet {
     private List<Offer> offers;
     
-//    @Override
-//    public void init(ServletConfig config) throws ServletException {
-//        try {
-//            Class.forName("com.mysql.jdbc.Driver");
-//            dbUrl = config.getInitParameter("dbUrl");
-//            dbUser = config.getInitParameter("dbUser");
-//            dbPassword = config.getInitParameter("dbPassword");
-//        } catch (ClassNotFoundException ex) {
-//            Logger.getLogger(WeeklyOfferServlet.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//    }
+    @javax.persistence.PersistenceContext
+    private EntityManager em;
     
     private void task(Date d) {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("churchPU");
-        if (emf != null) {
-            EntityManager em = emf.createEntityManager();
-            offers = em.createQuery("SELECT o FROM Offer o WHERE o.date1=:date1 ORDER BY o.account.code",Offer.class)
-                    .setParameter("date1", d).getResultList();
+//        if (offers == null) offers = new java.util.ArrayList<>();
+        if (em != null) {
+            offers.addAll(em.createQuery("SELECT o FROM Offer o WHERE o.date1=:date1 ORDER BY o.account.code",Offer.class)
+                    .setParameter("date1", d).getResultList());
         }
         else {
             offers = java.util.Collections.EMPTY_LIST;
@@ -66,7 +53,7 @@ public class WeeklyOfferServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("application/xml;charset=UTF-8");
         if (offers == null) {
-            offers = java.util.Collections.EMPTY_LIST;
+            offers = new ArrayList<>();
         }
         else {
             offers.clear();
