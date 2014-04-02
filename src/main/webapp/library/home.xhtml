@@ -22,10 +22,10 @@
                 <h:form id="borrowForm">
                     <p:growl id="borrowmsg" showDetail="#{true}" showSummary="#{true}" />
                     <h:panelGrid columns="3">
-                        <h:outputLabel value="Book" for="bookcode"/>
+                        <h:outputLabel value="Book" />
                         <p:inputText id="bookcode" value="#{bookCopyBean.bookCode}"/>
                         <p:commandButton icon="ui-icon-search" update="borrowmsg bcopy actionString" action="#{bookCopyBean.searchByBookCode()}"/>
-                        <h:outputLabel value="Member" for="membercode"/>
+                        <h:outputLabel value="Member" />
                         <p:inputText id="membercode" value="#{bookCopyBean.memberCode}"/>
                         <p:commandButton icon="ui-icon-search" update="borrowmsg bcopy actionString" action="#{bookCopyBean.searchByMemberCode()}"/>
                     </h:panelGrid>
