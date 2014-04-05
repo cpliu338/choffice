@@ -1,31 +1,33 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<ui:composition  xmlns="http://www.w3.org/1999/xhtml"
-    xmlns:ui="http://java.sun.com/jsf/facelets"
-     xmlns:f="http://java.sun.com/jsf/core"
-    xmlns:p="http://primefaces.org/ui" xmlns:h="http://java.sun.com/jsf/html"
-    template="../simpleTemplate.xhtml">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
 
-    <ui:define name="content">
-        <h:form prependId="true" id="form">
-            <p:growl id="growl"/>
-            <p:dataTable value="#{nasBean.files}" var="file" paginator="true" rows="15"
-                 paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} ">
-                <f:facet name="header">Files</f:facet>
-                <p:column>
-                    <h:outputText value="#{file.name}"/>
-                </p:column>
-                <p:column>
-                    <h:outputText value="#{file.strSize}"/>
-                </p:column>
-                <p:column>
-                    <p:commandButton value="download" ajax="false">
-                        <f:setPropertyActionListener value="#{file.name}" target="#{nasBean.selectedFile}" />
-                        <p:fileDownload value="#{nasBean.content}"/>
-                    </p:commandButton>
-                </p:column>
-            </p:dataTable>
-        </h:form>
-    </ui:define>
+    <body>
 
-</ui:composition>
+        <ui:composition template="../WEB-INF/mainTemplate.xhtml">
+            <ui:define name="left">
+                <h:form>
+                    <p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">Log out</h:commandLink>
+                    </p><p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="receipt?faces-redirect=true">Receipts</h:commandLink>
+                    </p>
+                </h:form>
+            </ui:define>
+            <ui:define name="content">
+                <h:form id="form">
+                    <p:dataList value="#{receiptsFileDownload.reports}" var="fname">
+                    <p:commandLink id="downloadLink" value="#{fname.name}" ajax="false">
+                        <f:setPropertyActionListener target="#{receiptsFileDownload.fname}" value="#{fname.name}"/>
+                        <p:fileDownload value="#{receiptsFileDownload.file}" />  
+                    </p:commandLink>
+                    </p:dataList>
+                </h:form>  
+                <h:messages />
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
+

@@ -25,7 +25,7 @@ public class Worker2 implements Runnable {
     public void run() {
         PrintShop printShop = new PrintShop();
         //ResourceBundle bundle = ResourceBundle.getBundle("formatStrings");
-        java.text.SimpleDateFormat fmt = new java.text.SimpleDateFormat("yyyy-MM-dd");
+//        java.text.SimpleDateFormat fmt = new java.text.SimpleDateFormat("yyyy-MM-dd");
         try {
             printShop.init(new File(folder, String.format("%d-r%d.pdf",year,batch)));
 //            Date d1 = fmt.parse(String.format("%d-04-01",year-1));
