@@ -9,21 +9,6 @@
         <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
         <param-value>server</param-value>
     </context-param>
-    <context-param>
-        <description>The principal used for ldap lookup</description>
-        <param-name>ldap.principal</param-name>
-        <param-value>cn=manager,ou=Internal,dc=system,dc=lan</param-value>
-    </context-param>
-    <context-param>
-        <description>The credential used for ldap lookup</description>
-        <param-name>ldap.credential</param-name>
-        <param-value>jMSL5KNZtM+O8RB+</param-value>
-    </context-param>
-    <context-param>
-        <description>The url of the ldap server</description>
-        <param-name>ldap.url</param-name>
-        <param-value>ldaps://192.168.11.224:636</param-value>
-    </context-param>
     <filter>
         <filter-name>AuthFilter</filter-name>
         <filter-class>org.therismos.authen.AuthFilter</filter-class>
@@ -58,7 +43,7 @@
         <url-pattern>/WeeklyOffer</url-pattern>
     </servlet-mapping>
     <session-config>
-        <session-timeout>300</session-timeout>
+        <session-timeout>3000</session-timeout>
     </session-config>
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
@@ -80,6 +65,11 @@
             <description/>
             <url-pattern>/users/*</url-pattern>
         </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>NAS</web-resource-name>
+            <description>downloading files</description>
+            <url-pattern>/nas/*</url-pattern>
+        </web-resource-collection>
         <auth-constraint>
             <description/>
             <role-name>staff</role-name>
@@ -98,10 +88,6 @@
             <role-name>librarians</role-name>
             <role-name>deacons</role-name>
         </auth-constraint>
-        <user-data-constraint>
-            <description/>
-            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-        </user-data-constraint>
     </security-constraint>
     <login-config>
         <auth-method>FORM</auth-method>

@@ -2,8 +2,9 @@ package org.therismos.jaas;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
+import java.sql.*;
+import javax.naming.*;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -12,6 +13,8 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
+import javax.sql.DataSource;
+import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  *
@@ -37,21 +40,45 @@ public class DummyModule  implements LoginModule {
         map = new java.util.HashMap<>();
         handler = callbackHandler;
         this.subject = subject;
-        props = new java.util.Properties();
-        try (java.io.InputStream is = LdapLoginModule.class.getResourceAsStream("/ldap.properties")) {
-            props.load(is);
-            if (!props.containsKey("url")) {
-                Logger.getLogger(DummyModule.class.getName()).log(Level.WARNING, "Cannot read property url");
-            }
-            props.getProperty("principal", "cn=manager,ou=Internal,dc=system,dc=lan");
-            props.getProperty("credential", "jMSL5KNZtM+O8RB+");
-            props.getProperty("url", "ldaps://192.168.11.224:636");
-            props.getProperty("base", "dc=system,dc=lan");
-        }
-        catch (IOException ex) {
-            Logger.getLogger(LdapLoginModule.class.getName()).log(Level.SEVERE, null, ex);
-        }
-            
+  }
+  
+  public Map<String,String> test(String nickname, String hashed) {
+      java.util.HashMap<String, String> map2 = new java.util.HashMap<>();
+      try {
+          Context initContext = new InitialContext();
+          DataSource ds = (DataSource)initContext.lookup("java:openejb/Resource/churchDB");
+          Connection conn = ds.getConnection();
+          if (conn==null) 
+              map2.put("Warning", "Connection is null");
+          else {
+              PreparedStatement stmt=conn.prepareStatement("SELECT id FROM members WHERE nickname=? AND pwd=?");
+              stmt.setString(1, nickname);
+              stmt.setString(2, hashed);
+              ResultSet rs = stmt.executeQuery();
+              if (rs.next()) {
+                  map2.put("Id", rs.getString(1));
+                  rs.close();
+                  stmt.close();
+                  stmt=conn.prepareStatement("SELECT role FROM groups WHERE user=?");
+                  stmt.setString(1, nickname);
+                  rs = stmt.executeQuery();
+                  while (rs.next()) {
+                      map2.put("group", rs.getString(1));
+                  }
+              }
+              else {
+                  map2.put("Info", "Wrong pwd");
+              }
+              rs.close();
+              stmt.close();
+              conn.close();
+          }
+      } catch (NamingException | SQLException ex) {
+          Logger.getLogger(DummyModule.class.getName()).log(Level.SEVERE, null, ex);
+          map2.put("Exception", ex.getClass().getName());
+          map2.put("Message", ex.getMessage());
+      }
+      return map2;
   }
 
   @Override
@@ -66,22 +93,40 @@ public class DummyModule  implements LoginModule {
       String name = ((NameCallback) callbacks[0]).getName();
       String password = String.valueOf(((PasswordCallback) callbacks[1])
           .getPassword());
-        if(!name.equals(password)) {
-                throw new LoginException("Wrong password");
-        }
+      Context initContext = new InitialContext();
+      DataSource ds = (DataSource)initContext.lookup("java:openejb/Resource/churchDB");
+      Connection conn = ds.getConnection();
+      if (conn==null) 
+          throw new RuntimeException("Connection is null");
+      else {
+          PreparedStatement stmt=conn.prepareStatement("SELECT name FROM members WHERE nickname=? AND pwd=?");
+          stmt.setString(1, name);
+          stmt.setString(2, DigestUtils.md5Hex(password));
+          ResultSet rs = stmt.executeQuery();
+          if (rs.next()) {
+            map.put("givenName", rs.getString(1));
+            map.put("nickname", name);
+              rs.close();
+              stmt.close();
+              stmt=conn.prepareStatement("SELECT role FROM groups WHERE user=?");
+              stmt.setString(1, name);
+              rs = stmt.executeQuery();
+              while (rs.next()) {
+                userGroups.add(rs.getString(1));
+              }
+          }
+          else {
+              throw new RuntimeException("Wrong pwd");
+          }
+          rs.close();
+          stmt.close();
+          conn.close();
+      }
         login = name;
-        map.put("givenName", name);
-        map.put("sn", "Mr");
-        if (name.contains("staff"))
-            userGroups.add("staff");
-        if (name.contains("deacon"))
-            userGroups.add("deacons");
-        if (name.contains("librarian"))
-            userGroups.add("librarians");
         return true;
-    } catch (IOException | UnsupportedCallbackException e) {
-      throw new LoginException(e.getMessage());
-    }
+     } catch (RuntimeException | SQLException | NamingException | IOException | UnsupportedCallbackException e) {
+          throw new LoginException(e.getMessage());
+     }
 
   }
 

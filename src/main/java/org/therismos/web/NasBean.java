@@ -1,21 +1,14 @@
 package org.therismos.web;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import org.therismos.model.FileModel;
-//import model.FolderModel;
+import org.therismos.model.FolderModel;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 
@@ -24,44 +17,46 @@ import org.primefaces.model.StreamedContent;
  * @author cpliu
  */
 @ManagedBean
-@ViewScoped
-public class NasBean {
+@javax.faces.bean.SessionScoped
+public class NasBean implements java.io.Serializable {
 
     private File base;
     private File currentPath;
     private String selectedFile;
     private List<FileModel> files;
-//    private List<FolderModel> subdirs;
+    private List<FolderModel> subdirs;
     private StreamedContent content;
     private String path;
-
+    
     @javax.inject.Inject
-    UserBean userBean;
+    transient UserBean userBean;
     
     @javax.annotation.PostConstruct
     public void init() {
-        currentPath = userBean.getBasePath();
+        base = userBean.getNasPath();
+        currentPath = base;
+        path = ".";
         files = new ArrayList<>();
-//        subdirs = new ArrayList<FolderModel>();
+        subdirs = new ArrayList<>();
         content = null;
         try {
             refresh();
         } catch (Exception ex) {
             this.files = Collections.EMPTY_LIST;
-//            this.subdirs = Collections.EMPTY_LIST;
+            this.subdirs = Collections.EMPTY_LIST;
         }
     }
-
-//    public List<FolderModel> getBreadCrumbs() {
-//        String strBase = base.getAbsolutePath();
-//        ArrayList<FolderModel> breadCrumbs = new ArrayList<FolderModel>();
-//        for (File current=currentPath; !strBase.equals(current.getAbsolutePath());
-//        current = current.getParentFile()) {
-//            breadCrumbs.add(new FolderModel(base, current));
-//        }
-//        Collections.reverse(breadCrumbs);
-//        return breadCrumbs;
-//    }
+    
+    public List<FolderModel> getBreadCrumbs() {
+        String strBase = base.getAbsolutePath();
+        ArrayList<FolderModel> breadCrumbs = new ArrayList<>();
+        for (File current=currentPath; !strBase.equals(current.getAbsolutePath());
+        current = current.getParentFile()) {
+            breadCrumbs.add(new FolderModel(base, current));
+        }
+        Collections.reverse(breadCrumbs);
+        return breadCrumbs;
+    }
 
     /**
      * @return the currentPath
@@ -108,7 +103,8 @@ public class NasBean {
     }
 
     public final void refresh() throws Exception {
-        Logger.getLogger(NasBean.class.getName()).log(Level.INFO, "refresh called");
+        Logger.getLogger(NasBean.class.getName()).log(Level.INFO, "refresh base:{0}, currentPath:{1}", 
+                new Object[]{base.getAbsolutePath(), currentPath.getAbsolutePath()});
         File[] subfolders = currentPath.listFiles(new java.io.FileFilter() {
             @Override
             public boolean accept(File pathname) {
@@ -121,10 +117,10 @@ public class NasBean {
                 return o1.getName().compareTo(o2.getName());
             }
         });
-//        subdirs.clear();
-//        for (File f : subfolders) {
-//            subdirs.add(new FolderModel(this.base,f));
-//        }
+        subdirs.clear();
+        for (File f : subfolders) {
+            subdirs.add(new FolderModel(this.base,f));
+        }
         File[] fs = currentPath.listFiles(new java.io.FileFilter() {
             @Override
             public boolean accept(File pathname) {
@@ -147,9 +143,9 @@ public class NasBean {
     /**
      * @return the subdirs
      */
-//    public List<FolderModel> getSubdirs() {
-//        return subdirs;
-//    }
+    public List<FolderModel> getSubdirs() {
+        return subdirs;
+    }
 
     /**
      * @return the content
@@ -176,7 +172,7 @@ public class NasBean {
             refresh();
         } catch (Exception ex) {
             this.files = Collections.EMPTY_LIST;
-//            this.subdirs = Collections.EMPTY_LIST;
+            this.subdirs = Collections.EMPTY_LIST;
         }
     }
 }

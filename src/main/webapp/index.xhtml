@@ -26,9 +26,12 @@
                         <li><h:outputLink value="offers/receipt.jsf">
                             <h:outputText value="#{msg['offer']} #{msg['menu.receipt']}"/>
                         </h:outputLink></li>
+                        <li><h:outputLink value="nas/list.jsf">
+                            <h:outputText value="NAS"/>
+                        </h:outputLink></li>
                     </ul>
                 </p:panel>
-                <h:outputText value="#{userBean.userMap['sn']} " />
+                <h:outputText value="#{userBean.userMap['nickname']} " />
                 <h:outputText value="#{userBean.userMap['givenName']}" /> :
                 <!--h:outputText value="#{userBean.name}"/ -->
                 <h:outputText rendered="#{userBean.isInRole('deacons')}" value="deacon"/>,
