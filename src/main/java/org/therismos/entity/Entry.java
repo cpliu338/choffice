@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package org.therismos.entity;
 
 import java.io.Serializable;
@@ -37,6 +31,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Entry.findByAmount", query = "SELECT e FROM Entry e WHERE e.amount = :amount"),
     @NamedQuery(name = "Entry.findByDetail", query = "SELECT e FROM Entry e WHERE e.detail = :detail"),
     @NamedQuery(name = "Entry.findByExtra1", query = "SELECT e FROM Entry e WHERE e.extra1 = :extra1"),
+    @NamedQuery(name = "Entry.findAggregateSinceDate", query = "SELECT e.accountId, SUM(e.amount) FROM Entry e WHERE e.date1 > :start AND e.accountId IN :acclist GROUP BY e.accountId ORDER BY e.accountId"),
+    @NamedQuery(name = "Entry.aggregate", query = "SELECT e.accountId, SUM(e.amount) FROM Entry e WHERE e.accountId IN :acclist AND (e.date1 BETWEEN :start AND :end) GROUP BY e.accountId ORDER BY e.accountId"),
     @NamedQuery(name = "Entry.findByAccountId", query = "SELECT e FROM Entry e WHERE e.accountId = :accountId")})
 public class Entry implements Serializable {
     private static final long serialVersionUID = 1L;

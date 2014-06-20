@@ -5,7 +5,7 @@
     <groupId>hk.org.therismos</groupId>
     <artifactId>choffice</artifactId>
     <packaging>war</packaging>
-    <version>3.2</version>
+    <version>3.3</version>
 
     <name>choffice</name>
     <url>http://maven.apache.org</url>
@@ -27,6 +27,16 @@
             <artifactId>commons-lang</artifactId>
             <version>2.4</version>
             <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>2.11.4</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.3</version>
         </dependency>
         <dependency>
             <groupId>javax</groupId>

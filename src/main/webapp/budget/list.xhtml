@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+    <body>
+
+        <ui:composition template="../WEB-INF/mainTemplate.xhtml">
+            <ui:define name="left">
+                <h:form>
+                    <p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">Log out</h:commandLink>
+                    </p><p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="receipt?faces-redirect=true">Receipts</h:commandLink>
+                    </p>
+                </h:form>
+            </ui:define>
+            <ui:define name="content">
+                <h:form id="form">
+                    <h:selectOneMenu value="#{budgetBean.year}">
+                        <f:selectItem itemLabel="Select year" itemValue="0"/>
+                        <f:selectItem itemLabel="2013" itemValue="2013"/>
+                        <f:selectItem itemLabel="2014" itemValue="2014"/>
+                        <f:ajax execute="@form" render="code cutoff :msg :results" listener="#{budgetBean.refreshYear}"/>
+                    </h:selectOneMenu>
+                    <br/>
+                    <h:selectOneMenu id="code" value="#{budgetBean.code}">
+                        <f:selectItems value="#{budgetBean.codeChoices}"/>
+                        <f:ajax execute="@form" render="cutoff :results :msg" listener="#{budgetBean.refreshCode}"/>
+                    </h:selectOneMenu>
+                    <br/>
+                    <h:selectOneMenu id="cutoff" value="#{budgetBean.cutoffDate}">
+                        <f:selectItems value="#{budgetBean.dateChoices}"/>
+                        <f:ajax execute="@form" render=":results :msg" listener="#{budgetBean.updateCutoffDate}"/>
+                    </h:selectOneMenu>
+                </h:form>
+                <p:panel id="results">
+                    <p:dataTable value="#{budgetBean.entrySummary}" var="item">
+                        <p:column headerText="#{budgetBean.budget}">
+                            <h:outputText value="#{item['account']}"/>
+                        </p:column>
+                        <p:column>
+                            <f:facet name="header">
+                                <h:outputText value="Empty" rendered="#{empty budgetBean.entrySummary}"/>
+                                <h:outputText value="Not empty" rendered="#{not empty budgetBean.entrySummary}"/>
+                            </f:facet>
+                            <h:outputText value="#{item['total']}"/>
+                        </p:column>
+                    </p:dataTable>
+                    Total: <h:outputText value="#{budgetBean.result['actual_total']}"/>
+                    <p:dataTable value="#{budgetBean.result['budget_items']}" var="item">
+                        <p:column>
+                            <h:outputText value="#{item['date']}"/>
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{item['value']}"/>
+                        </p:column>
+                    </p:dataTable>
+                </p:panel>
+                <h:messages id="msg" />
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
+
