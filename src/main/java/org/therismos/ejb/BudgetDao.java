@@ -22,12 +22,24 @@ public class BudgetDao {
     private EntityManager em;
     static final Logger logger = Logger.getLogger(BudgetDao.class.getName());
 
-    public List<Map> aggregateEntries(Date start, Date end, List acclist) {
+    public List<Map> aggregateEntries(Date start, Date end, BasicDBList acclist) {
         logger.log(Level.INFO, "dates between {0}:{1}", new Object[]{start,end});
-        for (Object o : acclist)
-            logger.log(Level.INFO, "acc: {0}", o);
+        HashMap<Integer,String> acc_ids = new HashMap<>();
+        for (Object o : acclist) {
+            try {
+                DBObject dbo = (DBObject)o;
+                String key = dbo.keySet().iterator().next();
+                Integer id1 = Integer.parseInt(key);
+//                acc_ids.add(id1);
+                acc_ids.put(id1, dbo.get(key).toString());
+                logger.log(Level.INFO, "acc id: {0}", id1);
+            }
+            catch (NumberFormatException | NullPointerException ex) {
+               logger.log(Level.INFO, "acc: {0}", o);
+            }
+        }
         Query q = em.createNamedQuery("Entry.aggregate").setParameter("start", start)
-        .setParameter("end", end).setParameter("acclist", acclist);
+        .setParameter("end", end).setParameter("acclist", acc_ids.keySet());
         List<Map> ret = new ArrayList<>();
         Integer i=0;
         for (Object o : q.getResultList()) {
@@ -36,6 +48,7 @@ public class BudgetDao {
             logger.log(Level.INFO, "entry {0}:{1}", ar);
             HashMap<String,Object> entrySummary = new HashMap<>();
             entrySummary.put("account", ar[0]);
+            entrySummary.put("name", acc_ids.get((Integer)ar[0]));
             entrySummary.put("total", ar[1]);
             ret.add(entrySummary);
         }

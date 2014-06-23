@@ -70,6 +70,11 @@
             <description>downloading files</description>
             <url-pattern>/nas/*</url-pattern>
         </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Budget things</web-resource-name>
+            <description/>
+            <url-pattern>/budget/*</url-pattern>
+        </web-resource-collection>
         <auth-constraint>
             <description/>
             <role-name>staff</role-name>

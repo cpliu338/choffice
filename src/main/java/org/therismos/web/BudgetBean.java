@@ -46,7 +46,7 @@ public class BudgetBean {
     }
     
     static {
-        blank = new SelectItem("", "Select code");
+        blank = new SelectItem("", "Select one");
     }
     
     public BudgetBean() {
@@ -119,7 +119,7 @@ public class BudgetBean {
     }
     
     public void updateCutoffDate(AjaxBehaviorEvent event) throws javax.faces.event.AbortProcessingException {
-        Logger.getLogger(BudgetBean.class.getName()).log(Level.INFO, "updateCutoffDate {0}:{1}:{2}", new Object[]{code, year,cutoffDate});
+//        Logger.getLogger(BudgetBean.class.getName()).log(Level.INFO, "updateCutoffDate {0}:{1}:{2}", new Object[]{code, year,cutoffDate});
         SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
         try {
             Date cutoff = fmt.parse(cutoffDate);
@@ -139,7 +139,7 @@ public class BudgetBean {
         }
         List<Map> entries = new ArrayList<>();
         Logger.getLogger(BudgetBean.class.getName()).log(Level.INFO, "budget entries size {0}", budget.getEntries().size());
-            BigDecimal tot = BigDecimal.ZERO;
+        BigDecimal tot = BigDecimal.ZERO;
         for (Iterator<Object> it = budget.getEntries().iterator(); it.hasNext();) {
             DBObject o = (DBObject)it.next();
             Logger.getLogger(BudgetBean.class.getName()).log(Level.INFO, "Item: {0}", o);
@@ -147,12 +147,14 @@ public class BudgetBean {
             String key = o.keySet().iterator().next();
             if (key.compareTo(cutoffDate)>0) continue;
             Object value = o.get(key);
-            if (BigDecimal.class.isAssignableFrom(value.getClass()))
-                tot = tot.add((BigDecimal)o.get(key));
+            if (Double.class.isAssignableFrom(value.getClass()))
+                tot = tot.add(new BigDecimal((Double)value));
+            else if (Integer.class.isAssignableFrom(value.getClass()))
+                tot = tot.add(new BigDecimal((Integer)value));
             else
                 Logger.getLogger(BudgetBean.class.getName()).log(Level.INFO, "Value class: {0}", value.getClass().getName());
             map.put("date", key);
-            map.put("value", o.get(key).toString());
+            map.put("value", value.toString());
             entries.add(map);
         }
         result.put("budget_items", entries);

@@ -18,45 +18,53 @@
             </ui:define>
             <ui:define name="content">
                 <h:form id="form">
-                    <h:selectOneMenu value="#{budgetBean.year}">
-                        <f:selectItem itemLabel="Select year" itemValue="0"/>
+                    Select year : <h:selectOneMenu value="#{budgetBean.year}">
+                        <f:selectItem itemLabel="Choose one" itemValue="0"/>
                         <f:selectItem itemLabel="2013" itemValue="2013"/>
                         <f:selectItem itemLabel="2014" itemValue="2014"/>
                         <f:ajax execute="@form" render="code cutoff :msg :results" listener="#{budgetBean.refreshYear}"/>
                     </h:selectOneMenu>
                     <br/>
-                    <h:selectOneMenu id="code" value="#{budgetBean.code}">
+                    Account code : <h:selectOneMenu id="code" value="#{budgetBean.code}">
                         <f:selectItems value="#{budgetBean.codeChoices}"/>
                         <f:ajax execute="@form" render="cutoff :results :msg" listener="#{budgetBean.refreshCode}"/>
                     </h:selectOneMenu>
                     <br/>
-                    <h:selectOneMenu id="cutoff" value="#{budgetBean.cutoffDate}">
+                    Cut-off date : <h:selectOneMenu id="cutoff" value="#{budgetBean.cutoffDate}">
                         <f:selectItems value="#{budgetBean.dateChoices}"/>
                         <f:ajax execute="@form" render=":results :msg" listener="#{budgetBean.updateCutoffDate}"/>
                     </h:selectOneMenu>
                 </h:form>
                 <p:panel id="results">
                     <p:dataTable value="#{budgetBean.entrySummary}" var="item">
-                        <p:column headerText="#{budgetBean.budget}">
-                            <h:outputText value="#{item['account']}"/>
+                        <p:column headerText="Sub account">
+                            <h:outputText value="#{item['account']}"/> :
+                            <h:outputText value="#{item['name']}"/>
                         </p:column>
                         <p:column>
                             <f:facet name="header">
-                                <h:outputText value="Empty" rendered="#{empty budgetBean.entrySummary}"/>
-                                <h:outputText value="Not empty" rendered="#{not empty budgetBean.entrySummary}"/>
+                                <h:outputText value="Expenditure upto #{budgetBean.cutoffDate}" />
                             </f:facet>
-                            <h:outputText value="#{item['total']}"/>
+                            <h:outputText value="#{0.0 - item['total']}"/>
                         </p:column>
                     </p:dataTable>
-                    Total: <h:outputText value="#{budgetBean.result['actual_total']}"/>
+                    Expenditure Total: <h:outputText value="#{budgetBean.result['actual_total']}"/>
                     <p:dataTable value="#{budgetBean.result['budget_items']}" var="item">
-                        <p:column>
+                        <p:column headerText="Date upto">
                             <h:outputText value="#{item['date']}"/>
                         </p:column>
-                        <p:column>
+                        <p:column headerText="Cumulative budget">
                             <h:outputText value="#{item['value']}"/>
                         </p:column>
-                    </p:dataTable>
+                        <f:facet name="footer">
+                            Budget Total: <h:outputText
+                                value="#{budgetBean.result['budget_total']}">
+                            </h:outputText><br/>
+                            Percentage: <h:outputFormat rendered="#{budgetBean.result['budget_total'] ne 0.0}" value="{0,number,percent}">
+                                <f:param value="#{0 - budgetBean.result['actual_total'] / budgetBean.result['budget_total']}"/>
+                            </h:outputFormat>
+                        </f:facet>
+                    </p:dataTable>                    
                 </p:panel>
                 <h:messages id="msg" />
             </ui:define>
