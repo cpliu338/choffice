@@ -62,9 +62,10 @@ public class BudgetDao {
     }
     
     public BudgetModel find(int year, String code) {
-        List<BudgetModel> results = find(new BasicDBObject("code",code).append("year", year));
-        if (results==null || results.isEmpty()) return null;
-        return results.get(0);
+//        List<BudgetModel> results = find(new BasicDBObject("code",code).append("year", year));
+//        if (results==null || results.isEmpty()) return null;
+//        return results.get(0);
+        return this.findOne(new BasicDBObject("code",code).append("year", year));
     }
     
     public int save(BudgetModel m) {
@@ -92,12 +93,16 @@ public class BudgetDao {
         return coll.save(m).getN();
     }
     
+    public BudgetModel findOne(DBObject crit) {
+        return (BudgetModel)coll.findOne(crit);
+    }
+    
     public List<BudgetModel> find(DBObject crit) {
         List<BudgetModel> results = new ArrayList<>();
         DBCursor cursor;
         cursor = coll.find(crit);
         for (DBObject item : cursor) {
-            System.out.println("Found:"+item.get("_id").toString());
+//            System.out.println("Found:"+item.get("_id").toString());
             if (BudgetModel.class.isAssignableFrom(item.getClass())) {
                 results.add((BudgetModel)item);
             }

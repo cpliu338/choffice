@@ -28,6 +28,7 @@ public class BudgetModel implements DBObject {
         store.put("name_chi", "");
         store.put("subitems", new BasicDBList());
         store.put("entries", new BasicDBList());
+        store.put("remarks", "");
     }
 
     /**
@@ -190,5 +191,13 @@ public class BudgetModel implements DBObject {
     @Override
     public Set<String> keySet() {
         return store.keySet();
+    }
+    
+    public String getRemarks() {
+        return (String)store.get("remarks");
+    }
+
+    public void setRemarks(String remarks) {
+        store.put("remarks", remarks);
     }
 }

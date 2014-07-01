@@ -36,6 +36,7 @@
                     </h:selectOneMenu>
                 </h:form>
                 <p:panel id="results">
+                            <h:outputText value="Remarks: #{budgetBean.budget['remarks']}"/>
                     <p:dataTable value="#{budgetBean.entrySummary}" var="item">
                         <p:column headerText="Sub account">
                             <h:outputText value="#{item['account']}"/> :
