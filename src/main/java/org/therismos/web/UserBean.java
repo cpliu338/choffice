@@ -72,12 +72,6 @@ public class UserBean implements java.io.Serializable {
         this.user = null;
         this.userMap.clear();
         return "/index?faces-redirect=true";
-//        HttpServletRequest req = (HttpServletRequest)ec.getRequest();
-//        try {
-//            req.getSession().getServletContext().getRequestDispatcher("/index.jsf").forward(req, (HttpServletResponse)ec.getResponse());
-//        } catch (ServletException | IOException ex) {
-//            Logger.getLogger(UserBean.class.getName()).log(Level.SEVERE, null, ex);
-//        }
     }
     
     public boolean isInRole(String r) {

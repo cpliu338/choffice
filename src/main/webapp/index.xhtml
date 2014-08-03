@@ -37,8 +37,9 @@
                 <h:outputText value="#{userBean.userMap['nickname']} " />
                 <h:outputText value="#{userBean.userMap['givenName']}" /> :
                 <!--h:outputText value="#{userBean.name}"/ -->
-                <h:outputText rendered="#{userBean.isInRole('deacons')}" value="deacon"/>,
-                <h:outputText rendered="#{userBean.isInRole('staff')}" value="staff"/>,
+                <h:outputText rendered="#{userBean.isInRole('deacons')}" value="deacon, "/>
+                <h:outputText rendered="#{userBean.isInRole('staff')}" value="staff, "/>,
+                <h:outputText rendered="#{userBean.isInRole('librarians')}" value="librarians"/>
                 <h:messages showDetail="true" />
             </ui:define>
 
