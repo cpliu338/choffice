@@ -49,6 +49,11 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
     }
     
     private boolean returnable;
+    private boolean checkinable;
+
+    public boolean isCheckinable() {
+        return checkinable;
+    }
     
     public BookCopyBean() {
         super();
@@ -102,7 +107,7 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
             bookDao.updateBookCopyStatus(new BookCopyPK(this.bookCode.trim()), BookCopy.ONSHELF, null, 
                     null, null, "");
             msg.setSeverity(FacesMessage.SEVERITY_INFO);
-            msg.setSummary("Returned");
+            msg.setSummary(bundle.getString("legend.checkin"));
             msg.setDetail(this.actionString);
             this.blankCopy();
         }
@@ -121,7 +126,7 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
             bookDao.updateBookCopyStatus(new BookCopyPK(this.bookCode.trim()), BookCopy.LOANED, member, 
                     new Date(), new Date(System.currentTimeMillis()+14*86400000L), "");
             msg.setSeverity(FacesMessage.SEVERITY_INFO);
-            msg.setSummary("Borrowed");
+            msg.setSummary(bundle.getString("legend.borrow"));
             msg.setDetail(this.actionString);
             this.blankCopy();
         }
@@ -150,7 +155,8 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
         }
         catch (NumberFormatException | PersistenceException ex) {
             msg.setSeverity(FacesMessage.SEVERITY_WARN);
-            msg.setSummary("Invalid member code");
+            msg.setSummary(String.format("%s %s", bundle.getString("legend.member"),
+                    bundle.getString("legend.notfound"))); //"Invalid member code");
             msg.setDetail(memberCode);
             blankCopy();
             FacesContext.getCurrentInstance().addMessage(null, msg);
@@ -164,12 +170,14 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
             copy = bookDao.searchCopyByCode(bookCode);
             returnable = (copy.getStatus() == BookCopy.LOANED);
             borrowable = (copy.getStatus() == BookCopy.ONSHELF && this.member!=null);
+            checkinable = (copy.getStatus() == BookCopy.STOCKTAKING);
             logger.log(Level.INFO, "Copy found: {0}", copy.getBook().getTitle());
         }
         catch (NumberFormatException | PersistenceException | NullPointerException ex) {
             logger.log(Level.SEVERE, null, ex);
             msg.setSeverity(FacesMessage.SEVERITY_WARN);
-            msg.setSummary("Invalid book code");
+            msg.setSummary(String.format("%s %s", bundle.getString("legend.barcode"),
+                    bundle.getString("legend.notfound"))); //"Invalid book code");
             msg.setDetail(this.bookCode);
             blankCopy();
             FacesContext.getCurrentInstance().addMessage(null, msg);
