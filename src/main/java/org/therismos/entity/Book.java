@@ -25,9 +25,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "lib_books")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Book.findAll", query = "SELECT b FROM Book b"),
+    @NamedQuery(name = "Book.findAll", query = "SELECT b FROM Book b ORDER BY b.callNo DESC"),
     @NamedQuery(name = "Book.findByCallNo", query = "SELECT b FROM Book b WHERE b.callNo = :callNo"),
-    @NamedQuery(name = "Book.findLikeTitle", query = "SELECT b FROM Book b WHERE b.title LIKE :title"),
+    @NamedQuery(name = "Book.findLikeTitle", query = "SELECT b FROM Book b WHERE b.title LIKE :title ORDER BY b.title"),
     @NamedQuery(name = "Book.findByCatId", query = "SELECT b FROM Book b WHERE b.catId = :catId"),
     @NamedQuery(name = "Book.findByOwnerId", query = "SELECT b FROM Book b WHERE b.ownerId = :ownerId"),
     @NamedQuery(name = "Book.findLikeIndexStr", query = "SELECT b FROM Book b WHERE b.indexStr LIKE :indexStr")})

@@ -16,7 +16,46 @@ import org.therismos.entity.*;
 @ManagedBean
 @javax.faces.bean.ViewScoped
 public class BookBean extends BookBaseBean implements java.io.Serializable {
-    private String indexStr;
+    private String indexStr, author1, publisher1, title;
+    private boolean creative;
+    private List<Integer> copies;
+
+    public List<Integer> getCopies() {
+        return copies;
+    }
+
+    public boolean isCreative() {
+        return creative;
+    }
+
+    public void setCreative(boolean creative) {
+        this.creative = creative;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getPublisher1() {
+        return publisher1;
+    }
+
+    public void setPublisher1(String publisher1) {
+        this.publisher1 = publisher1;
+    }
+
+    public String getAuthor1() {
+        return author1;
+    }
+
+    public void setAuthor1(String author1) {
+        this.author1 = author1;
+    }
+    
     private String crit;
     List<Book> foundBooks;
     @javax.ejb.EJB
@@ -33,13 +72,26 @@ public class BookBean extends BookBaseBean implements java.io.Serializable {
         this.bookid = bookid;
         if (book==null) {
             book = new Book(0);
+            title = "";
+            author1 = "";
+            publisher1 = "";
+            copies = Collections.EMPTY_LIST;
         }
-//        logger.log(Level.INFO, "Old Book id: {0}", book.getCallNo());
-        if (book.getCallNo() != bookid) { // book id changed
-            book = dao.searchBookById(bookid);
+        if (bookid>0 && book.getCallNo() != bookid) { // book id changed
+            Book book1 = dao.searchBookById(bookid);
+            if (book1 != null) {
+                book = book1;
+                indexStr = book1.getIndexStr();
+                title = book1.getTitle();
+                author1 = book1.getAuthor().getNameChi();
+                publisher1 = book1.getPublisher().getNameChi();
+                copies = new ArrayList<>();
+                int codebase = (9000000+bookid)*100;
+                for (BookCopy c : dao.findCopies(bookid)) {
+                    copies.add(codebase + c.getBookCopyPK().getCopyNo());
+                }
+            }
         }
-        this.setIndexStr(book.getIndexStr());
-//        logger.log(Level.INFO, "New Book id: {0}", book.getCallNo());
     }
 
     public String getIndexStr() {
@@ -58,6 +110,7 @@ public class BookBean extends BookBaseBean implements java.io.Serializable {
         indexStr = "";
         foundBooks = new ArrayList<>();
         crit = "";
+        copies = Collections.EMPTY_LIST;
     }
     
 //    @javax.annotation.PostConstruct
@@ -66,13 +119,39 @@ public class BookBean extends BookBaseBean implements java.io.Serializable {
         foundBooks = dao.fullTextSearch(crit);
     }
     
+    public String createBook() {
+        FacesMessage msg = new FacesMessage();
+        String ret = null;
+        try {
+            if (this.title.isEmpty()) 
+                throw new RuntimeException("Empty book title");
+            if (!creative && dao.checkBookByTitle(title)!=null)
+                throw new RuntimeException("Duplicated book title, override by setting create mode");
+            book = new Book();
+            book.setTitle(title);
+            dao.createBook(book, this.indexStr, this.author1, this.publisher1, this.creative);
+            msg.setSeverity(FacesMessage.SEVERITY_INFO);
+            msg.setSummary("Created "+book.getCallNo());
+            msg.setDetail(title);
+            ret = String.format("book?id=%d&faces-redirect=true", book.getCallNo());
+        }
+        catch (RuntimeException ex) {
+            msg.setSeverity(FacesMessage.SEVERITY_WARN);
+            msg.setDetail(ex.getMessage());
+            msg.setSummary(ex.getClass().getName());
+            ret = null;
+        }
+        FacesContext.getCurrentInstance().addMessage(null, msg);
+        return ret;
+    }
+    
     public void saveIndexStr() {
         FacesMessage msg = new FacesMessage();
         try {
             book = dao.searchBookById(bookid);
             book.setIndexStr(this.indexStr);
-            logger.log(Level.INFO, "Getting author: {0}", book.getAuthor().getNameChi());
             dao.updateBook(book);
+            logger.log(Level.INFO, "Save indexStr for: {0}", book.getTitle());
             msg.setSeverity(FacesMessage.SEVERITY_INFO);
             msg.setSummary("Saved ");
             msg.setDetail(book.getIndexStr());
@@ -85,74 +164,97 @@ public class BookBean extends BookBaseBean implements java.io.Serializable {
         FacesContext.getCurrentInstance().addMessage(null, msg);
     }
     
-//    public void save() {
-//        FacesMessage msg = new FacesMessage();
-//            if (em==null) throw new RuntimeException("Cannot create EntityManager");
-//        try {
-//            javax.persistence.EntityTransaction tx = em.getTransaction();
-//            tx.begin();
-//            Book b = em.createNamedQuery("Book.findByCallNo", Book.class).setParameter("callNo", book.getCallNo()).getSingleResult();
-//            if (b==null) throw new RuntimeException("Cannot find this book");
-//            Logger.getLogger(BookBean.class.getName()).log(Level.INFO, "Finding author: {0}", book.getAuthor().getNameChi());
-//            List<Author> l = em.createNamedQuery("Author.findByNameChi", Author.class).setParameter("nameChi", book.getAuthor().getNameChi()).getResultList();
-//            if (l.isEmpty()) throw new RuntimeException("Cannot find this author");
-//            b.setIndexStr(book.getIndexStr());
-//            b.setAuthor(l.get(0));
-//            em.merge(b);
-//            tx.commit();
-//            msg.setSeverity(FacesMessage.SEVERITY_INFO);
-//            msg.setSummary("Saved ");
-//            msg.setDetail(b.getIndexStr());
-//            init();
-//        }
-//        catch (RuntimeException ex) {
-//            Logger.getLogger(BookBean.class.getName()).log(Level.WARNING, book.toString());
-//            msg.setSeverity(FacesMessage.SEVERITY_WARN);
-//            msg.setDetail(ex.getMessage());
-//            msg.setSummary(ex.getClass().getName());
-//        }
-//        finally {
-//            em.close();
-//            FacesContext.getCurrentInstance().addMessage("form2", msg);
-//        }
-//    }
+    public void saveAuthor() {
+        FacesMessage msg = new FacesMessage();
+        msg.setSeverity(FacesMessage.SEVERITY_INFO);
+        try {
+            book = dao.searchBookById(bookid);
+            msg.setDetail(book.getTitle());
+            Author a = dao.getAuthorByNameChi(author1);
+            if (a!=null) {
+                book.setAuthor(a);
+                dao.updateBook(book);
+                msg.setSummary("Saved "+author1);
+            }
+            else if (this.creative) {
+                dao.createAuthor(author1);
+                msg.setSummary("created "+author1);
+            }
+            else {
+                msg.setSeverity(FacesMessage.SEVERITY_ERROR);
+                msg.setSummary("Must set create mode to create "+author1);
+            }
+            creative = false;
+        }
+        catch (NumberFormatException | PersistenceException ex) {
+            msg.setSeverity(FacesMessage.SEVERITY_WARN);
+            msg.setDetail(ex.getMessage());
+            msg.setSummary(ex.getClass().getName());
+        }
+        FacesContext.getCurrentInstance().addMessage(null, msg);
+    }
     
-//    public void search() {
-//        Logger.getLogger(BookBean.class.getName()).log(Level.INFO, "Searching: {0}", indexStr);
-//        foundBooks.clear();
-//        EntityManager em = EMF.createEntityManager();
-//        if (em==null) return;
-//        int callno;
-//        try {
-//            callno = Integer.parseInt(indexStr.trim())/ 100 - 9000000;
-//            foundBooks.add(
-//                em.createNamedQuery("Book.findByCallNo", Book.class).setParameter("callNo", callno).getSingleResult()
-//            );
-//        }
-//        catch (NumberFormatException | javax.persistence.NoResultException ex) {
-//        }
-//        String crit_trim = indexStr.trim();
-//        if (crit_trim.length()>1) {
-//            foundBooks.addAll(em.createNamedQuery("Book.findLikeIndexStr", Book.class).setParameter("indexStr", crit_trim+"%").getResultList());
-//            foundBooks.addAll(em.createNamedQuery("Book.findLikeTitle", Book.class).setParameter("title", "%"+crit_trim+"%").getResultList());
-//        }
-//        if (foundBooks ==null || foundBooks.isEmpty()) {
-//            book = new Book(0);
-//            FacesMessage msg = new FacesMessage();
-//            msg.setDetail("Books not found");
-//            msg.setSummary("Alert");
-//            msg.setSeverity(FacesMessage.SEVERITY_WARN);
-//            FacesContext.getCurrentInstance().addMessage("form1", msg);
-//        }
-//        em.close();
-//    }
-
+    public void savePublisher() {
+        FacesMessage msg = new FacesMessage();
+        msg.setSeverity(FacesMessage.SEVERITY_INFO);
+        try {
+            book = dao.searchBookById(bookid);
+            msg.setDetail(book.getTitle());
+            Publisher p = dao.getPublisherByNameChi(publisher1);
+            if (p!=null) {
+                book.setPublisher(p);
+                dao.updateBook(book);
+                msg.setSummary("Saved "+publisher1);
+                msg.setDetail(book.getPublisher().getNameChi());
+            }
+            else if (this.creative) {
+                dao.createPublisher(publisher1);
+                msg.setSummary("created "+publisher1);
+            }
+            else {
+                msg.setSeverity(FacesMessage.SEVERITY_ERROR);
+                msg.setSummary("Must set create mode to create "+publisher1);
+            }
+            creative = false;
+        }
+        catch (NumberFormatException | PersistenceException ex) {
+            msg.setSeverity(FacesMessage.SEVERITY_WARN);
+            msg.setDetail(ex.getMessage());
+            msg.setSummary(ex.getClass().getName());
+        }
+        FacesContext.getCurrentInstance().addMessage(null, msg);
+    }
+    
+    public void create() {
+        FacesMessage msg = new FacesMessage();
+        msg.setSeverity(FacesMessage.SEVERITY_INFO);
+        try {
+            if (creative) {
+                msg.setSummary("Next id: "+dao.findNextNewCallno());
+            }
+            else {
+                msg.setSummary("Must set create mode to create");
+            }
+            creative = false;
+        }
+        catch (NumberFormatException | PersistenceException ex) {
+            msg.setSeverity(FacesMessage.SEVERITY_WARN);
+            msg.setDetail(ex.getMessage());
+            msg.setSummary(ex.getClass().getName());
+        }
+        FacesContext.getCurrentInstance().addMessage(null, msg);
+    }
+    
     public List<String> suggestAuthor(String query) {
         return dao.suggest(query, "Author");
     }
     
     public List<String> suggestPublisher(String query) {
         return dao.suggest(query, "Publisher");
+    }
+    
+    public List<String>suggestBook(String query) {
+        return dao.suggestBook(query);
     }
 
     /**

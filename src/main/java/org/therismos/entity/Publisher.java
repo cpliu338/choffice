@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "Publisher.findAll", query = "SELECT p FROM Publisher p"),
     @NamedQuery(name = "Publisher.findById", query = "SELECT p FROM Publisher p WHERE p.id = :id"),
+    @NamedQuery(name = "Publisher.findByNameChi", query = "SELECT p FROM Publisher p WHERE p.nameChi = :nameChi"),
     @NamedQuery(name = "Publisher.suggest", query = "SELECT p.nameChi FROM Publisher p WHERE p.nameChi LIKE :nameFrag ORDER BY p.nameChi")
 })
 public class Publisher implements Serializable {

@@ -13,12 +13,15 @@
             <ui:define name="left">
                 <h:form>
                     <p><h:commandLink action="#{userBean.logout()}"><h:outputText value="#{msg['menu.logout']}"/></h:commandLink></p>
-                        <p><h:outputLink value="books.jsf">
-                            <h:outputText value="#{msg['legend.book']}"/>
-                        </h:outputLink></p>
+                    <p><h:outputLink value="books.jsf">
+                        <h:outputText value="#{msg['legend.book']}"/>
+                    </h:outputLink></p>
                     <p><h:outputLink value="home.jsf">
                         <h:outputText value="#{msg['legend.borrow']}"/> /
                         <h:outputText value="#{msg['legend.return']}"/>
+                    </h:outputLink></p>
+                    <p><h:outputLink value="book.jsf">
+                        <h:outputText value="New book"/>
                     </h:outputLink></p>
                 </h:form>
             </ui:define>
@@ -27,19 +30,27 @@
                 <h:form>
                     <h:panelGrid columns="3" id="book">
                         <h:outputLabel value="Call no"/>
-                        <h:inputText id="bookid" readonly="#{false}" value="#{bookBean.bookid}"/>
+                        <h:inputText id="bookid" readonly="#{true}" value="#{bookBean.bookid}"/>
                         <p:messages id="msg" showDetail="#{true}" showSummary="#{true}" />
-                        <h:outputLabel value="Index"/>
+                        <h:outputLabel value="#{msg['legend.indexStr']}"/>
                         <h:inputText id="indexStr" value="#{bookBean.indexStr}"/>
-                        <p:commandButton update="@form" process="bookid indexStr" action="#{bookBean.saveIndexStr()}" value="Update"/>
+                        <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="bookid indexStr" action="#{bookBean.saveIndexStr()}" value="Update"/>
                         <h:outputLabel value="Title"/>
-                        <h:inputText readonly="#{true}" value="#{bookBean.book.title}"/>
-                        <p:commandButton action="#{bookBean.init()}" value="Update"/>
-                        <h:outputLabel value="Author"/>
-                        <h:inputText readonly="#{true}" value="#{bookBean.book.author.nameChi}"/>
-                        <p:commandButton action="#{bookBean.init()}" value="Update"/>
+                        <p:autoComplete id="title" readonly="#{bookBean.bookid!=0}" value="#{bookBean.title}"
+                         minQueryLength="2" completeMethod="#{bookBean.suggestBook}"/>
+                        <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="create bookid title" action="#{bookBean.create()}" value="Update"/>
+                        <h:outputLabel value="#{msg['legend.author']}"/>
+                        <p:autoComplete id="author" value="#{bookBean.author1}" minQueryLength="2" completeMethod="#{bookBean.suggestAuthor}" />
+                        <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="bookid author create" action="#{bookBean.saveAuthor()}" value="Update"/>
+                        <h:outputLabel value="#{msg['legend.publisher']}"/>
+                        <p:autoComplete id="publisher" value="#{bookBean.publisher1}" minQueryLength="2" completeMethod="#{bookBean.suggestPublisher}" />
+                        <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="bookid publisher create" action="#{bookBean.savePublisher()}" value="Update"/>
+                        <h:outputText value=""/>
+                        <p:selectBooleanCheckbox id="create" itemLabel="create" label="Create" value="#{bookBean.creative}"/>
+                        <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid!=0}" value="Create" ajax="#{false}" action="#{bookBean.createBook}"/>
                     </h:panelGrid>
                 </h:form>
+                Book copies: <p:dataGrid emptyMessage="Nil" value="#{bookBean.copies}" var="copyno">#{copyno} </p:dataGrid>
             </ui:define>
 
         </ui:composition>

@@ -74,6 +74,10 @@ public class UserBean implements java.io.Serializable {
         return "/index?faces-redirect=true";
     }
     
+    public boolean isLibrarian() {
+        return isInRole("librarians");
+    }
+    
     public boolean isInRole(String r) {
         FacesContext fc = FacesContext.getCurrentInstance();
         HttpServletRequest req = (HttpServletRequest)fc.getExternalContext().getRequest();
