@@ -49,6 +49,7 @@
                         <p:selectBooleanCheckbox id="create" itemLabel="create" label="Create" value="#{bookBean.creative}"/>
                         <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid!=0}" value="Create" ajax="#{false}" action="#{bookBean.createBook}"/>
                     </h:panelGrid>
+                    <p><p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" ajax="#{false}" action="#{bookBean.addBookCopy}" value="Add 1 Copy"/> </p>
                 </h:form>
                 Book copies: <p:dataGrid emptyMessage="Nil" value="#{bookBean.copies}" var="copyno">#{copyno} </p:dataGrid>
             </ui:define>

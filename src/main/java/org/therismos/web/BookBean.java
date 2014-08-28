@@ -119,6 +119,11 @@ public class BookBean extends BookBaseBean implements java.io.Serializable {
         foundBooks = dao.fullTextSearch(crit);
     }
     
+    public String addBookCopy() {
+        dao.addBookCopy(bookid);
+        return String.format("book?id=%d&faces-redirect=true", bookid);
+    }
+    
     public String createBook() {
         FacesMessage msg = new FacesMessage();
         String ret = null;

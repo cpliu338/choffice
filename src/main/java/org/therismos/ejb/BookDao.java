@@ -166,14 +166,28 @@ public class BookDao {
         BookCopy c = new BookCopy();
         c.setBookCopyPK(new BookCopyPK(b.getCallNo(),1));
         c.setBook(b);
-        c.setStatus(3);
-        c.setUserId(801);
+        c.setStatus(BookCopy.STOCKTAKING);
+        c.setUserId(Member1.XXXid);
         c.setStartdate(new java.util.Date());
         c.setEnddate(c.getStartdate());
         c.setRemark("");
         em.merge(c);
         em.flush(); // needed so that last inserted id gets updated
         return b;
+    }
+    
+    public void addBookCopy(int bookid) {
+        List<BookCopy> found = em.createNamedQuery("BookCopy.findByCallNo",BookCopy.class).setParameter("callNo", bookid).getResultList();
+        if (found.isEmpty()) return;
+        BookCopy c = new BookCopy();
+        c.setBookCopyPK(new BookCopyPK(bookid,found.size()+1));
+        c.setBook(em.find(Book.class, bookid));
+        c.setStatus(BookCopy.STOCKTAKING);
+        c.setUserId(Member1.XXXid);
+        c.setStartdate(new java.util.Date());
+        c.setEnddate(c.getStartdate());
+        c.setRemark("");
+        em.persist(c);
     }
     
     public java.util.List<String> suggestBook(String query) throws PersistenceException {
