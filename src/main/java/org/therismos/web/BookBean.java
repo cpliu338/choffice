@@ -230,15 +230,21 @@ public class BookBean extends BookBaseBean implements java.io.Serializable {
         FacesContext.getCurrentInstance().addMessage(null, msg);
     }
     
-    public void create() {
+    public void saveTitle() {
         FacesMessage msg = new FacesMessage();
         msg.setSeverity(FacesMessage.SEVERITY_INFO);
         try {
-            if (creative) {
-                msg.setSummary("Next id: "+dao.findNextNewCallno());
+            book = dao.searchBookById(bookid);
+            msg.setDetail(book.getTitle());
+            title = title.trim();
+            if (title.length()>0) {
+                book.setTitle(title);
+                dao.updateBook(book);
+                msg.setSummary("Saved ");
             }
             else {
-                msg.setSummary("Must set create mode to create");
+                msg.setSeverity(FacesMessage.SEVERITY_ERROR);
+                msg.setSummary("Title must not be empty");
             }
             creative = false;
         }

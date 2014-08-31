@@ -38,7 +38,7 @@
                         <h:outputLabel value="Title"/>
                         <p:autoComplete id="title" value="#{bookBean.title}"
                          minQueryLength="2" completeMethod="#{bookBean.suggestBook}"/>
-                        <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="create bookid title" action="#{bookBean.create()}" value="Update"/>
+                        <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="create bookid title" action="#{bookBean.saveTitle()}" value="Update"/>
                         <h:outputLabel value="#{msg['legend.author']}"/>
                         <p:autoComplete id="author" value="#{bookBean.author1}" minQueryLength="2" completeMethod="#{bookBean.suggestAuthor}" />
                         <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="bookid author create" action="#{bookBean.saveAuthor()}" value="Update"/>
