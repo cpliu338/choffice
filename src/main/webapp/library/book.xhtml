@@ -36,7 +36,7 @@
                         <h:inputText id="indexStr" value="#{bookBean.indexStr}"/>
                         <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="bookid indexStr" action="#{bookBean.saveIndexStr()}" value="Update"/>
                         <h:outputLabel value="Title"/>
-                        <p:autoComplete id="title" readonly="#{bookBean.bookid!=0}" value="#{bookBean.title}"
+                        <p:autoComplete id="title" value="#{bookBean.title}"
                          minQueryLength="2" completeMethod="#{bookBean.suggestBook}"/>
                         <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="create bookid title" action="#{bookBean.create()}" value="Update"/>
                         <h:outputLabel value="#{msg['legend.author']}"/>
