@@ -9,6 +9,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -27,12 +29,13 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Entry.findAll", query = "SELECT e FROM Entry e"),
     @NamedQuery(name = "Entry.findById", query = "SELECT e FROM Entry e WHERE e.id = :id"),
     @NamedQuery(name = "Entry.findByDate1", query = "SELECT e FROM Entry e WHERE e.date1 = :date1"),
+    @NamedQuery(name = "Entry.findBetweenDates", query = "SELECT e FROM Entry e WHERE e.date1 BETWEEN :date1 AND :date2 ORDER BY e.account.code"),
     @NamedQuery(name = "Entry.findByTransref", query = "SELECT e FROM Entry e WHERE e.transref = :transref"),
     @NamedQuery(name = "Entry.findByAmount", query = "SELECT e FROM Entry e WHERE e.amount = :amount"),
     @NamedQuery(name = "Entry.findByDetail", query = "SELECT e FROM Entry e WHERE e.detail = :detail"),
     @NamedQuery(name = "Entry.findByExtra1", query = "SELECT e FROM Entry e WHERE e.extra1 = :extra1"),
-    @NamedQuery(name = "Entry.findAggregateSinceDate", query = "SELECT e.accountId, SUM(e.amount) FROM Entry e WHERE e.date1 > :start AND e.accountId IN :acclist GROUP BY e.accountId ORDER BY e.accountId"),
-    @NamedQuery(name = "Entry.aggregate", query = "SELECT e.accountId, SUM(e.amount) FROM Entry e WHERE e.accountId IN :acclist AND (e.date1 BETWEEN :start AND :end) GROUP BY e.accountId ORDER BY e.accountId"),
+    @NamedQuery(name = "Entry.findAggregateSinceDate", query = "SELECT e.accountId, SUM(e.amount) FROM Entry e WHERE e.date1 > :start AND e.account.id IN :acclist GROUP BY e.account.id ORDER BY e.account.id"),
+    @NamedQuery(name = "Entry.aggregate", query = "SELECT e.account.id, SUM(e.amount) FROM Entry e WHERE e.account.id IN :acclist AND (e.date1 BETWEEN :start AND :end) GROUP BY e.account.id ORDER BY e.account.id"),
     @NamedQuery(name = "Entry.findByAccountId", query = "SELECT e FROM Entry e WHERE e.accountId = :accountId")})
 public class Entry implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -47,9 +50,12 @@ public class Entry implements Serializable {
     private BigDecimal amount;
     private String detail;
     private String extra1;
-    @Column(name = "account_id")
-    private Integer accountId;
-
+//    @Column(name = "account_id")
+//    private Integer accountId;
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
+    
     public Entry() {
     }
 
@@ -105,12 +111,12 @@ public class Entry implements Serializable {
         this.extra1 = extra1;
     }
 
-    public Integer getAccountId() {
-        return accountId;
+    public Account getAccount() {
+        return account;
     }
 
-    public void setAccountId(Integer accountId) {
-        this.accountId = accountId;
+    public void setAccount(Account account) {
+        this.account = account;
     }
 
     @Override
