@@ -2,7 +2,7 @@ package barcode;
 
 import java.net.*;
 import java.io.*;
-import java.util.*;
+import java.util.regex.*;
 import barcode.jbarcodebean.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,13 +42,17 @@ public class GenBarcode {
 		  base = defaultbase;
 		  throw new IllegalArgumentException("Cannot write to directory "+desc);
 	  }
+         System.out.println(base.getAbsolutePath());
     }
 
 	public void setCode(int id){
-		if (id < 0 || id >10000)
-			throw new IllegalArgumentException("Illegal id (must be 1-1000: "+id);
-		code = String.format("%d", id*107+10000000);
-		this.filename= code+".gif";
+            if (id < 0 || id >10000)
+                throw new IllegalArgumentException("Illegal id (must be 1-1000: "+id);
+            String code2 = String.format("%d", id*107+10000000);
+   	 Pattern p = Pattern.compile("(\\d)\\1");
+   	 Matcher m = p.matcher(code2);
+         code = m.replaceAll("$1A");
+         this.filename = code+".gif";
 	}
 
 	public String getFileName() {

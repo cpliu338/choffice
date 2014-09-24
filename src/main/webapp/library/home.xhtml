@@ -17,7 +17,7 @@
                         <h:outputText value="#{msg['legend.return']}"/>
                     </h:outputLink></p>
                     <p><h:outputLink value="book.jsf">
-                        <h:outputText value="New book"/>
+                        <h:outputText value="#{msg['cmd.add']}#{msg['legend.book']}"/>
                     </h:outputLink></p>
                 </h:form>
             </ui:define>
@@ -25,20 +25,20 @@
                 <h:form id="borrowForm">
                     <p:growl id="borrowmsg" showDetail="#{true}" showSummary="#{true}" />
                     <h:panelGrid columns="3">
-                        <h:outputLabel value="Book" />
+                        <h:outputLabel value="#{msg['legend.book']}" />
                         <p:inputText id="bookcode" value="#{bookCopyBean.bookCode}"/>
-                        <p:commandButton icon="ui-icon-search" update="borrowmsg bcopy actionString" action="#{bookCopyBean.searchByBookCode()}"/>
-                        <h:outputLabel value="Member" />
+                        <p:commandButton icon="ui-icon-search" update="bookcode borrowmsg bcopy actionString" action="#{bookCopyBean.searchByBookCode()}"/>
+                        <h:outputLabel value="#{msg['legend.member']}" />
                         <p:inputText id="membercode" value="#{bookCopyBean.memberCode}"/>
-                        <p:commandButton icon="ui-icon-search" update="borrowmsg bcopy actionString" action="#{bookCopyBean.searchByMemberCode()}"/>
+                        <p:commandButton icon="ui-icon-search" update="membercode borrowmsg bcopy actionString" action="#{bookCopyBean.searchByMemberCode()}"/>
                     </h:panelGrid>
                     <p:panelGrid columns="2" id="bcopy" >
-                        <h:outputLabel value="Book"/>
+                        <h:outputLabel value="#{msg['legend.book']}"/>
                         <h:outputText rendered="#{not empty bookCopyBean.copy}" value="#{bookCopyBean.copy.book.title}"/>
-                        <h:outputLabel value="Member"/>
+                        <h:outputLabel value="#{msg['legend.member']}"/>
                         <h:outputText rendered="#{not empty bookCopyBean.member}" value="#{bookCopyBean.member.name}"/>
                         <h:outputText rendered="#{empty bookCopyBean.member}" value=" "/>
-                        <h:outputLabel value="Status"/>
+                        <h:outputLabel value="#{msg['legend.status']}"/>
                         <h:outputText value="#{msg[bookCopyBean.statusText]}"/>
                         <p:commandButton update="borrowForm" value="#{msg['legend.borrow']}"
                                          disabled="#{not bookCopyBean.borrowable}" action="#{bookCopyBean.borrow()}"/>

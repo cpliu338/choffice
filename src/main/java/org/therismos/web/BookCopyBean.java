@@ -149,6 +149,7 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
     public void searchByMemberCode() {
         FacesMessage msg = new FacesMessage();
         try {
+            memberCode = bookDao.convert(memberCode).trim();
             member = memberDao.findMemberByCode(Integer.parseInt(memberCode));
             returnable = copy != null && (copy.getStatus() == BookCopy.LOANED);
             borrowable = (copy.getStatus() == BookCopy.ONSHELF);
@@ -167,6 +168,7 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
     public void searchByBookCode() {
         FacesMessage msg = new FacesMessage();
         try {
+            bookCode = bookDao.convert(bookCode).trim();
             copy = bookDao.searchCopyByCode(bookCode);
             returnable = (copy.getStatus() == BookCopy.LOANED);
             borrowable = (copy.getStatus() == BookCopy.ONSHELF && this.member!=null);

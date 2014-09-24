@@ -12,7 +12,7 @@
                     <p>
                     <h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">Log out</h:commandLink>
                     </p><p>
-                    <h:commandLink rendered="#{userBean.loggedIn}" action="report?faces-redirect=true">Monthly Report</h:commandLink>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="export?faces-redirect=true">Export entries for auditing</h:commandLink>
                     </p>
                 </h:form>
             </ui:define>
@@ -22,9 +22,20 @@
                     <br/>
                     Select end date : <p:calendar pattern="yyyy-MM-dd" value="#{entryBean.end}"/>
                     <br/>
-                    <p:commandButton update=":results" value="export" action="#{entryBean.export()}"/>
+                    <h:commandButton value="report" action="#{entryBean.report()}"/>
                 </h:form>
-                <p:inputTextarea id="results" value="#{entryBean.csv}"/>
+        <h:form id="form2">
+            <dl>
+                <dt>Available reports</dt>
+            <ui:repeat value="#{reportFileDownload.reports}" var="fname">
+                <dd><p:commandLink id="downloadLink" ajax="false">
+                    <h:outputText value="#{reportFileDownload.translate(fname)}"/>
+                    <f:setPropertyActionListener target="#{reportFileDownload.fname}" value="#{fname}"/>
+                    <p:fileDownload value="#{reportFileDownload.file}" />  
+                </p:commandLink>  </dd>
+            </ui:repeat>
+            </dl>
+        </h:form>  
                 <h:messages id="msg" />
             </ui:define>
         </ui:composition>

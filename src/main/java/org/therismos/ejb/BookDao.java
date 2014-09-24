@@ -25,8 +25,23 @@ public class BookDao {
     @PersistenceContext
     private EntityManager em;
     
+    /**
+     * Convert 0A1A to 0011
+     * @param code input code with A
+     * @return output code without A
+     */
+    public String convert(String code) {
+    	// = "10A0A107";
+    	StringBuilder buf = new StringBuilder(code);
+    	for (int i=buf.lastIndexOf("A"); i > 0; i = buf.lastIndexOf("A")) {
+            	buf.setCharAt(i, code.charAt(i-1));
+    	}
+    	return buf.toString();
+    }
+
+            
     public BookCopy searchCopyByCode(String bookCode) throws NumberFormatException, PersistenceException {
-        BookCopyPK pk = new BookCopyPK(bookCode.trim());
+        BookCopyPK pk = new BookCopyPK(bookCode);
         return em.find(BookCopy.class, pk);
     }
     

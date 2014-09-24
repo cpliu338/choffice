@@ -15,12 +15,18 @@ import org.therismos.model.BudgetModel;
  */
 @javax.inject.Named
 public class BudgetDao {
-    
-    @Inject
+
+    @javax.ejb.EJB
+    MongoService mongoService;
     DBCollection coll;
     @PersistenceContext
     private EntityManager em;
     static final Logger logger = Logger.getLogger(BudgetDao.class.getName());
+    
+    @javax.annotation.PostConstruct
+    public void init() {
+        coll = mongoService.getBudgetCollection();
+    }
 
     public List<Map> aggregateEntries(Date start, Date end, BasicDBList acclist) {
         logger.log(Level.INFO, "dates between {0}:{1}", new Object[]{start,end});
