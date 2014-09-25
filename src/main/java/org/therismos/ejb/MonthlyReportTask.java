@@ -51,6 +51,15 @@ public class MonthlyReportTask implements Runnable {
     private String message;
     private List<Entry> entries;
 
+    /**
+     * opening balance for mortgage debt
+     */
+    private java.math.BigDecimal opening231;
+
+    public void setOpening231(java.math.BigDecimal opening231) {
+        this.opening231 = opening231;
+    }
+
     public void setEntries(List<Entry> entries) {
         this.entries = entries;
     }
@@ -378,16 +387,17 @@ public class MonthlyReportTask implements Runnable {
             cell1 = row.createCell(1);
             cell.setCellValue(translate.getProperty(prefix+"mortgage"));
             cell1.setCellStyle(styleCheckSum);
-            Number opening;// = 0.0;
+            /*
             try {
                 Object o = mongoDao.getConfig("opening");
                 DBObject config = (DBObject)o;
-                opening = ((Number)config.get("231")).doubleValue();
+                opening231 = ((Number)config.get("231")).doubleValue();
             }
             catch (Exception ex) {
                 return false;
             }
-            cell1.setCellValue(opening.doubleValue() - totals.get("231"));//637106.57-a.getTotal());
+            */
+            cell1.setCellValue(opening231.doubleValue() - totals.get("231"));
         return true;
     }
     

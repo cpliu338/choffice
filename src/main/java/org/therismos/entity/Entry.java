@@ -36,7 +36,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Entry.findByExtra1", query = "SELECT e FROM Entry e WHERE e.extra1 = :extra1"),
     @NamedQuery(name = "Entry.findAggregateSinceDate", query = "SELECT e.accountId, SUM(e.amount) FROM Entry e WHERE e.date1 > :start AND e.account.id IN :acclist GROUP BY e.account.id ORDER BY e.account.id"),
     @NamedQuery(name = "Entry.aggregate", query = "SELECT e.account.id, SUM(e.amount) FROM Entry e WHERE e.account.id IN :acclist AND (e.date1 BETWEEN :start AND :end) GROUP BY e.account.id ORDER BY e.account.id"),
-    @NamedQuery(name = "Entry.findByAccountId", query = "SELECT e FROM Entry e WHERE e.accountId = :accountId")})
+    @NamedQuery(name = "Entry.findByAccountId", query = "SELECT e FROM Entry e WHERE e.account.id = :accountId")})
 public class Entry implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id

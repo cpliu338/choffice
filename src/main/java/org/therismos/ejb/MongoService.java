@@ -60,14 +60,16 @@ public class MongoService {
     public void init() {
         results.clear();
         try {
-            mongoClient = new MongoClient("ds043358.mongolab.com", 43358);
+            mongoClient = new MongoClient(); //"ds043358.mongolab.com", 43358);
         } catch (UnknownHostException ex) {
             Logger.getLogger(MongoService.class.getName()).log(Level.SEVERE, null, ex);
             return;
         }
         db = mongoClient.getDB("therismos");
+        /*
         if (!db.authenticate("therismos","26629066".toCharArray()))
             throw new RuntimeException("Cannot authenticate");
+                */
         collBudgets = db.getCollection("budget");
         collBudgets.setObjectClass(BudgetModel.class);
         collAccounts = db.getCollection("accounts");

@@ -22,7 +22,10 @@
                     <br/>
                     Select end date : <p:calendar pattern="yyyy-MM-dd" value="#{entryBean.end}"/>
                     <br/>
+            <p><h:outputText id="progress" value="#{entryBean.progress}"/></p>
+            <p:messages id="msg"/>
                     <h:commandButton value="report" action="#{entryBean.report()}"/>
+            <p:poll interval="5" listener="#{entryBean.refresh}" update=":form2 :form"/>
                 </h:form>
         <h:form id="form2">
             <dl>
@@ -36,7 +39,6 @@
             </ui:repeat>
             </dl>
         </h:form>  
-                <h:messages id="msg" />
             </ui:define>
         </ui:composition>
     </body>

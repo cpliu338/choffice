@@ -36,6 +36,8 @@ public class EntryBean implements java.io.Serializable {
 
     public EntryBean() {
         csv = "";
+        begin = new Date();
+        end = new Date();
     }
     
     public void export() {
@@ -98,6 +100,7 @@ public class EntryBean implements java.io.Serializable {
         begin.setDate(1);
         task.setLevel(3);
         task.setEntries(entryEjb.getEntries(begin, end));
+        task.setOpening231(entryEjb.getOpening29001(begin, end));
         runner = new Thread(task);
         runner.start();
     }

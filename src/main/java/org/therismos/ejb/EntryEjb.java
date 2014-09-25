@@ -1,5 +1,6 @@
 package org.therismos.ejb;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.*;
@@ -27,6 +28,14 @@ public class EntryEjb {
         return
         em.createNamedQuery("Entry.findBetweenDates", Entry.class).
         setParameter("date1", begin).setParameter("date2", end).getResultList();
+    }
+    
+    public BigDecimal getOpening29001(Date begin, Date end) {
+        List<Entry> loans = em.createQuery("SELECT e FROM Entry e WHERE e.account.id = 29001 and e.date1 BETWEEN :begin and :end ORDER BY e.date1", Entry.class)
+                .setParameter("begin", begin).setParameter("end", end).setMaxResults(1).getResultList();
+        if (loans.isEmpty())
+            return BigDecimal.ZERO;
+        return loans.get(0).getAmount();
     }
     
     public void report() {
