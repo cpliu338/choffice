@@ -20,7 +20,7 @@ import javax.servlet.http.HttpSession;
  */
 public class AuthFilter implements Filter {
     
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     // The filter configuration object we are associated with.  If
     // this value is null, this filter instance is not currently
@@ -40,22 +40,6 @@ public class AuthFilter implements Filter {
         // the rest of the filter chain is invoked.
 	// For example, a logging filter might log items on the request object,
         // such as the parameters.
-	/*
-         for (Enumeration en = request.getParameterNames(); en.hasMoreElements(); ) {
-         String name = (String)en.nextElement();
-         String values[] = request.getParameterValues(name);
-         int n = values.length;
-         StringBuffer buf = new StringBuffer();
-         buf.append(name);
-         buf.append("=");
-         for(int i=0; i < n; i++) {
-         buf.append(values[i]);
-         if (i < n-1)
-         buf.append(",");
-         }
-         log(buf.toString());
-         }
-         */
     }    
     
     private void doAfterProcessing(ServletRequest request, ServletResponse response)
@@ -92,6 +76,7 @@ public class AuthFilter implements Filter {
      * @exception IOException if an input/output error occurs
      * @exception ServletException if a servlet error occurs
      */
+    @Override
     public void doFilter(ServletRequest request, ServletResponse response,
             FilterChain chain)
             throws IOException, ServletException {
@@ -103,6 +88,20 @@ public class AuthFilter implements Filter {
         doBeforeProcessing(request, response);
         if (request instanceof HttpServletRequest) {
             HttpServletRequest req = (HttpServletRequest)request;
+            if (req.getUserPrincipal() == null) {
+                String ip = req.getRemoteAddr();
+                if (debug) log(ip);
+                if (!ip.startsWith("127.0.0.") && !ip.startsWith("192.168.") )
+                    filterConfig.getServletContext().getRequestDispatcher("/index.jsf").forward(req, response);
+            }
+            else {
+                if (debug) log(req.getUserPrincipal().getName());
+                if (!req.isUserInRole("deacons") && !req.isUserInRole("librarians"))
+                    filterConfig.getServletContext().getRequestDispatcher("/index.jsf").forward(req, response);
+            }
+            String uri = req.getRequestURI();
+            if (debug) log(uri.toString());
+/*
             HttpSession session = req.getSession(true);
             Object o = session.getAttribute("user");
             String uri = req.getRequestURI();
@@ -126,8 +125,8 @@ public class AuthFilter implements Filter {
                 session.setAttribute("target", req.getRequestURI());
                 filterConfig.getServletContext().getRequestDispatcher("/index.jsf").forward(req, response);
             }
+*/        
         }
-        
         Throwable problem = null;
         try {
             chain.doFilter(request, response);

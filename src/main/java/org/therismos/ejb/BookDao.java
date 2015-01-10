@@ -3,6 +3,7 @@ package org.therismos.ejb;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
@@ -133,6 +134,7 @@ public class BookDao {
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @RolesAllowed({"deacons","librarians"})
     public void updateBook(Book c) throws PersistenceException {
         em.merge(c);
     }
