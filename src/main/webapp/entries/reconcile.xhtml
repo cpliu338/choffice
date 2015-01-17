@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+    <body>
+
+        <ui:composition template="./../WEB-INF/mainTemplate.xhtml">
+
+            <ui:define name="left">
+                <h:form>
+                    <p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">Log out</h:commandLink>
+                    </p><p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="report?faces-redirect=true">Monthly Report</h:commandLink>
+                    </p><p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="reconcile?faces-redirect=true">Monthly Reconcile</h:commandLink>
+                     </p><p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="cheques?faces-redirect=true">List past unpresented cheques</h:commandLink>
+                    </p><p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="export?faces-redirect=true">Export entries to Excel (CSV format)</h:commandLink>
+                   </p>
+                </h:form>
+            </ui:define>
+
+            <ui:define name="content">
+                <h:form id="form">
+                    Start date: <p:calendar value="#{entryBean.begin}" pattern="yyyy-MM-dd"/>
+                    <br/>
+                    End date: <p:calendar value="#{entryBean.end}" pattern="yyyy-MM-dd"/>
+                    <br/>
+                    <p:commandButton update="save results balance" value="Reconcile" action="#{entryBean.reconcile()}">
+                    </p:commandButton>
+                    <p:commandButton id="save" update="balance" value="Save" action="#{entryBean.saveCheques()}" disabled="#{not entryBean.chequesSaveable}" />
+                    <p:panel id="balance" rendered="#{entryBean.chequesSaveable}">
+                        <h:outputFormat value="Book Balance: {0} | ">
+                            <f:param value="#{entryBean.dbobject.get('bookBalance')}"/>
+                        </h:outputFormat>
+                        <h:outputFormat value="Unpresented cheques: {0} | ">
+                            <f:param value="#{entryBean.dbobject.get('uncheq')}"/>
+                        </h:outputFormat>
+                        <h:outputFormat value="Bank Balance: {0}">
+                            <f:param value="#{entryBean.dbobject.get('bookBalance')+entryBean.dbobject.get('uncheq')}"/>
+                        </h:outputFormat>
+                    </p:panel>
+                    <p:dataTable id="results" value="#{entryBean.entries}" var="cheq">
+            <p:column>
+                <f:facet name="header">Cheque No.</f:facet>
+                <h:outputText value="#{cheq.extra1}"/>
+            </p:column>
+            <p:column>
+                <f:facet name="header">Amount</f:facet>
+                <h:outputText value="#{cheq.amount}"/>
+            </p:column>
+        </p:dataTable>
+                </h:form>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
