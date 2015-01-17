@@ -1,12 +1,13 @@
 package org.therismos.web;
 
+import com.mongodb.*;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.*;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
-import javax.persistence.EntityManager;
 import org.therismos.ejb.EntryEjb;
 import org.therismos.ejb.MongoService;
 import org.therismos.ejb.MonthlyReportTask;
@@ -22,6 +23,19 @@ public class EntryBean implements java.io.Serializable {
     private Date begin;
     private Date end;
     private String csv;
+    private List<Entry> entries;
+    private BasicDBObject dbobject;
+
+    public BasicDBObject getDbobject() {
+        return dbobject;
+    }
+    /*
+    @javax.persistence.PersistenceContext
+    private EntityManager em;
+    */
+    public List<Entry> getEntries() {
+        return entries;
+    }
     
     @javax.inject.Inject
     private EntryEjb entryEjb;
@@ -38,6 +52,10 @@ public class EntryBean implements java.io.Serializable {
         csv = "";
         begin = new Date();
         end = new Date();
+        entries = Collections.EMPTY_LIST;
+        dbobject = new BasicDBObject();
+        dbobject.append("bookBalance", BigDecimal.ZERO);
+        dbobject.append("uncheq", 0.0);
     }
     
     public void export() {
@@ -103,6 +121,45 @@ public class EntryBean implements java.io.Serializable {
         task.setOpening231(entryEjb.getOpening29001(begin, end));
         runner = new Thread(task);
         runner.start();
+    }
+    
+    public void saveCheques() {
+        if (dbobject.containsKey((Object)("end"))) {
+            mongoService.saveCheques(dbobject);
+        }
+        // if dbobject does not contains key "end", will not save
+        dbobject.removeField("end");
+    }
+    
+    public boolean isChequesSaveable() {
+        return dbobject.containsKey((Object)("end"));
+    }
+    
+    public void reconcile() {
+        // if dbobject does not contains key "end", will not save
+        dbobject.removeField("end");
+        entries = entryEjb.getUncheques(end, 11201);
+        double sum=0.0;
+        BasicDBList list = new BasicDBList();
+        for (Entry e : entries) {
+            logger.log(Level.INFO, "Sum is now {0}", sum);
+            BasicDBObject o = new BasicDBObject("id", e.getId());
+            o.append("amount", e.getAmount().doubleValue());
+            o.append("extra1", e.getExtra1());
+            list.add(o);
+            sum += e.getAmount().doubleValue();
+        }
+        dbobject = new BasicDBObject("accountId", "11201");
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+        dbobject.append("start", fmt.format(begin));
+        dbobject.append("end", fmt.format(end));
+        java.math.BigDecimal bbal = entryEjb.calcBookBalance(begin, end, 11201);
+        logger.log(Level.INFO, "Book Balance is {0}", bbal);
+        dbobject.append("bookBalance", bbal.doubleValue());
+        dbobject.append("uncheq", sum);
+        dbobject.append("pending", list);
+        //accountId, end, bookBalance, uncheq (sum), pending [list of entries],
+        logger.log(Level.INFO, "Result: {0}", dbobject.toString());
     }
     
 }

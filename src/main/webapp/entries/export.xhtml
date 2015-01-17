@@ -13,7 +13,13 @@
                     <h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">Log out</h:commandLink>
                     </p><p>
                     <h:commandLink rendered="#{userBean.loggedIn}" action="report?faces-redirect=true">Monthly Report</h:commandLink>
-                    </p>
+                    </p><p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="reconcile?faces-redirect=true">Monthly Reconcile</h:commandLink>
+                     </p><p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="cheques?faces-redirect=true">List past unpresented cheques</h:commandLink>
+                    </p><p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="export?faces-redirect=true">Export entries to Excel (CSV format)</h:commandLink>
+                   </p>
                 </h:form>
             </ui:define>
             <ui:define name="content">

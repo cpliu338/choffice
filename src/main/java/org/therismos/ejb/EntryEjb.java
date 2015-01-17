@@ -13,7 +13,7 @@ import org.therismos.entity.Entry;
  * @author cpliu
  */
 @javax.inject.Named
-public class EntryEjb {
+public class EntryEjb implements java.io.Serializable {
     @PersistenceContext
     private EntityManager em;
     static final Logger logger = Logger.getLogger(EntryEjb.class.getName());
@@ -29,7 +29,29 @@ public class EntryEjb {
         em.createNamedQuery("Entry.findBetweenDates", Entry.class).
         setParameter("date1", begin).setParameter("date2", end).getResultList();
     }
+
+    public List<Entry> getUncheques(Date end, int accountid) {
+        List<Entry> r = em.createNamedQuery("Entry.findUnchequesBeforeDate", Entry.class).
+            setParameter("enddate", end).setParameter("accountid", accountid).getResultList();
+        logger.log(Level.INFO, "Result size{0}", r.size());
+        return r;
+    }
     
+    public BigDecimal calcBookBalance(Date start, Date end, int accountid) {
+        List<Integer> accs = new ArrayList<>();
+        accs.add(11201);
+        javax.persistence.Query q = em.createNamedQuery("Entry.aggregate").setParameter("start", start)
+        .setParameter("end", end).setParameter("acclist", accs);
+        BigDecimal o1 = BigDecimal.ZERO;
+        for (Object o : q.getResultList()) {
+            Object[] ar = (Object[])o;
+            logger.log(Level.INFO, "entry {0}:{1}", ar);
+            logger.log(Level.INFO, "class name {0}", ar[1].getClass().getName());
+            o1 = (BigDecimal)(ar[1]);
+        }
+        return o1;
+    }
+
     public BigDecimal getOpening29001(Date begin, Date end) {
         List<Entry> loans = em.createQuery("SELECT e FROM Entry e WHERE e.account.id = 29001 and e.date1 BETWEEN :begin and :end ORDER BY e.date1", Entry.class)
                 .setParameter("begin", begin).setParameter("end", end).setMaxResults(1).getResultList();

@@ -21,7 +21,7 @@ public class MongoService {
     
     MongoClient mongoClient;
     DB db;
-    DBCollection collBudgets, collAccounts;
+    DBCollection collBudgets, collAccounts, collCheques;
     List<AccountModel> results;
     private java.util.Map<String, Double> totals;
 
@@ -74,10 +74,15 @@ public class MongoService {
         collBudgets.setObjectClass(BudgetModel.class);
         collAccounts = db.getCollection("accounts");
         collAccounts.setObjectClass(AccountModel.class);
+        collCheques = db.getCollection("reconcile");
         Iterator<DBObject> it = collAccounts.find().sort(new BasicDBObject("code",1)).iterator();
         while (it.hasNext()) {
             results.add((AccountModel)it.next());
         }
+    }
+    
+    public void saveCheques(DBObject o) {
+        collCheques.insert(o);
     }
     
     public DBCollection getBudgetCollection() {
@@ -88,6 +93,10 @@ public class MongoService {
         return (mongoClient==null) ? null : collAccounts;
     }
     
+    public DBCollection getChequeCollection() {
+        return (mongoClient==null) ? null : collCheques;
+    }
+
     @PreDestroy
     public void cleanup() {
         if (mongoClient != null)
