@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+    <body>
+
+        <ui:composition template="../WEB-INF/mainTemplate.xhtml">
+            <ui:define name="left">
+                <h:form>
+                    <p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">Log out</h:commandLink>
+                    </p><p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="receipt?faces-redirect=true">Receipts</h:commandLink>
+                    </p>
+                </h:form>
+            </ui:define>
+            <ui:define name="content">
+                <h:form id="form">
+                    <h:panelGrid columns="3">
+                        <p:outputLabel for="year" value="Year"/>
+                        <p:inputText id="year" value="#{editBudgetBean.budget.year}">
+                            <p:ajax listener="#{editBudgetBean.refresh}" event="change" process="@form" update="@form"/>
+                        </p:inputText>
+                        <p:message for="year"/>
+                        <p:outputLabel for="code" value="Account code"/>
+                        <p:inputText id="code" value="#{editBudgetBean.budget.code}">
+                            <p:ajax listener="#{editBudgetBean.refresh}" event="change" process="@form" update="@form"/>
+                        </p:inputText>
+                        <p:message for="code"/>
+                        <p:outputLabel for="remarks" value="Remarks"/>
+                        <p:inputText id="remarks" value="#{editBudgetBean.budget.remarks}"/>
+                        <p:message for="remarks"/>
+                    </h:panelGrid>
+                    <p>
+                        <h:outputText value="Invalid" rendered="#{editBudgetBean.status == 0}"/>
+                        <h:outputText value="new" rendered="#{editBudgetBean.status == 1}"/>
+                        <h:outputText value="Existing" rendered="#{editBudgetBean.status == 2}"/>
+                    </p>
+                    <p:dataGrid var="item" columns="4" rendered="#{editBudgetBean.status ne 0}" value="#{editBudgetBean.codes}">
+                        <h:outputText value="#{item} "/>
+                    </p:dataGrid>
+                    <p:ajaxStatus>
+                        <f:facet name="error">
+                            <h:outputText value="Error" />
+                        </f:facet>
+                        <f:facet name="success">
+                            <h:outputText value="Done" />
+                        </f:facet>
+                        <f:facet name="default">
+                            <h:outputText value="..." />
+                        </f:facet>
+                        <f:facet name="start">
+                            <h:outputText value="Working" />
+                        </f:facet>
+                        <f:facet name="complete">
+                            <h:outputText value="..." />
+                        </f:facet>
+                    </p:ajaxStatus>
+                </h:form>
+                <p:messages autoUpdate="true" id="msg" />
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
+
