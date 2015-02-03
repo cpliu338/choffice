@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import org.therismos.entity.Account;
 import org.therismos.model.BudgetModel;
 
 /**
@@ -26,6 +27,14 @@ public class BudgetDao {
     @javax.annotation.PostConstruct
     public void init() {
         coll = mongoService.getBudgetCollection();
+    }
+    
+    public List<Account> findAllAccountsUnder(String code) { // List<Account>
+        if (code.length() < 2) return Collections.EMPTY_LIST;
+        String pattern = code;
+        if (code.endsWith("0"))
+            pattern = code.substring(0, code.length()-1);
+        return em.createNamedQuery("Account.findAccountsUnder", Account.class).setParameter("pattern", pattern+"%").getResultList();
     }
 
     public List<Map> aggregateEntries(Date start, Date end, BasicDBList acclist) {

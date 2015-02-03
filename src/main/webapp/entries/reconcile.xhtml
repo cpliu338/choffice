@@ -33,15 +33,15 @@
                     <p:commandButton update="save results balance" value="Reconcile" action="#{entryBean.reconcile()}">
                     </p:commandButton>
                     <p:commandButton id="save" update="balance" value="Save" action="#{entryBean.saveCheques()}" disabled="#{not entryBean.chequesSaveable}" />
-                    <p:panel id="balance" rendered="#{entryBean.chequesSaveable}">
+                    <p:panel id="balance" rendered="true">
                         <h:outputFormat value="Book Balance: {0} | ">
-                            <f:param value="#{entryBean.dbobject.get('bookBalance')}"/>
+                            <f:param value="#{0-entryBean.dbobject.get('bookBalance')}"/>
                         </h:outputFormat>
                         <h:outputFormat value="Unpresented cheques: {0} | ">
                             <f:param value="#{entryBean.dbobject.get('uncheq')}"/>
                         </h:outputFormat>
                         <h:outputFormat value="Bank Balance: {0}">
-                            <f:param value="#{entryBean.dbobject.get('bookBalance')+entryBean.dbobject.get('uncheq')}"/>
+                            <f:param value="#{0-entryBean.dbobject.get('bookBalance')+entryBean.dbobject.get('uncheq')}"/>
                         </h:outputFormat>
                     </p:panel>
                     <p:dataTable id="results" value="#{entryBean.entries}" var="cheq">

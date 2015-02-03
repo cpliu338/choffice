@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Account.findByCode", query = "SELECT a FROM Account a WHERE a.code = :code"),
     @NamedQuery(name = "Account.findByName", query = "SELECT a FROM Account a WHERE a.name = :name"),
     @NamedQuery(name = "Account.findByNameChi", query = "SELECT a FROM Account a WHERE a.nameChi = :nameChi"),
-    @NamedQuery(name = "Account.findByIncBy", query = "SELECT a FROM Account a WHERE a.incBy = :incBy"),
+    @NamedQuery(name = "Account.findAccountsUnder", query = "SELECT a FROM Account a WHERE a.code LIKE :pattern ORDER BY a.code"),
     @NamedQuery(name = "Account.findByDetails", query = "SELECT a FROM Account a WHERE a.details = :details")})
 public class Account implements Serializable {
     private static final long serialVersionUID = 1L;
