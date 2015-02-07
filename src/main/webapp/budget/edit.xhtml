@@ -21,26 +21,30 @@
                     <h:panelGrid columns="3">
                         <p:outputLabel for="year" value="Year"/>
                         <p:inputText id="year" value="#{editBudgetBean.budget.year}">
-                            <p:ajax listener="#{editBudgetBean.refresh}" event="change" process="@form" update="@form"/>
+                            <p:ajax listener="#{editBudgetBean.refresh}" event="change" process="@form" update="form"/>
                         </p:inputText>
                         <p:message for="year"/>
                         <p:outputLabel for="code" value="Account code"/>
                         <p:inputText id="code" value="#{editBudgetBean.budget.code}">
-                            <p:ajax listener="#{editBudgetBean.refresh}" event="change" process="@form" update="@form"/>
+                            <p:ajax listener="#{editBudgetBean.refresh}" event="change" process="@form" update="form"/>
                         </p:inputText>
                         <p:message for="code"/>
                         <p:outputLabel for="remarks" value="Remarks"/>
                         <p:inputText id="remarks" value="#{editBudgetBean.budget.remarks}"/>
                         <p:message for="remarks"/>
                     </h:panelGrid>
-                    <p>
+                    <p> Status: <h:outputText id="debug" value="#{editBudgetBean.status}"/>
                         <h:outputText value="Invalid" rendered="#{editBudgetBean.status == 0}"/>
                         <h:outputText value="new" rendered="#{editBudgetBean.status == 1}"/>
                         <h:outputText value="Existing" rendered="#{editBudgetBean.status == 2}"/>
                     </p>
-                    <p:dataGrid var="item" columns="4" rendered="#{editBudgetBean.status ne 0}" value="#{editBudgetBean.codes}">
-                        <h:outputText value="#{item} "/>
+                    <p:dataGrid var="item" columns="4" rendered="#{editBudgetBean.status != 0}" value="#{editBudgetBean.budget.subitems}">
+                        <h:outputText value="#{item}"/>
                     </p:dataGrid>
+                    <p:dataTable var="row" rendered="#{editBudgetBean.status != 0}" value="#{editBudgetBean.codes}">
+                        <p:column><h:outputText value="#{row['date']}"/></p:column>
+                        <p:column><h:outputText value="#{row['amount']}"/></p:column>
+                    </p:dataTable>
                     <p:ajaxStatus>
                         <f:facet name="error">
                             <h:outputText value="Error" />

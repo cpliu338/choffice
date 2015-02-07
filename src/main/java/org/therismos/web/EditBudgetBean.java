@@ -1,14 +1,9 @@
 package org.therismos.web;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.logging.*;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
-import javax.faces.event.AjaxBehaviorEvent;
-import javax.faces.model.SelectItem;
 import org.therismos.ejb.BudgetDao;
 import org.therismos.entity.Account;
 import org.therismos.model.BudgetModel;
@@ -19,7 +14,7 @@ import org.therismos.model.BudgetModel;
  */
 @javax.faces.bean.ManagedBean
 @javax.faces.bean.ViewScoped
-public class EditBudgetBean {
+public class EditBudgetBean implements java.io.Serializable {
     @javax.inject.Inject
     BudgetDao budgetDao;
     
@@ -32,8 +27,17 @@ public class EditBudgetBean {
     private final List<String> codes;
     private final List<Map> entries;
 
-    public List<String> getCodes() {
-        return codes;
+    public /*List<String>*/javax.faces.model.ArrayDataModel getCodes() {
+        //return codes;
+        Set set = budget.getEntries();
+        int size = set.size();
+        Map[] m = new Map[size];
+        int i=0;
+        for (Object entry : set) {
+            m[i++] = (Map)entry;
+        }
+        logger.log(Level.INFO, "Entries:" + m.length);
+        return new javax.faces.model.ArrayDataModel(m);
     }
 
     public int getStatus() {
@@ -55,15 +59,17 @@ public class EditBudgetBean {
     public void refresh() {
         String code = budget.getCode();
         logger.log(Level.INFO, "refresh {0} : {1}", new Object[]{budget.getYear(), code});
+        /*
         if (budget.getYear()<2014 || code.length()<2) {
             status = 0;
             codes.clear();
             entries.clear();
         }
+                */
 //        else if (budgetDao.findAllAccountsUnder(code).isEmpty()) {
 //            status = 0;
 //        }
-        else {
+        /*else*/ {
             BudgetModel m = budgetDao.find(budget.getYear(), code);
             List<Account> l = budgetDao.findAllAccountsUnder(code);
             logger.log(Level.INFO, "Accounts under {0} : {1}", new Object[]{code, l.size()});
@@ -73,14 +79,19 @@ public class EditBudgetBean {
             }
             if (m==null) {
                 status = 1;
+                m = new BudgetModel();
+                m.setYear(budget.getYear());
+                m.setCode(code);
+                budget = m;
     //            FacesContext.getCurrentInstance().addMessage(null, 
     //                new FacesMessage(FacesMessage.SEVERITY_WARN, "No such code", "No such budget"));
             }
             else {
                 budget = m;
+        logger.log(Level.INFO, budget.toString());
                 status = 2;
-                for (Object o : m.getEntries()) {
-                    DBObject dbo = (DBObject)o;
+                for (Map o : m.getEntries()) {
+                    logger.log(Level.INFO, "{0}:{1}", new Object[]{o.get("date").toString(), o.get("amount").toString()});
                 }
             }
         }

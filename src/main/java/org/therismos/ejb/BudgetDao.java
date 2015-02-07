@@ -82,7 +82,7 @@ public class BudgetDao {
 //        return results.get(0);
         return this.findOne(new BasicDBObject("code",code).append("year", year));
     }
-    
+    /*
     public int save(BudgetModel m) {
         BudgetModel existing;
         if (m.getYear()<2013 || m.getYear()>2030)
@@ -107,9 +107,34 @@ public class BudgetDao {
         }
         return coll.save(m).getN();
     }
+    */
+    private BudgetModel convertToModel(DBObject o) {
+        if (o==null) return null;
+        BudgetModel m = new BudgetModel();
+        try {
+        m.setYear((Integer)o.get("year"));
+        m.setCode((String)o.get("code"));
+        m.setRemarks((String)o.get("remarks"));
+        m.setName_chi((String)o.get("name_chi"));
+        BasicDBList l = (BasicDBList)o.get("entries");
+        for (Object o1 : l) {
+            DBObject dbo = (DBObject)o1;
+            m.addToEntries((String)dbo.get("date"), (Number)dbo.get("amount"));
+        }
+        l = (BasicDBList)o.get("subitems");
+        for (Object o1 : l) {
+            DBObject dbo = (DBObject)o1;
+            m.addToSubitems((String)dbo.get("code"), (String)dbo.get("name_chi"));
+        }
+        }
+        catch (Exception e) {
+            e.printStackTrace(System.out);
+        }
+        return m;
+    }
     
     public BudgetModel findOne(DBObject crit) {
-        return (BudgetModel)coll.findOne(crit);
+        return  convertToModel(coll.findOne(crit));
     }
     
     public List<BudgetModel> find(DBObject crit) {
@@ -117,12 +142,11 @@ public class BudgetDao {
         DBCursor cursor;
         cursor = coll.find(crit);
         for (DBObject item : cursor) {
-//            System.out.println("Found:"+item.get("_id").toString());
             if (BudgetModel.class.isAssignableFrom(item.getClass())) {
-                results.add((BudgetModel)item);
+                results.add(convertToModel(item));
             }
         }
-        return results.isEmpty() ? null : results;
+        return results;//.isEmpty() ? null : results;
     }
     
 }

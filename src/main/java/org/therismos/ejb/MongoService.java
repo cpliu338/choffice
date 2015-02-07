@@ -71,7 +71,7 @@ public class MongoService {
             throw new RuntimeException("Cannot authenticate");
                 */
         collBudgets = db.getCollection("budget");
-        collBudgets.setObjectClass(BudgetModel.class);
+        //collBudgets.setObjectClass(BudgetModel.class);
         collAccounts = db.getCollection("accounts");
         collAccounts.setObjectClass(AccountModel.class);
         collCheques = db.getCollection("reconcile");

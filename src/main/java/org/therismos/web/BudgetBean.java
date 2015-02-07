@@ -107,9 +107,9 @@ public class BudgetBean {
         result.put("budget_items", Collections.EMPTY_LIST);
         if (year!=0 && code.length()>0) {
             budget = budgetDao.find(year, code);
-//            Logger.getLogger(BudgetBean.class.getName()).log(Level.INFO, "Budget remark: {0}", budget==null?"null":budget.getRemarks());
             for (int i=0; i< budget.getEntries().size(); i++) {
-                DBObject o = (DBObject)budget.getEntries().get(i);
+//  Change below
+                DBObject o = new BasicDBObject();//(DBObject)budget.getEntries().get(i);
                 String dateStr = o.keySet().iterator().next();
                 dateChoices.add(new SelectItem(dateStr,dateStr));
             }
@@ -126,7 +126,8 @@ public class BudgetBean {
         try {
             Date cutoff = fmt.parse(cutoffDate);
             Date yearStart = fmt.parse(cutoffDate.substring(0, 4).concat("-01-01"));
-            entrySummary = budgetDao.aggregateEntries(yearStart, cutoff, budget.getSubitems());
+//  Change below
+            entrySummary = null;//budgetDao.aggregateEntries(yearStart, cutoff, budget.getSubitems());
             BigDecimal tot = BigDecimal.ZERO;
             for (Map entry : entrySummary) {
                 BigDecimal subtotal = (BigDecimal)entry.get("total");
@@ -140,11 +141,10 @@ public class BudgetBean {
             return;
         }
         List<Map> entries = new ArrayList<>();
-//        Logger.getLogger(BudgetBean.class.getName()).log(Level.INFO, "budget entries size {0}", budget.getEntries().size());
         BigDecimal tot = BigDecimal.ZERO;
-        for (Iterator<Object> it = budget.getEntries().iterator(); it.hasNext();) {
+//  Change below
+        for (Iterator<Map<String, Object>> it = budget.getEntries().iterator(); it.hasNext();) {
             DBObject o = (DBObject)it.next();
-//            Logger.getLogger(BudgetBean.class.getName()).log(Level.INFO, "Item: {0}", o);
             Map<String,String> map = new HashMap<>();
             String key = o.keySet().iterator().next();
             if (key.compareTo(cutoffDate)>0) continue;

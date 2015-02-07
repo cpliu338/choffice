@@ -1,120 +1,49 @@
 package org.therismos.model;
 
-import com.mongodb.*;
+import java.util.logging.*;
 import java.util.*;
-import org.bson.BSONObject;
-import org.bson.types.ObjectId;
-import org.joda.time.DateTime;
 
 /**
  *
  * @author USER
  */
-public class BudgetModel implements DBObject {
-    private final HashMap<String, Object> store;
+public class BudgetModel {
 
+    private String code;
+    private int year;
+    private String remarks;
+    private String name_chi;
+    final private TreeSet<Map<String, Object>> entries;
+    final private TreeSet<Map<String, Object>> subitems;
+    
+    static final Logger logger = Logger.getLogger(BudgetModel.class.getName());
+    
     @Override
     public String toString() {
         return "BudgetModel{" + "code=" + getCode() + ", year=" + getYear() + ", name_chi=" + getName_chi() 
-                //+ ", subitems=" + subitems + ", entries=" + entries 
+                + subitems.size() + " subitems=" + entries.size() + " entries="
                 + '}';
     }
 
     public BudgetModel() {
-        this.store = new HashMap<>();
-        store.put("_id", null);
-        store.put("code", "");
-        store.put("year", 0);
-        store.put("name_chi", "");
-        store.put("subitems", new BasicDBList());
-        store.put("entries", new BasicDBList());
-        store.put("remarks", "");
+        code = "";
+        year = Calendar.getInstance().get(Calendar.YEAR);
+        name_chi = "";
+        remarks = "";
+        entries = new TreeSet<>(new Comparator<Map>() {
+            @Override
+            public int compare(Map t, Map t1) {
+                return t.get("date").toString().compareTo(t1.get("date").toString());
+            }
+        });
+        subitems = new TreeSet<>(new Comparator<Map>() {
+            @Override
+            public int compare(Map t, Map t1) {
+                return t.get("code").toString().compareTo(t1.get("code").toString());
+            }
+        });
     }
 
-    /**
-     * @return the _id
-     */
-    public ObjectId getId() {
-        return (ObjectId)store.get("_id");
-    }
-
-    /**
-     * @param _id the _id to set
-     */
-    public void setId(ObjectId _id) {
-        store.put("_id", _id);
-    }
-
-    /**
-     * @return the code
-     */
-    public String getCode() {
-        return (String)store.get("code");
-    }
-
-    /**
-     * @param code the code to set
-     */
-    public void setCode(String code) {
-        store.put("code", code);
-    }
-
-    /**
-     * @return the year
-     */
-    public int getYear() {
-        return (Integer)store.get("year");
-    }
-
-    /**
-     * @param year the year to set
-     */
-    public void setYear(int year) {
-        store.put("year", year);
-    }
-
-    /**
-     * @return the name_chi
-     */
-    public String getName_chi() {
-        return (String)store.get("name_chi");
-    }
-
-    /**
-     * @param name_chi the name_chi to set
-     */
-    public void setName_chi(String name_chi) {
-        store.put("name_chi", name_chi);
-    }
-
-    /**
-     * @return the subitems
-     */
-    public BasicDBList getSubitems() {
-        return (BasicDBList)store.get("subitems");
-    }
-
-    /**
-     * @param subitems the subitems to set
-     */
-    public void setSubitems(BasicDBList subitems) {
-        store.put("subitems", subitems);
-    }
-
-    /**
-     * @return the entries
-     */
-    public BasicDBList getEntries() {
-        return (BasicDBList)store.get("entries");
-    }
-
-    /**
-     * @param entries the entries to set
-     */
-    public void setEntries(BasicDBList entries) {
-        store.put("entries", entries);
-    }
-    
     public void clearEntries() {
         getEntries().clear();
     }
@@ -123,81 +52,87 @@ public class BudgetModel implements DBObject {
         getSubitems().clear();
     }
     
-    public void addToEntries(DateTime date, double amount) {
-        getEntries().add(new BasicDBObject(org.joda.time.format.DateTimeFormat.forPattern("yyyy-MM-dd").print(date),
-        amount));
-    }
-    public void setSubitemsByString(String l) {
-        String[] tokens = l.split(",");
-        getSubitems().clear();
-        for (String token : tokens) {
-            getSubitems().add(Integer.parseInt(token.trim()));
-        }
-    }
-
-    @Override
-    public void markAsPartialObject() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean isPartialObject() {
-        return false;
-    }
-
-    @Override
-    public Object put(String string, Object o) {
-        return store.put(string, o);
-    }
-
-    @Override
-    public void putAll(BSONObject bsono) {
-        for (String key : bsono.keySet()) {
-            if (store.containsKey(key))
-                store.put(key, bsono.get(key));
-        }
-    }
-
-    @Override
-    public void putAll(Map map) {
-        store.putAll(map);
-    }
-
-    @Override
-    public Object get(String string) {
-        return store.get(string);
-    }
-
-    @Override
-    public Map toMap() {
-        return store;
-    }
-
-    @Override
-    public Object removeField(String string) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean containsKey(String string) {
-        return store.containsKey(string);
-    }
-
-    @Override
-    public boolean containsField(String string) {
-        return store.containsKey(string);
-    }
-
-    @Override
-    public Set<String> keySet() {
-        return store.keySet();
+    public void addToEntries(String date, Number amount) {
+        HashMap<String, Object> m = new HashMap<>();
+        m.put("date", date);
+        m.put("amount", amount);
+        entries.add(m);
     }
     
-    public String getRemarks() {
-        return (String)store.get("remarks");
+    public void addToSubitems(String code, String name_chi) {
+        HashMap<String, Object> m = new HashMap<>();
+        m.put("code", code);
+        m.put("name_chi", name_chi);
+        subitems.add(m);
+    }
+    
+    /**
+     * @return the code
+     */
+    public String getCode() {
+        return code;
     }
 
+    /**
+     * @param code the code to set
+     */
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    /**
+     * @return the year
+     */
+    public int getYear() {
+        return year;
+    }
+
+    /**
+     * @param year the year to set
+     */
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    /**
+     * @return the name_chi
+     */
+    public String getName_chi() {
+        return name_chi;
+    }
+
+    /**
+     * @param name_chi the name_chi to set
+     */
+    public void setName_chi(String name_chi) {
+        this.name_chi = name_chi;
+    }
+
+    /**
+     * @return the entries
+     */
+    public TreeSet<Map<String, Object>> getEntries() {
+        return entries;
+    }
+
+    /**
+     * @return the subitems
+     */
+    public TreeSet<Map<String, Object>> getSubitems() {
+        return subitems;
+    }
+
+    /**
+     * @return the remarks
+     */
+    public String getRemarks() {
+        return remarks;
+    }
+
+    /**
+     * @param remarks the remarks to set
+     */
     public void setRemarks(String remarks) {
-        store.put("remarks", remarks);
+        this.remarks = remarks;
     }
 }
