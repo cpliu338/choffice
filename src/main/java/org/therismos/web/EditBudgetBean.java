@@ -59,17 +59,15 @@ public class EditBudgetBean implements java.io.Serializable {
     public void refresh() {
         String code = budget.getCode();
         logger.log(Level.INFO, "refresh {0} : {1}", new Object[]{budget.getYear(), code});
-        /*
         if (budget.getYear()<2014 || code.length()<2) {
             status = 0;
             codes.clear();
             entries.clear();
         }
-                */
-//        else if (budgetDao.findAllAccountsUnder(code).isEmpty()) {
-//            status = 0;
-//        }
-        /*else*/ {
+        else if (budgetDao.findAllAccountsUnder(code).isEmpty()) {
+            status = 0;
+        }
+        else {
             BudgetModel m = budgetDao.find(budget.getYear(), code);
             List<Account> l = budgetDao.findAllAccountsUnder(code);
             logger.log(Level.INFO, "Accounts under {0} : {1}", new Object[]{code, l.size()});
