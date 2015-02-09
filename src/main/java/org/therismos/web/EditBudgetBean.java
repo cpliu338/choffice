@@ -26,6 +26,20 @@ public class EditBudgetBean implements java.io.Serializable {
     private int status;
     private final List<String> codes;
     private final List<Map> entries;
+    private String selectedDate;
+
+    public String getSelectedDate() {
+        return selectedDate;
+    }
+
+    public void setSelectedDate(String selectedDate) {
+        this.selectedDate = selectedDate;
+    }
+    
+    public void removeItem() {
+        logger.log(Level.INFO, "Removing {0}", selectedDate);
+        budget.removeItem(selectedDate);
+    }
 
     public /*List<String>*/javax.faces.model.ArrayDataModel getCodes() {
         //return codes;
@@ -48,6 +62,7 @@ public class EditBudgetBean implements java.io.Serializable {
         budget = new BudgetModel();
         budget.setYear(Calendar.getInstance().get(Calendar.YEAR));
         status = 0;
+        selectedDate="";
         codes = new ArrayList<>();
         entries = new ArrayList<>();
     }

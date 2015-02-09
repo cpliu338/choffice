@@ -45,6 +45,11 @@
                         <p:column><h:outputText value="#{row['date']}"/></p:column>
                         <p:column><h:outputText value="#{row['amount']}"/></p:column>
                     </p:dataTable>
+                        <div>
+                            <p:inputText id="date" value="#{editBudgetBean.selectedDate}"/>
+                            <p:commandButton value="Remove" action="#{editBudgetBean.removeItem}" process="date" update="form">
+                            </p:commandButton>
+                        </div>
                     <p:ajaxStatus>
                         <f:facet name="error">
                             <h:outputText value="Error" />

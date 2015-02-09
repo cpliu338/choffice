@@ -59,6 +59,13 @@ public class BudgetModel {
         entries.add(m);
     }
     
+    public void removeItem(String date) {
+        HashMap<String, Object> m = new HashMap<>();
+        m.put("date", date);
+        m.put("amount", "");
+        entries.remove(entries.ceiling(m));
+    }
+    
     public void addToSubitems(String code, String name_chi) {
         HashMap<String, Object> m = new HashMap<>();
         m.put("code", code);
