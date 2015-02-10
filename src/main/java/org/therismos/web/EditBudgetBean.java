@@ -82,15 +82,14 @@ public class EditBudgetBean implements java.io.Serializable {
         refresh();
     }
     
-    public Iterator<Map<String, Object>> getSubcodes() {
-        return budget.getSubitems().iterator();
+    public List<Account> getSubcodes() {
+        return budget.getSubitems();
     }
+    
     public void refresh() {
         String code = budget.getCode();
         if (budget.getYear()<2014 || code.length()<2) {
             status = 0;
-//            codes.clear();
-//            entries.clear();
         }
         else if (budgetDao.findAllAccountsUnder(code).isEmpty()) {
             status = 0;
@@ -108,9 +107,10 @@ public class EditBudgetBean implements java.io.Serializable {
                 budgetModel = new BudgetModel();
                 budgetModel.setYear(budget.getYear());
                 budgetModel.setCode(code);
+                budgetModel.clearSubitems();
                 for (Account a : l) {
+                    budgetModel.addToSubitems(a);
 //        logger.log(Level.INFO, "Added {0} : {1}", new Object[]{a.getNameChi(), a.getCode()});
-                    budgetModel.addToSubitems(a.getNameChi(),a.getCode());
                 }
                 budget = budgetModel;
                 entries = populateEntries(budgetModel);
@@ -120,10 +120,15 @@ public class EditBudgetBean implements java.io.Serializable {
             else {
                 budget = budgetModel;
                 entries = populateEntries(budgetModel);
-                status = 2;
-                for (Map o : budgetModel.getEntries()) {
-                    logger.log(Level.INFO, "{0}:{1}", new Object[]{o.get("date").toString(), o.get("amount").toString()});
+                budgetModel.clearSubitems();
+                for (Account a : l) {
+                    budgetModel.addToSubitems(a);
+        logger.log(Level.INFO, "Added {0} : {1}", new Object[]{a.getNameChi(), a.getCode()});
                 }
+                status = 2;
+//                for (Map o : budgetModel.getEntries()) {
+//                    logger.log(Level.INFO, "{0}:{1}", new Object[]{o.get("date").toString(), o.get("amount").toString()});
+//                }
             }
         }
     }

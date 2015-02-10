@@ -40,13 +40,16 @@
                         <h:outputText value="new" rendered="#{editBudgetBean.status == 1}"/>
                         <h:outputText value="Existing" rendered="#{editBudgetBean.status == 2}"/>
                     </p>
-                    <p:panel  rendered="#{editBudgetBean.status != 0}">
-                        <ui:repeat var="#{item}" value="#{editBudgetBean.subcodes}">
-                            <h:outputFormat value="{0}">
-                                <f:param value="#{item['code']}"/>
-                            </h:outputFormat>
-                        </ui:repeat>
-                    </p:panel>
+                    <p:accordionPanel>
+                        <p:tab title="Sub-accounts">
+                    <p:dataGrid columns="5" var="acc" value="#{editBudgetBean.subcodes}" rendered="#{editBudgetBean.status != 0}">
+                        <h:outputFormat value="{0}({1}),">
+                            <f:param value="#{acc.code}"/>
+                            <f:param value="#{acc.nameChi}"/>
+                        </h:outputFormat>
+                    </p:dataGrid>
+                        </p:tab>
+                        <p:tab title="Entries">
                     <p:dataTable id="subitems" value="#{editBudgetBean.entries}" var="row" rendered="#{editBudgetBean.status != 0}" >
                         <p:column>
                             <p:commandLink id="datekey" process="@this" update="@form">
@@ -56,11 +59,23 @@
                         </p:column>
                         <p:column><h:outputText value="#{row['amount']}"/></p:column>
                     </p:dataTable>
-                        <div>
-                            <p:inputText id="date" value="#{editBudgetBean.selectedDate}"/>
-                            <p:commandButton value="Remove" action="#{editBudgetBean.removeItem}" process="date" update="form">
-                            </p:commandButton>
-                        </div>
+                        </p:tab>
+                    </p:accordionPanel>
+                    <p:panelGrid columns="3">
+                        <h:outputLabel for="date" value="Date (yyyy-mm-dd)"/>
+                        <p:inputText id="date" value="#{editBudgetBean.selectedDate}">
+                            <f:validateRegex pattern="20[1-4][0-9]-[0-1][0-9]-[0-3][0-9]"/>
+                        </p:inputText>
+                        <p:message for="date"/>
+                        <h:outputLabel for="amount" value="Amount"/>
+                        <p:inputText id="amount" value="0.0">
+                            <f:validateDoubleRange minimum="-10000000" maximum="1000000"/>
+                        </p:inputText>
+                        <p:message for="amount"/>
+                    </p:panelGrid>
+                        <p:commandButton value="Remove" action="#{editBudgetBean.removeItem}" process="date" update="form"/>
+                        <p:commandButton value="Add"/>
+                        <p:commandButton value="Save" update="@form"/>
                     <p:ajaxStatus>
                         <f:facet name="error">
                             <h:outputText value="Error" />

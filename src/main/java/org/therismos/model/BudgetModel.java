@@ -2,6 +2,7 @@ package org.therismos.model;
 
 import java.util.logging.*;
 import java.util.*;
+import org.therismos.entity.Account;
 
 /**
  *
@@ -14,7 +15,7 @@ public class BudgetModel {
     private String remarks;
     private String name_chi;
     final private TreeSet<Map<String, Object>> entries;
-    final private TreeSet<Map<String, Object>> subitems;
+    private ArrayList<Account> subitems;
     
     static final Logger logger = Logger.getLogger(BudgetModel.class.getName());
     
@@ -36,12 +37,7 @@ public class BudgetModel {
                 return t.get("date").toString().compareTo(t1.get("date").toString());
             }
         });
-        subitems = new TreeSet<>(new Comparator<Map>() {
-            @Override
-            public int compare(Map t, Map t1) {
-                return t.get("code").toString().compareTo(t1.get("code").toString());
-            }
-        });
+        subitems = new ArrayList<>();
     }
 
     public void clearEntries() {
@@ -66,13 +62,10 @@ public class BudgetModel {
         entries.remove(entries.ceiling(m));
     }
     
-    public void addToSubitems(String code, String name_chi) {
-        HashMap<String, Object> m = new HashMap<>();
-        m.put("code", code);
-        m.put("name_chi", name_chi);
-        subitems.add(m);
+    public void addToSubitems(Account a) {
+        logger.log(Level.INFO, "Added {0}", a.getCode());
+        subitems.add(a);
     }
-    
     /**
      * @return the code
      */
@@ -125,7 +118,7 @@ public class BudgetModel {
     /**
      * @return the subitems
      */
-    public TreeSet<Map<String, Object>> getSubitems() {
+    public List<Account> getSubitems() {
         return subitems;
     }
 
@@ -142,4 +135,5 @@ public class BudgetModel {
     public void setRemarks(String remarks) {
         this.remarks = remarks;
     }
+
 }

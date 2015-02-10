@@ -121,11 +121,11 @@ public class BudgetDao {
             DBObject dbo = (DBObject)o1;
             m.addToEntries((String)dbo.get("date"), (Number)dbo.get("amount"));
         }
-        l = (BasicDBList)o.get("subitems");
-        for (Object o1 : l) {
-            DBObject dbo = (DBObject)o1;
-            m.addToSubitems((String)dbo.get("code"), (String)dbo.get("name_chi"));
-        }
+//        l = (BasicDBList)o.get("subitems");
+//        for (Object o1 : l) {
+//            DBObject dbo = (DBObject)o1;
+//            m.addToSubitems((String)dbo.get("code"), (String)dbo.get("name_chi"));
+//        }
         }
         catch (Exception e) {
             e.printStackTrace(System.out);
