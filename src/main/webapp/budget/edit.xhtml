@@ -13,19 +13,28 @@
                     <h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">Log out</h:commandLink>
                     </p><p>
                     <h:commandLink rendered="#{userBean.loggedIn}" action="receipt?faces-redirect=true">Receipts</h:commandLink>
+                    </p><p>
+                        <h:outputLink value="list.jsf">
+                            <h:outputText value="#{msg['menu.record']}"/>
+                        </h:outputLink>
+                    </p><p>
+                        <h:outputLink value="edit.jsf">
+                            <h:outputText value="#{msg['cmd.edit']}"/>
+                        </h:outputLink>
                     </p>
                 </h:form>
             </ui:define>
             <ui:define name="content">
+                <h2><h:outputText value="#{msg['legend.budget']}"/></h2>
                 <h:form id="form">
                     <h:panelGrid columns="3">
-                        <p:outputLabel for="year" value="Year"/>
+                        <p:outputLabel for="year" value="#{msg['finyr']}"/>
                         <p:inputText id="year" value="#{editBudgetBean.budget.year}">
                             <p:ajax listener="#{editBudgetBean.refresh}" event="change" process="@form" update="form"/>
                             <f:validateLongRange maximum="2047" minimum="2014"/>
                         </p:inputText>
                         <p:message for="year"/>
-                        <p:outputLabel for="code" value="Account code"/>
+                        <p:outputLabel for="code" value="#{msg['account']}"/>
                         <p:inputText id="code" value="#{editBudgetBean.budget.code}">
                             <f:validateRegex pattern="[0-9A-Z]{2,5}"/>
                             <p:ajax listener="#{editBudgetBean.refresh}" event="change" process="@form" update="form"/>
