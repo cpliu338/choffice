@@ -49,7 +49,7 @@
                         <h:outputText value="new" rendered="#{editBudgetBean.status == 1}"/>
                         <h:outputText value="Existing" rendered="#{editBudgetBean.status == 2}"/>
                     </p>
-                    <p:accordionPanel>
+                    <p:accordionPanel activeIndex="1">
                         <p:tab title="Sub-accounts">
                     <p:dataGrid columns="5" var="acc" value="#{editBudgetBean.subcodes}" rendered="#{editBudgetBean.status != 0}">
                         <h:outputFormat value="{0}({1}),">
@@ -59,7 +59,7 @@
                     </p:dataGrid>
                         </p:tab>
                         <p:tab title="Entries">
-                    <p:dataTable id="subitems" value="#{editBudgetBean.entries}" var="row" rendered="#{editBudgetBean.status != 0}" >
+                    <p:dataTable id="subitems" value="#{editBudgetBean.entries}" var="row" >
                         <p:column>
                             <p:commandLink id="datekey" process="@this" update="@form">
                                 <f:setPropertyActionListener target="#{editBudgetBean.selectedDate}" value="#{row['date']}"/>
@@ -77,13 +77,13 @@
                         </p:inputText>
                         <p:message for="date"/>
                         <h:outputLabel for="amount" value="Amount"/>
-                        <p:inputText id="amount" value="0.0">
+                        <p:inputText id="amount" value="#{editBudgetBean.amount}">
                             <f:validateDoubleRange minimum="-10000000" maximum="1000000"/>
                         </p:inputText>
                         <p:message for="amount"/>
                     </p:panelGrid>
                         <p:commandButton value="Remove" action="#{editBudgetBean.removeItem}" process="date" update="form"/>
-                        <p:commandButton value="Add"/>
+                        <p:commandButton value="Add" action="#{editBudgetBean.addItem}" process="date,amount" update="form"/>
                         <p:commandButton value="Save" update="@form"/>
                     <p:ajaxStatus>
                         <f:facet name="error">

@@ -15,7 +15,7 @@ import org.therismos.model.BudgetModel;
  * @author USER
  */
 @javax.inject.Named
-public class BudgetDao {
+public class BudgetDao implements java.io.Serializable {
 
     @javax.ejb.EJB
     MongoService mongoService;

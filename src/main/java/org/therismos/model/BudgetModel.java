@@ -8,7 +8,7 @@ import org.therismos.entity.Account;
  *
  * @author USER
  */
-public class BudgetModel {
+public class BudgetModel implements java.io.Serializable {
 
     private String code;
     private int year;
@@ -49,13 +49,14 @@ public class BudgetModel {
     }
     
     public void addToEntries(String date, Number amount) {
+        logger.log(Level.FINE, "Adding {0} and {1}", new Object[]{date,amount});
         HashMap<String, Object> m = new HashMap<>();
         m.put("date", date);
         m.put("amount", amount);
         entries.add(m);
     }
     
-    public void removeItem(String date) {
+    public void removeFromEntries(String date) {
         HashMap<String, Object> m = new HashMap<>();
         m.put("date", date);
         m.put("amount", "");
@@ -63,7 +64,6 @@ public class BudgetModel {
     }
     
     public void addToSubitems(Account a) {
-        logger.log(Level.INFO, "Added {0}", a.getCode());
         subitems.add(a);
     }
     /**

@@ -6,6 +6,8 @@ import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.model.ArrayDataModel;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.therismos.ejb.BudgetDao;
 import org.therismos.entity.Account;
 import org.therismos.model.BudgetModel;
@@ -26,7 +28,7 @@ public class EditBudgetBean implements java.io.Serializable {
      * 0 = not defined, 1 = new entry, 2 = existing entry
      */
     private int status;
-//    private final List<String> codes;
+    private Double amount;
     private ArrayDataModel entries;
     private String selectedDate;
 
@@ -39,8 +41,17 @@ public class EditBudgetBean implements java.io.Serializable {
     }
     
     public void removeItem() {
-        logger.log(Level.INFO, "Removing {0}", selectedDate);
-        budget.removeItem(selectedDate);
+        budget.removeFromEntries(selectedDate);
+        entries = populateEntries(budget);
+        logger.log(Level.FINE, "Removing {0}, total {1} items", 
+                new Object[]{selectedDate,budget.getEntries().size()});
+    }
+
+    public void addItem() {
+        budget.addToEntries(selectedDate, amount);
+        entries = populateEntries(budget);
+        logger.log(Level.FINE, "Adding {0} and {1}, total {2} items", 
+                new Object[]{selectedDate,amount,budget.getEntries().size()});
     }
 
     public ArrayDataModel getEntries() {
@@ -53,12 +64,15 @@ public class EditBudgetBean implements java.io.Serializable {
             
     public EditBudgetBean() {
         budget = new BudgetModel();
-        budget.setYear(Calendar.getInstance().get(Calendar.YEAR)-1);
+        DateTime today = DateTime.now();
+        budget.setYear(today.year().get()-1);
         budget.setCode("50");
         status = 0;
-        selectedDate="";
-//        codes = new ArrayList<>();
+        String tod = DateTimeFormat.forPattern("yyyy-MM-dd").print(today);
+        logger.log(Level.FINE, "today is {0}", new Object[]{tod});
+        selectedDate=tod;
         entries = null;
+        amount = 0.0;
     }
 
     public BudgetModel getBudget() {
@@ -110,7 +124,6 @@ public class EditBudgetBean implements java.io.Serializable {
                 budgetModel.clearSubitems();
                 for (Account a : l) {
                     budgetModel.addToSubitems(a);
-//        logger.log(Level.INFO, "Added {0} : {1}", new Object[]{a.getNameChi(), a.getCode()});
                 }
                 budget = budgetModel;
                 entries = populateEntries(budgetModel);
@@ -123,7 +136,7 @@ public class EditBudgetBean implements java.io.Serializable {
                 budgetModel.clearSubitems();
                 for (Account a : l) {
                     budgetModel.addToSubitems(a);
-        logger.log(Level.INFO, "Added {0} : {1}", new Object[]{a.getNameChi(), a.getCode()});
+        logger.log(Level.FINE, "Added {0} : {1}", new Object[]{a.getNameChi(), a.getCode()});
                 }
                 status = 2;
 //                for (Map o : budgetModel.getEntries()) {
@@ -131,6 +144,20 @@ public class EditBudgetBean implements java.io.Serializable {
 //                }
             }
         }
+    }
+
+    /**
+     * @return the amount
+     */
+    public double getAmount() {
+        return amount;
+    }
+
+    /**
+     * @param amount the amount to set
+     */
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
     
 }
