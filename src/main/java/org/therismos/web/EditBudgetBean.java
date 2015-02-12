@@ -43,6 +43,7 @@ public class EditBudgetBean implements java.io.Serializable {
     public void removeItem() {
         budget.removeFromEntries(selectedDate);
         entries = populateEntries(budget);
+        status = 1;
         logger.log(Level.FINE, "Removing {0}, total {1} items", 
                 new Object[]{selectedDate,budget.getEntries().size()});
     }
@@ -50,6 +51,7 @@ public class EditBudgetBean implements java.io.Serializable {
     public void addItem() {
         budget.addToEntries(selectedDate, amount);
         entries = populateEntries(budget);
+        status = 1;
         logger.log(Level.FINE, "Adding {0} and {1}, total {2} items", 
                 new Object[]{selectedDate,amount,budget.getEntries().size()});
     }
@@ -65,7 +67,7 @@ public class EditBudgetBean implements java.io.Serializable {
     public EditBudgetBean() {
         budget = new BudgetModel();
         DateTime today = DateTime.now();
-        budget.setYear(today.year().get()-1);
+        budget.setYear(today.year().get());
         budget.setCode("50");
         status = 0;
         String tod = DateTimeFormat.forPattern("yyyy-MM-dd").print(today);
@@ -100,6 +102,21 @@ public class EditBudgetBean implements java.io.Serializable {
         return budget.getSubitems();
     }
     
+    public void save() {
+        try {
+            budgetDao.save(budget);
+            status = 2;
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new FacesMessage(FacesMessage.SEVERITY_INFO, "Saved record", 
+                        String.format("%s(%d)",budget.getCode(),budget.getYear()))
+            );
+        }
+        catch (RuntimeException ex) {
+                FacesContext.getCurrentInstance().addMessage(null, 
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, ex.getClass().getName(), ex.getMessage()));
+        }
+    }
+    
     public void refresh() {
         String code = budget.getCode();
         if (budget.getYear()<2014 || code.length()<2) {
@@ -127,8 +144,8 @@ public class EditBudgetBean implements java.io.Serializable {
                 }
                 budget = budgetModel;
                 entries = populateEntries(budgetModel);
-    //            FacesContext.getCurrentInstance().addMessage(null, 
-    //                new FacesMessage(FacesMessage.SEVERITY_WARN, "No such code", "No such budget"));
+                FacesContext.getCurrentInstance().addMessage(null, 
+                    new FacesMessage(FacesMessage.SEVERITY_WARN, "New record", "need to be saved"));
             }
             else {
                 budget = budgetModel;
@@ -139,9 +156,8 @@ public class EditBudgetBean implements java.io.Serializable {
         logger.log(Level.FINE, "Added {0} : {1}", new Object[]{a.getNameChi(), a.getCode()});
                 }
                 status = 2;
-//                for (Map o : budgetModel.getEntries()) {
-//                    logger.log(Level.INFO, "{0}:{1}", new Object[]{o.get("date").toString(), o.get("amount").toString()});
-//                }
+                FacesContext.getCurrentInstance().addMessage(null, 
+                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Existing record", "found"));
             }
         }
     }

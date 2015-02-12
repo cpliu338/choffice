@@ -14,10 +14,6 @@
                     </p><p>
                     <h:commandLink rendered="#{userBean.loggedIn}" action="receipt?faces-redirect=true">Receipts</h:commandLink>
                     </p><p>
-                        <h:outputLink value="list.jsf">
-                            <h:outputText value="#{msg['menu.record']}"/>
-                        </h:outputLink>
-                    </p><p>
                         <h:outputLink value="edit.jsf">
                             <h:outputText value="#{msg['cmd.edit']}"/>
                         </h:outputLink>
@@ -28,27 +24,27 @@
                 <h2><h:outputText value="#{msg['legend.budget']}"/></h2>
                 <h:form id="form">
                     <p:panelGrid columns="2">
-                        <h:outputLabel for="menu" value="#{msg['finyr']}"/>
-                        <h:selectOneMenu value="#{budgetBean.year}">
+                        <h:outputLabel for="menu1" value="#{msg['finyr']}"/>
+                        <h:selectOneMenu id="menu1" value="#{budgetBean.year}">
                             <f:selectItem itemLabel="Choose one" itemValue="0"/>
-                            <f:selectItem itemLabel="2013" itemValue="2013"/>
                             <f:selectItem itemLabel="2014" itemValue="2014"/>
+                            <f:selectItem itemLabel="2015" itemValue="2015"/>
                             <f:ajax execute="@form" render="code cutoff :msg :results" listener="#{budgetBean.refreshYear}"/>
                         </h:selectOneMenu>
-                        <h:outputLabel for="menu" value="#{msg['account']}"/>
+                        <h:outputLabel for="code" value="#{msg['account']}"/>
                         <h:selectOneMenu id="code" value="#{budgetBean.code}">
                             <f:selectItems value="#{budgetBean.codeChoices}"/>
                             <f:ajax execute="@form" render="cutoff :results :msg" listener="#{budgetBean.refreshCode}"/>
                         </h:selectOneMenu>
-                        <h:outputLabel for="menu" value="Cut-off #{msg['date']}"/>
+                        <h:outputLabel for="cutoff" value="Cut-off #{msg['date']}"/>
                         <h:selectOneMenu id="cutoff" value="#{budgetBean.cutoffDate}">
                             <f:selectItems value="#{budgetBean.dateChoices}"/>
-                            <f:ajax execute="@form" render=":results :msg" listener="#{budgetBean.updateCutoffDate}"/>
                         </h:selectOneMenu>
                     </p:panelGrid>
+                    <p:commandButton value="Exec" action="#{budgetBean.execute}" update=":results" process="@form"/>
                 </h:form>
                 <p:panel id="results">
-                            <h:outputText value="Remarks: #{budgetBean.budget['remarks']}"/>
+                    <h:outputText value="Remarks: #{budgetBean.budget['remarks']}"/>
                     <p:dataTable value="#{budgetBean.entrySummary}" var="item">
                         <p:column headerText="Sub account">
                             <h:outputText value="#{item['account']}"/> :
@@ -79,7 +75,7 @@
                         </f:facet>
                     </p:dataTable>                    
                 </p:panel>
-                <h:messages id="msg" />
+                <p:messages autoUpdate="true" id="msg" />
             </ui:define>
         </ui:composition>
     </body>

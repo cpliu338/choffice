@@ -25,9 +25,12 @@
                 </h:form>
             </ui:define>
             <ui:define name="content">
-                <h2><h:outputText value="#{msg['legend.budget']}"/></h2>
                 <h:form id="form">
-                    <h:panelGrid columns="3">
+                    <p:fieldset legend="#{msg['legend.budget']}">
+                        <!--p:panel rendered="#{editBudgetBean.status == 1}">
+                            <h1>Record need to be saved</h1>
+                        </p:panel-->
+                    <h:panelGrid columns="6">
                         <p:outputLabel for="year" value="#{msg['finyr']}"/>
                         <p:inputText id="year" value="#{editBudgetBean.budget.year}">
                             <p:ajax listener="#{editBudgetBean.refresh}" event="change" process="@form" update="form"/>
@@ -40,15 +43,14 @@
                             <p:ajax listener="#{editBudgetBean.refresh}" event="change" process="@form" update="form"/>
                         </p:inputText>
                         <p:message for="code"/>
+                    </h:panelGrid>
+                        </p:fieldset>
+                    <h:panelGrid columns="2">
                         <p:outputLabel for="remarks" value="Remarks"/>
                         <p:inputText id="remarks" value="#{editBudgetBean.budget.remarks}"/>
-                        <p:message for="remarks"/>
+                        <p:commandButton value="Save" action="#{editBudgetBean.save}" process="@form" update="form"/>
+                        <p:messages autoUpdate="true" showDetail="true" showSummary="true" id="msg" />
                     </h:panelGrid>
-                    <p> Status: <h:outputText id="debug" value="#{editBudgetBean.status}"/>
-                        <h:outputText value="Invalid" rendered="#{editBudgetBean.status == 0}"/>
-                        <h:outputText value="new" rendered="#{editBudgetBean.status == 1}"/>
-                        <h:outputText value="Existing" rendered="#{editBudgetBean.status == 2}"/>
-                    </p>
                     <p:accordionPanel activeIndex="1">
                         <p:tab title="Sub-accounts">
                     <p:dataGrid columns="5" var="acc" value="#{editBudgetBean.subcodes}" rendered="#{editBudgetBean.status != 0}">
@@ -70,21 +72,20 @@
                     </p:dataTable>
                         </p:tab>
                     </p:accordionPanel>
-                    <p:panelGrid columns="3">
+                    <p:panelGrid columns="4">
                         <h:outputLabel for="date" value="Date (yyyy-mm-dd)"/>
                         <p:inputText id="date" value="#{editBudgetBean.selectedDate}">
                             <f:validateRegex pattern="20[1-4][0-9]-[0-1][0-9]-[0-3][0-9]"/>
                         </p:inputText>
                         <p:message for="date"/>
+                        <p:commandButton value="Remove" action="#{editBudgetBean.removeItem}" process="date" update="form"/>
                         <h:outputLabel for="amount" value="Amount"/>
                         <p:inputText id="amount" value="#{editBudgetBean.amount}">
                             <f:validateDoubleRange minimum="-10000000" maximum="1000000"/>
                         </p:inputText>
                         <p:message for="amount"/>
-                    </p:panelGrid>
-                        <p:commandButton value="Remove" action="#{editBudgetBean.removeItem}" process="date" update="form"/>
                         <p:commandButton value="Add" action="#{editBudgetBean.addItem}" process="date,amount" update="form"/>
-                        <p:commandButton value="Save" update="@form"/>
+                    </p:panelGrid>
                     <p:ajaxStatus>
                         <f:facet name="error">
                             <h:outputText value="Error" />
@@ -103,7 +104,6 @@
                         </f:facet>
                     </p:ajaxStatus>
                 </h:form>
-                <p:messages autoUpdate="true" id="msg" />
             </ui:define>
         </ui:composition>
     </body>

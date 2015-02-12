@@ -32,8 +32,6 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Entry.findByTransref", query = "SELECT e FROM Entry e WHERE e.transref = :transref"),
     @NamedQuery(name = "Entry.findByAmount", query = "SELECT e FROM Entry e WHERE e.amount = :amount"),
     @NamedQuery(name = "Entry.findUnchequesBeforeDate", query = "SELECT e FROM Entry e WHERE e.date1 <= :enddate AND e.account.id = :accountid AND e.extra1 LIKE '$%'"),
-    //@NamedQuery(name = "Entry.calcBookBalanceForAccountId", query = "SELECT e.account.id, SUM(e.amount) FROM Entry e WHERE (e.date1 BETWEEN :begin AND :end) AND e.account.id = :accountId GROUP BY e.account.id"),
-    //@NamedQuery(name = "Entry.findAggregateSinceDate", query = "SELECT e.account.id, SUM(e.amount) FROM Entry e WHERE e.date1 > :start AND e.account.id IN :acclist GROUP BY e.account.id ORDER BY e.account.id"),
     @NamedQuery(name = "Entry.aggregate", query = "SELECT e.account.id, SUM(e.amount) FROM Entry e WHERE e.account.id IN :acclist AND (e.date1 BETWEEN :start AND :end) GROUP BY e.account.id ORDER BY e.account.id"),
     @NamedQuery(name = "Entry.findByAccountId", query = "SELECT e FROM Entry e WHERE e.account.id = :accountId")})
 public class Entry implements Serializable {

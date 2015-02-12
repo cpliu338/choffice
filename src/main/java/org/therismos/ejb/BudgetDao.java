@@ -37,20 +37,16 @@ public class BudgetDao implements java.io.Serializable {
         return em.createNamedQuery("Account.findAccountsUnder", Account.class).setParameter("pattern", pattern+"%").getResultList();
     }
 
-    public List<Map> aggregateEntries(Date start, Date end, BasicDBList acclist) {
-        logger.log(Level.INFO, "dates between {0}:{1}", new Object[]{start,end});
+    public List<Map> aggregateEntries(Date start, Date end, List<Account> acclist) {
+        logger.log(Level.FINE, "dates between {0} and {1} with {2} accounts", new Object[]{start,end,acclist.size()});
         HashMap<Integer,String> acc_ids = new HashMap<>();
-        for (Object o : acclist) {
+        for (Account a : acclist) {
             try {
-                DBObject dbo = (DBObject)o;
-                String key = dbo.keySet().iterator().next();
-                Integer id1 = Integer.parseInt(key);
-//                acc_ids.add(id1);
-                acc_ids.put(id1, dbo.get(key).toString());
-                logger.log(Level.INFO, "acc id: {0}", id1);
+                acc_ids.put(a.getId(), a.getNameChi());
+                logger.log(Level.FINE, "acc : {0}({1})", new Object[]{a.getId(),a.getCode()});
             }
-            catch (NumberFormatException | NullPointerException ex) {
-               logger.log(Level.INFO, "acc: {0}", o);
+            catch (RuntimeException ex) {
+               logger.log(Level.WARNING, "Problematic acc: {0}", a);
             }
         }
         Query q = em.createNamedQuery("Entry.aggregate").setParameter("start", start)
@@ -60,67 +56,86 @@ public class BudgetDao implements java.io.Serializable {
         for (Object o : q.getResultList()) {
             i++;
             Object[] ar = (Object[])o;
-            logger.log(Level.INFO, "entry {0}:{1}", ar);
+            logger.log(Level.FINE, "entry {0}:{1}", ar);
             HashMap<String,Object> entrySummary = new HashMap<>();
             entrySummary.put("account", ar[0]);
-            entrySummary.put("name", acc_ids.get((Integer)ar[0]));
+            entrySummary.put("name", acc_ids.get(ar[0]));
             entrySummary.put("total", ar[1]);
             ret.add(entrySummary);
         }
-            logger.log(Level.INFO, "entries: {0}", i);
+            logger.log(Level.FINE, "entries: {0}", i);
         return ret;
     }
     
-    // The following is copied from a desktop app
     public int remove(int year, String code) {
-        return coll.remove(new BasicDBObject("code",code).append("year", year)).getN();
+        return coll.remove(buildCriterion(code, year)).getN();
     }
     
     public BudgetModel find(int year, String code) {
-//        List<BudgetModel> results = find(new BasicDBObject("code",code).append("year", year));
-//        if (results==null || results.isEmpty()) return null;
-//        return results.get(0);
-        return this.findOne(new BasicDBObject("code",code).append("year", year));
+        return this.findOne(buildCriterion(code, year));
     }
-    /*
-    public int save(BudgetModel m) {
-        BudgetModel existing;
-        if (m.getYear()<2013 || m.getYear()>2030)
-            return -4; //invalid year
-        //TODO check for invalid code
-        if (m.getId()==null) {
-            existing = find(m.getYear(), m.getCode());
-            if (existing != null)
-                return -3; // violate constraint: year+code must be unique
+
+    private static DBObject buildCriterion(String code, int year) {
+        return new BasicDBObject(CODE,code).append(YEAR, year);
+    }
+    private static final String YEAR = "year";
+    private static final String CODE = "code";
+    
+    public void save(BudgetModel m) {
+        WriteResult writeResult;
+        if (m.getYear()<2014 || m.getYear()>2047)
+            throw new IllegalArgumentException("Invalid year, must be between 2014 and 2047");
+        if (this.findAllAccountsUnder(m.getCode()).isEmpty()) {
+            throw new IllegalArgumentException("Invalid account "+m.getCode());
+        }
+        DBObject crit = buildCriterion(m.getCode(),m.getYear());
+        DBObject b = coll.findOne(crit);
+            BasicDBList entries = new BasicDBList();
+            Iterator<Map<String,Object>> it = m.getEntries().iterator();
+            while (it.hasNext()) {
+                Map map = it.next();
+                entries.add(new BasicDBObject(DATE,map.get(DATE)).append(AMOUNT, map.get(AMOUNT)));
+            }
+        if (b==null) {
+            // use crit to build a new DBObject
+            Account a = em.createNamedQuery("Account.findByCode", Account.class).setParameter("code", m.getCode()).getSingleResult();
+            crit.put(REMARKS, m.getRemarks());
+            crit.put(ENTRIES, entries);
+            crit.put(NAME_CHI, a.getNameChi());
+            writeResult = coll.save(crit);
         }
         else {
-            existing = (BudgetModel)coll.findOne(m.getId());
-            if (existing==null)
-                return -1; // invalid objectId
-            else if (m.getYear()!=existing.getYear() || !m.getCode().equalsIgnoreCase(existing.getCode())) {
-//        System.out.println(m.getYear());
-//        System.out.println(existing.getYear());
-//        System.out.println("'"+m.getCode()+"'");
-//        System.out.println("'"+existing.getCode()+"'");
-                return -2; // attempt to change year/code on an existing entry
-            }
+            writeResult = coll.update(crit, new BasicDBObject("$set",
+                    new BasicDBObject(REMARKS,m.getRemarks())
+                    .append(ENTRIES, entries)
+                ), false, false);
         }
-        return coll.save(m).getN();
+        if (writeResult.getError()!=null) {
+            throw new RuntimeException(String.format("Update error with n=%d, message: %s",writeResult.getN(),writeResult.getError()));
+        }
     }
-    */
+    private static final String NAME_CHI = "name_chi";
+    private static final String ENTRIES = "entries";
+    private static final String REMARKS = "remarks";
+    private static final String AMOUNT = "amount";
+    private static final String DATE = "date";
+    
     private BudgetModel convertToModel(DBObject o) {
         if (o==null) return null;
         BudgetModel m = new BudgetModel();
         try {
-        m.setYear((Integer)o.get("year"));
-        m.setCode((String)o.get("code"));
-        m.setRemarks((String)o.get("remarks"));
-        m.setName_chi((String)o.get("name_chi"));
-        BasicDBList l = (BasicDBList)o.get("entries");
+        m.setYear((Integer)o.get(YEAR));
+        m.setCode((String)o.get(CODE));
+        m.setRemarks((String)o.get(REMARKS));
+        m.setName_chi((String)o.get(NAME_CHI));
+        BasicDBList l = (BasicDBList)o.get(ENTRIES);
         for (Object o1 : l) {
             DBObject dbo = (DBObject)o1;
-            m.addToEntries((String)dbo.get("date"), (Number)dbo.get("amount"));
+            m.addToEntries((String)dbo.get(DATE), (Number)dbo.get(AMOUNT));
         }
+                for (Account a : this.findAllAccountsUnder(m.getCode())) {
+                    m.addToSubitems(a);
+                }
 //        l = (BasicDBList)o.get("subitems");
 //        for (Object o1 : l) {
 //            DBObject dbo = (DBObject)o1;
@@ -142,9 +157,9 @@ public class BudgetDao implements java.io.Serializable {
         DBCursor cursor;
         cursor = coll.find(crit);
         for (DBObject item : cursor) {
-            if (BudgetModel.class.isAssignableFrom(item.getClass())) {
+//            if (BudgetModel.class.isAssignableFrom(item.getClass())) {
                 results.add(convertToModel(item));
-            }
+//            }
         }
         return results;//.isEmpty() ? null : results;
     }
