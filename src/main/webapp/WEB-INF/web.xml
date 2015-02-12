@@ -3,7 +3,7 @@
     <display-name>choffice</display-name>
     <context-param>
         <param-name>javax.faces.PROJECT_STAGE</param-name>
-        <param-value>Development</param-value>
+        <param-value>Production</param-value>
     </context-param>
     <context-param>
         <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
@@ -78,7 +78,7 @@
         <web-resource-collection>
             <web-resource-name>Budget things</web-resource-name>
             <description/>
-            <url-pattern>/x_budget/*</url-pattern>
+            <url-pattern>/budget/*</url-pattern>
         </web-resource-collection>
         <web-resource-collection>
             <web-resource-name>Account entries</web-resource-name>
