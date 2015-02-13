@@ -12,8 +12,6 @@
                     <p>
                     <h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">Log out</h:commandLink>
                     </p><p>
-                    <h:commandLink rendered="#{userBean.loggedIn}" action="receipt?faces-redirect=true">Receipts</h:commandLink>
-                    </p><p>
                         <h:outputLink value="list.jsf">
                             <h:outputText value="#{msg['menu.record']}"/>
                         </h:outputLink>
@@ -42,15 +40,24 @@
                             <f:validateRegex pattern="[0-9A-Z]{2,5}"/>
                             <p:ajax listener="#{editBudgetBean.refresh}" event="change" process="@form" update="form"/>
                         </p:inputText>
-                        <p:message for="code"/>
+                        <p:message for="code" showDetail="true" showSummary="true"/>
                     </h:panelGrid>
                         </p:fieldset>
                     <h:panelGrid columns="2">
                         <p:outputLabel for="remarks" value="Remarks"/>
                         <p:inputText id="remarks" value="#{editBudgetBean.budget.remarks}"/>
                         <p:commandButton value="Save" action="#{editBudgetBean.save}" process="@form" update="form"/>
-                        <p:messages autoUpdate="true" showDetail="true" showSummary="true" id="msg" />
+                        <p:commandButton value="Delete" type="button" onclick="cd.show()" />
                     </h:panelGrid>
+                        <p:growl autoUpdate="true" showDetail="true" showSummary="true" id="msg" />
+                        <p:confirmDialog header="Initiating destroy process" severity="alert" widgetVar="cd">
+                            <f:facet name="message">
+                                <h:outputText value="Are you sure to delete #{editBudgetBean.budget.year} : #{editBudgetBean.budget.code}"/>
+                            </f:facet>
+                            <p:commandButton value="Yes" action="#{editBudgetBean.removeBudget}" process="@form" update="form" oncomplete="cd.hide()"/>
+                            <p:commandButton value="No" onclick="cd.hide();" type="button" />
+                        </p:confirmDialog>
+
                     <p:accordionPanel activeIndex="1">
                         <p:tab title="Sub-accounts">
                     <p:dataGrid columns="5" var="acc" value="#{editBudgetBean.subcodes}" rendered="#{editBudgetBean.status != 0}">

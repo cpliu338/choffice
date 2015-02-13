@@ -1,5 +1,6 @@
 package org.therismos.web;
 
+import com.mongodb.WriteResult;
 import java.util.*;
 import java.util.logging.*;
 import javax.annotation.PostConstruct;
@@ -38,6 +39,18 @@ public class EditBudgetBean implements java.io.Serializable {
 
     public void setSelectedDate(String selectedDate) {
         this.selectedDate = selectedDate;
+    }
+    
+    public void removeBudget() {
+        WriteResult wr = budgetDao.remove(budget.getYear(), budget.getCode());
+        if (wr.getError() == null) {
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new FacesMessage(FacesMessage.SEVERITY_INFO, "Delete record", "done"));
+        }
+        else {
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Cannot delete", wr.getError()));
+        }
     }
     
     public void removeItem() {
@@ -127,14 +140,15 @@ public class EditBudgetBean implements java.io.Serializable {
         }
         else {
             BudgetModel budgetModel = budgetDao.find(budget.getYear(), code);
-            List<Account> l = budgetDao.findAllAccountsUnder(code);
-//            logger.log(Level.INFO, "Accounts under {0} : {1}", new Object[]{code, l.size()});
-//            codes.clear();
-//            for (Account a : l) {
-//                codes.add(String.format("%s (%s)", a.getNameChi(),a. getCode()));
-//            }
+                StringBuilder buf = new StringBuilder();
+                for (String c : budgetDao.findAllCodesInYear(budget.getYear())) {
+                    buf.append(c).append(',');
+                }
+                FacesContext.getCurrentInstance().addMessage("form:code", 
+                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Available budgets", buf.toString()));
             if (budgetModel==null) {
                 status = 1;
+            List<Account> l = budgetDao.findAllAccountsUnder(code);
                 budgetModel = new BudgetModel();
                 budgetModel.setYear(budget.getYear());
                 budgetModel.setCode(code);
@@ -150,11 +164,11 @@ public class EditBudgetBean implements java.io.Serializable {
             else {
                 budget = budgetModel;
                 entries = populateEntries(budgetModel);
-                budgetModel.clearSubitems();
-                for (Account a : l) {
-                    budgetModel.addToSubitems(a);
-        logger.log(Level.FINE, "Added {0} : {1}", new Object[]{a.getNameChi(), a.getCode()});
-                }
+//                budgetModel.clearSubitems();
+//                for (Account a : l) {
+//                    budgetModel.addToSubitems(a);
+//        logger.log(Level.FINE, "Added {0} : {1}", new Object[]{a.getNameChi(), a.getCode()});
+//                }
                 status = 2;
                 FacesContext.getCurrentInstance().addMessage(null, 
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Existing record", "found"));

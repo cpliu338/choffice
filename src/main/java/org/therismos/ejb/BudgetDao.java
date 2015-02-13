@@ -29,6 +29,19 @@ public class BudgetDao implements java.io.Serializable {
         coll = mongoService.getBudgetCollection();
     }
     
+    public List findAllYears() {
+        return coll.distinct(YEAR);
+    }
+    
+    public List<String> findAllCodesInYear(int yr) {
+        DBCursor cur = coll.find(new BasicDBObject(YEAR, yr));
+        List<String> results = new ArrayList<>();
+        while (cur.hasNext()) {
+            results.add(cur.next().get(CODE).toString());
+        }
+        return results;
+    }
+    
     public List<Account> findAllAccountsUnder(String code) { // List<Account>
         if (code.length() < 2) return Collections.EMPTY_LIST;
         String pattern = code;
@@ -67,8 +80,8 @@ public class BudgetDao implements java.io.Serializable {
         return ret;
     }
     
-    public int remove(int year, String code) {
-        return coll.remove(buildCriterion(code, year)).getN();
+    public WriteResult remove(int year, String code) {
+        return coll.remove(buildCriterion(code, year));
     }
     
     public BudgetModel find(int year, String code) {

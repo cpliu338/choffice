@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.faces.event.AjaxBehaviorEvent;
 import javax.faces.model.SelectItem;
 import org.therismos.ejb.BudgetDao;
@@ -28,6 +29,7 @@ public class BudgetBean {
     private String code;
     private final List<SelectItem> codeChoices;
     private final List<SelectItem> dateChoices;
+    private final List<SelectItem> yearChoices;
     private List<Map> entrySummary;
     private final Map<String,Object> result;
     private String cutoffDate;
@@ -56,11 +58,21 @@ public class BudgetBean {
         entrySummary = Collections.EMPTY_LIST;
         result = new HashMap<>();
         code = "";
+        yearChoices = new ArrayList<>();
         codeChoices = new ArrayList<>();
         codeChoices.add(blank);
         dateChoices = new ArrayList<>();
         dateChoices.add(blank);
         cutoffDate = "";
+    }
+    
+    @PostConstruct
+    public void init() {
+        Iterator it = budgetDao.findAllYears().iterator();
+        while (it.hasNext()) {
+            Object o = it.next();
+            yearChoices.add(new SelectItem(o, o.toString()));
+        }
     }
 
     public int getYear() {
@@ -81,6 +93,10 @@ public class BudgetBean {
     
     public List<SelectItem> getCodeChoices() {
         return codeChoices;
+    }
+    
+    public List<SelectItem> getYearChoices() {
+        return yearChoices;
     }
     
     public void refreshYear(AjaxBehaviorEvent event) throws javax.faces.event.AbortProcessingException {

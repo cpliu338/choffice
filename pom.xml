@@ -5,7 +5,7 @@
     <groupId>hk.org.therismos</groupId>
     <artifactId>choffice</artifactId>
     <packaging>war</packaging>
-    <version>4.2</version>
+    <version>4.3</version>
 
     <name>choffice</name>
     <url>http://maven.apache.org</url>
