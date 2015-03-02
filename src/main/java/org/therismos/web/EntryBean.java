@@ -153,7 +153,9 @@ public class EntryBean implements java.io.Serializable {
         SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
         dbobject.append("start", fmt.format(begin));
         dbobject.append("end", fmt.format(end));
-        java.math.BigDecimal bbal = entryEjb.calcBookBalance(begin, end, 11201);
+        List<Integer> accs = new ArrayList<>();
+        accs.add(11201);
+        java.math.BigDecimal bbal = entryEjb.aggregate(accs, begin, end);
         logger.log(Level.INFO, "Book Balance is {0}", bbal);
         dbobject.append("bookBalance", bbal.doubleValue());
         dbobject.append("uncheq", sum);

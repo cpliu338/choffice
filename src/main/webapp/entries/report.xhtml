@@ -19,6 +19,8 @@
                     <h:commandLink rendered="#{userBean.loggedIn}" action="cheques?faces-redirect=true">List past unpresented cheques</h:commandLink>
                     </p><p>
                     <h:commandLink rendered="#{userBean.loggedIn}" action="export?faces-redirect=true">Export entries to Excel (CSV format)</h:commandLink>
+                    </p><p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="payable?faces-redirect=true">payable</h:commandLink>
                    </p>
                 </h:form>
             </ui:define>

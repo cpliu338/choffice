@@ -37,17 +37,15 @@ public class EntryEjb implements java.io.Serializable {
         return r;
     }
     
-    public BigDecimal calcBookBalance(Date start, Date end, int accountid) {
-        List<Integer> accs = new ArrayList<>();
-        accs.add(11201);
+    public BigDecimal aggregate(List<Integer> accs, Date start, Date end) {
         javax.persistence.Query q = em.createNamedQuery("Entry.aggregate").setParameter("start", start)
         .setParameter("end", end).setParameter("acclist", accs);
         BigDecimal o1 = BigDecimal.ZERO;
         for (Object o : q.getResultList()) {
             Object[] ar = (Object[])o;
-            logger.log(Level.INFO, "entry {0}:{1}", ar);
-            logger.log(Level.INFO, "class name {0}", ar[1].getClass().getName());
-            o1 = (BigDecimal)(ar[1]);
+            logger.log(Level.FINE, "entry {0}:{1}", ar);
+            logger.log(Level.FINE, "class name {0}", ar[1].getClass().getName());
+            o1 = o1.add((BigDecimal)(ar[1]));
         }
         return o1;
     }
@@ -59,10 +57,19 @@ public class EntryEjb implements java.io.Serializable {
             return BigDecimal.ZERO;
         return loans.get(0).getAmount();
     }
-    
-    public void report() {
-        
+/*
+    @NamedQuery(name = "Entry.findByAccount", query = "SELECT e FROM Entry e WHERE e.account.id=:account_id AND (e.date1 BETWEEN :start AND :end) ORDER BY e.date1"),
+    @NamedQuery(name = "Entry.aggregate", query = "SELECT e.account.id, SUM(e.amount) FROM Entry e WHERE e.account.id IN :acclist AND (e.date1 BETWEEN :start AND :end) GROUP BY e.account.id ORDER BY e.account.id"),
+    */    
+    public List<Entry> findByAccount(int id, Date d1, Date d2) {
+        return em.createNamedQuery("Entry.findByAccount", Entry.class)
+                .setParameter("account_id", id)
+                .setParameter("start", d1)
+                .setParameter("end", d2)
+                .setMaxResults(100).getResultList();
     }
+    
+    
     
     /**
      * Export the entries for auditor, ultimately in xlsx format
