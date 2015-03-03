@@ -186,6 +186,7 @@ public class PayableBean implements java.io.Serializable {
             Entry e = entriesCMA.get(id)[0];
             choicesCMA[i] = new SelectItem(id, fmt.format(new Object[]{e.getDetail(),e.getAmount()}));
         }
+        logger.log(Level.INFO, "41001: {0,number,#.##}", aggregates.get(41001));
     }
 
     /**
@@ -214,8 +215,14 @@ public class PayableBean implements java.io.Serializable {
     /**
      * @return the aggregates
      */
-    public List<java.util.Map.Entry<Integer,BigDecimal>> getAggregates() {
-        return new ArrayList<>(aggregates.entrySet());
+    public Map<Integer,BigDecimal> getAggregates() {
+        return aggregates; //new ArrayList<>(aggregates.entrySet());
+    }
+    
+    public BigDecimal getIncome1() {
+        if (aggregates.containsKey(GENINC) && aggregates.containsKey(THANKINC))
+            return aggregates.get(GENINC).add(aggregates.get(THANKINC));
+        return BigDecimal.ZERO;
     }
 
     /**

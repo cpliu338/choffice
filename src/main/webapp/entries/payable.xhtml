@@ -21,22 +21,10 @@
                     <p:commandButton value="Execute" action="#{payableBean.execute()}" process="cutoff" update=":entriesCMA"/>
                 </h:form>
                 <h:form id="entriesCMA">
-                <p:dataTable id="aggregates" value="#{payableBean.aggregates}" var="item">
-                    <p:column>
-                        <f:facet name="header">
-                            Account
-                        </f:facet>
-                        <h:outputText value="#{item.key}"/>
-                    </p:column>
-                    <p:column>
-                        <f:facet name="header">
-                            Amount
-                        </f:facet>
-                        <h:outputFormat style="text-align: right" value="{0, number}">
-                            <f:param value="#{item.value}"/>
-                        </h:outputFormat>
-                    </p:column>
-                </p:dataTable>
+                    <h:outputFormat value="[{0,number,#.##}()] = {1,number,#.##}()">
+                        <f:param value="#{payableBean.income1}"/>
+                        <f:param value="#{payableBean.income1*0.04}"/>
+                    </h:outputFormat>
                     <p:selectOneMenu>
                         <f:selectItem itemLabel="Create new" itemValue="0"/>
                         <f:selectItems value="#{payableBean.choicesCMA}"/>
