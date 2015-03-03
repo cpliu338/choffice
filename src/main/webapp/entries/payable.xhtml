@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+    <body>
+
+        <ui:composition template="./../WEB-INF/mainTemplate.xhtml">
+
+            <ui:define name="content">
+                <h:form id="form">
+                    <p:panelGrid columns="2">
+                        <h:outputLabel value="Start date"/>
+                        <h:outputFormat value="{0, date, yyyy-MM-dd}">
+                            <f:param value="#{payableBean.startdate}"/>
+                        </h:outputFormat>
+                        <h:outputLabel value="Cutoff date"/>
+                        <p:calendar id="cutoff" value="#{payableBean.cutoffdate}" pattern="yyyy-MM-dd"/>
+                    </p:panelGrid>
+                    <p:commandButton value="Execute" action="#{payableBean.execute()}" process="cutoff" update=":entriesCMA"/>
+                </h:form>
+                <h:form id="entriesCMA">
+                <p:dataTable id="aggregates" value="#{payableBean.aggregates}" var="item">
+                    <p:column>
+                        <f:facet name="header">
+                            Account
+                        </f:facet>
+                        <h:outputText value="#{item.key}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            Amount
+                        </f:facet>
+                        <h:outputFormat style="text-align: right" value="{0, number}">
+                            <f:param value="#{item.value}"/>
+                        </h:outputFormat>
+                    </p:column>
+                </p:dataTable>
+                    <p:selectOneMenu>
+                        <f:selectItem itemLabel="Create new" itemValue="0"/>
+                        <f:selectItems value="#{payableBean.choicesCMA}"/>
+                    </p:selectOneMenu>
+                <p:dataTable value="#{payableBean.entriesCMA}" var="item">
+                    <p:column>
+                        <f:facet name="header">
+                            Trans ref
+                        </f:facet>
+                        <h:outputText value="#{item.key}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            Entry
+                        </f:facet>
+                        <h:outputText value="#{item.value[0]}"/>
+                    </p:column>
+                </p:dataTable>
+                </h:form>
+                <p:messages showDetail="true" showSummary="true"/>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>

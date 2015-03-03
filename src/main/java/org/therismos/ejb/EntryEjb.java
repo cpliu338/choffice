@@ -37,6 +37,26 @@ public class EntryEjb implements java.io.Serializable {
         return r;
     }
     
+    public List<Entry> findByEachAccount(List<Integer> accs, Date start, Date end) {
+        List<Entry> r = em.createQuery("SELECT e FROM Entry e WHERE e.account.id IN :acclist AND (e.date1 BETWEEN :start AND :end)", Entry.class)
+            .setParameter("start", start)
+            .setParameter("end", end).setParameter("acclist", accs).getResultList();
+        logger.log(Level.INFO, "Result size{0}", r.size());
+        return r;
+    }
+    
+    public Map<Integer, BigDecimal> aggregateEach(List<Integer> accs, Date start, Date end) {
+        javax.persistence.Query q = em.createNamedQuery("Entry.aggregate").setParameter("start", start)
+        .setParameter("end", end).setParameter("acclist", accs);
+        BigDecimal o1 = BigDecimal.ZERO;
+        Map<Integer, BigDecimal> aggregates= new HashMap<>();
+        for (Object o : q.getResultList()) {
+            Object[] ar = (Object[])o;
+            aggregates.put((Integer)ar[0], (BigDecimal)(ar[1]));
+        }
+        return aggregates;
+    }
+    
     public BigDecimal aggregate(List<Integer> accs, Date start, Date end) {
         javax.persistence.Query q = em.createNamedQuery("Entry.aggregate").setParameter("start", start)
         .setParameter("end", end).setParameter("acclist", accs);
