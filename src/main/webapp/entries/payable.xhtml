@@ -33,7 +33,7 @@
                             </h:outputFormat>
                             <p:outputLabel value="Shortfall (Due-expenses)"/>
                             <h:outputFormat value="{0,number,#.##}">
-                                <f:param value="#{payableBean.due1 + payableBean.expense1 + payableBean.debt1}"/>
+                                <f:param value="#{payableBean.due1 + payableBean.expense1}"/>
                             </h:outputFormat>
                             <p:outputLabel for="acc1" value="Charge to"/>
                             <p:selectOneMenu id="acc1" value="#{payableBean.transref}">
@@ -42,12 +42,13 @@
                                 <p:ajax listener="#{payableBean.updateCMAEntry()}" process="@this" update="detail date1"/>
                             </p:selectOneMenu>
                             <p:outputLabel value="Detail"/>
-                            <h:outputText id="detail" value="#{payableBean.entry.detail}"/>
+                            <p:inputText id="detail" value="#{payableBean.entry.detail}"/>
                             <p:outputLabel value="Date"/>
                             <h:outputFormat id="date1" value="{0,date,yyyy-MM-dd}">
                                 <f:param value="#{payableBean.entry.date1}"/>
                             </h:outputFormat>
                         </p:panelGrid>
+                        <p:commandButton value="Commit" action="#{payableBean.commitCMAEntry()}" update="@form"/>
                     </p:fieldset>
                 <p:dataTable value="#{payableBean.entriesCMA}" var="item">
                     <p:column>

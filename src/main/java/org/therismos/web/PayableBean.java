@@ -123,39 +123,46 @@ public class PayableBean implements java.io.Serializable {
     }
     
     public void updateCMAEntry() {
-        logger.log(Level.FINE, "Finding transref {0}", transref);
-        FacesMessage msg = new FacesMessage();
-        List<Entry> entries = entryEjb.findByTransref(transref);
-        try {
         if (transref == 0) {
-            entry.setId(null);
-            entry.setTransref(0);
-            Account a = new Account();
-            a.setId(CMADEBT);
-            entry.setAccount(a);
-            entry.setAmount(getDue1());
-            entryEjb.chargePayableShortfall(entry, CMAEXP);
-            msg.setSummary("Success");
-            msg.setDetail("Created new entries");
-        }
-        else if (entries.isEmpty()) {
-            entry.setId(null);
+            entry = new Entry();
+            entry.setId(0);
             entry.setTransref(transref);
-            entry.setAmount(BigDecimal.ZERO);
-            entry.setDetail("ERROR!");
-            entry.setDate1(new Date());
-            msg.setSummary("Failure");
-            msg.setDetail("Error");
-            msg.setSeverity(FacesMessage.SEVERITY_ERROR);
+            entry.setDate1(cutoffdate);
+            entry.setDetail("CMA Debt up to "+formatter.format(cutoffdate));
         }
         else {
-            Entry e = entryEjb.findByTransref(transref).get(0);
-            entry.setAmount(e.getAmount().add(this.getDue1()));
+            List<Entry> entries = entryEjb.findByTransref(transref);
+            if (entries.isEmpty()) {
+            logger.log(Level.INFO, "Transref found none");
+                entry.setDetail("ERROR!");
+                entry.setDate1(new Date());
+            }
+            else {
+            logger.log(Level.INFO, "Cutoff date is {0,date}", cutoffdate);
+            logger.log(Level.INFO, "Transref is {0}", transref);
+                Entry e = entryEjb.findByTransref(transref).get(0);
+                String olddetail = e.getDetail();
+                entry = e;
+                entry.setDate1(cutoffdate);
+                entry.setDetail(olddetail + formatter.format(cutoffdate));
+                entry.setAmount(this.getDue1().add(this.getExpense1()));
+            logger.log(Level.INFO, "Entry amount is {0,number}", entry.getAmount());
+            }
+        }
+    }
+    
+    public void commitCMAEntry() {
+        FacesMessage msg = new FacesMessage();
+        try {
+            logger.log(Level.INFO, "Entry amount is {0,number}", entry.getAmount());
+            logger.log(Level.INFO, "Detail is {0}", entry.getDetail());
+            logger.log(Level.INFO, "Entry date is {0,date}", entry.getDate1());
             entryEjb.chargePayableShortfall(entry, CMAEXP);
             msg.setSummary("Success");
-            msg.setDetail("Updated entries");
-            msg.setSeverity(FacesMessage.SEVERITY_INFO);
-        }
+            if (transref == 0)
+                msg.setDetail("Created new entries");
+            else
+                msg.setDetail("Modified new entries");
         }
         catch (RuntimeException ex) {
             logger.log(Level.SEVERE, null, ex);

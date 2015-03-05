@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.*;
+import javax.ejb.*;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.therismos.entity.Account;
@@ -13,7 +14,7 @@ import org.therismos.entity.Entry;
  *
  * @author cpliu
  */
-@javax.inject.Named
+@Stateless
 public class EntryEjb implements java.io.Serializable {
     @PersistenceContext
     private EntityManager em;
@@ -42,7 +43,6 @@ public class EntryEjb implements java.io.Serializable {
         List<Entry> r = em.createQuery("SELECT e FROM Entry e WHERE e.account.id IN :acclist AND (e.date1 BETWEEN :start AND :end)", Entry.class)
             .setParameter("start", start)
             .setParameter("end", end).setParameter("acclist", accs).getResultList();
-//        logger.log(Level.INFO, "Result size{0}", r.size());
         return r;
     }
     
@@ -55,17 +55,19 @@ public class EntryEjb implements java.io.Serializable {
      * Charge payable debt to a new/existing entry pair
      * @param sample A sample entry.  Its id is ignored, 
      * transref used to locate entry pair (0 if new pair is needed),
-     * amount is the chargeable amount (usually the debt)
+     * amount is the chargeable amount (usually the shortfall in debt)
      * detail is the detail to be used, applicable to both legs of the pair
      * account id is the account (usually debt)
      * date1 is the desired date, applicable to both legs of the pair
      * @param counterpart Account id of the other leg of the entry pair
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void chargePayableShortfall(Entry sample, int counterpart) {
         Entry e1, e2;
         if (sample.getTransref() == 0) {
             e1 = sample; e1.setId(null);
             Account a = em.find(Account.class, counterpart);
+            Next line, BigDecimal::subtract caused a NullPointerException
             e2 = new Entry(); e2.setAccount(a); e2.setAmount(BigDecimal.ZERO.subtract(e1.getAmount()));
             e2.setDate1(e1.getDate1()); e2.setExtra1(""); e2.setDetail(e1.getDetail());
             Entry lastTrans = em.createQuery("SELECT e FROM Entry e ORDER BY e.transref DESC", Entry.class).setMaxResults(1).getResultList().get(0);
@@ -80,26 +82,26 @@ public class EntryEjb implements java.io.Serializable {
             e1.setDetail(sample.getDetail());
             int targetAccId = e1.getAccount().getId();
             if (targetAccId==sample.getAccount().getId()) {
-                e1.setAmount(sample.getAmount());
+                e1.setAmount(e1.getAmount().add(sample.getAmount()));
+                targetAccId=counterpart;
             }
             else if (targetAccId==counterpart) {
-                e1.setAmount(BigDecimal.ZERO.subtract(sample.getAmount()));
+                e1.setAmount(BigDecimal.ZERO.subtract(sample.getAmount()).subtract(e1.getAmount()));
+                targetAccId=sample.getAccount().getId();
             }
             else
                 throw new UnsupportedOperationException("Provided transref have no entry with account "+targetAccId);
             e2 = results.get(1);
             e2.setDate1(sample.getDate1());
             e2.setDetail(sample.getDetail());
-            targetAccId = e2.getAccount().getId();
-            if (targetAccId==sample.getAccount().getId()) {
-                e2.setAmount(sample.getAmount());
-            }
-            else if (targetAccId==counterpart) {
-                e2.setAmount(BigDecimal.ZERO.subtract(sample.getAmount()));
+            if (targetAccId==e2.getAccount().getId()) {
+                e2.setAmount(BigDecimal.ZERO.subtract(e1.getAmount()));
             }
             else
                 throw new UnsupportedOperationException("Provided transref have no entry with account "+targetAccId);
         }
+        logger.log(Level.INFO, "e1: {0,number} and {1,number}", new Object[]{e1.getAccount().getId(), e1.getAmount()});
+        logger.log(Level.INFO, "e2: {0,number} and {1,number}", new Object[]{e2.getAccount().getId(), e2.getAmount()});
         em.merge(e1);
         em.merge(e2);
     }
