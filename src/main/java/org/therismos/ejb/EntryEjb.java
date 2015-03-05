@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.logging.*;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import org.therismos.entity.Account;
 import org.therismos.entity.Entry;
 
 /**
@@ -43,6 +44,64 @@ public class EntryEjb implements java.io.Serializable {
             .setParameter("end", end).setParameter("acclist", accs).getResultList();
 //        logger.log(Level.INFO, "Result size{0}", r.size());
         return r;
+    }
+    
+    public List<Entry> findByTransref(int transref) {
+        return em.createNamedQuery("Entry.findByTransref", Entry.class)
+            .setParameter("transref", transref).getResultList();
+    }
+    
+    /**
+     * Charge payable debt to a new/existing entry pair
+     * @param sample A sample entry.  Its id is ignored, 
+     * transref used to locate entry pair (0 if new pair is needed),
+     * amount is the chargeable amount (usually the debt)
+     * detail is the detail to be used, applicable to both legs of the pair
+     * account id is the account (usually debt)
+     * date1 is the desired date, applicable to both legs of the pair
+     * @param counterpart Account id of the other leg of the entry pair
+     */
+    public void chargePayableShortfall(Entry sample, int counterpart) {
+        Entry e1, e2;
+        if (sample.getTransref() == 0) {
+            e1 = sample; e1.setId(null);
+            Account a = em.find(Account.class, counterpart);
+            e2 = new Entry(); e2.setAccount(a); e2.setAmount(BigDecimal.ZERO.subtract(e1.getAmount()));
+            e2.setDate1(e1.getDate1()); e2.setExtra1(""); e2.setDetail(e1.getDetail());
+            Entry lastTrans = em.createQuery("SELECT e FROM Entry e ORDER BY e.transref DESC", Entry.class).setMaxResults(1).getResultList().get(0);
+            e1.setTransref(lastTrans.getTransref()+1);
+            e2.setTransref(e1.getTransref());
+        }
+        else {
+            List<Entry> results = em.createNamedQuery("Entry.findByTransref", Entry.class).setParameter("transref", sample.getTransref()).getResultList();
+            if (results.size() != 2) throw new UnsupportedOperationException("Provided transref does not return a pair of (2) entries");
+            e1 = results.get(0);
+            e1.setDate1(sample.getDate1());
+            e1.setDetail(sample.getDetail());
+            int targetAccId = e1.getAccount().getId();
+            if (targetAccId==sample.getAccount().getId()) {
+                e1.setAmount(sample.getAmount());
+            }
+            else if (targetAccId==counterpart) {
+                e1.setAmount(BigDecimal.ZERO.subtract(sample.getAmount()));
+            }
+            else
+                throw new UnsupportedOperationException("Provided transref have no entry with account "+targetAccId);
+            e2 = results.get(1);
+            e2.setDate1(sample.getDate1());
+            e2.setDetail(sample.getDetail());
+            targetAccId = e2.getAccount().getId();
+            if (targetAccId==sample.getAccount().getId()) {
+                e2.setAmount(sample.getAmount());
+            }
+            else if (targetAccId==counterpart) {
+                e2.setAmount(BigDecimal.ZERO.subtract(sample.getAmount()));
+            }
+            else
+                throw new UnsupportedOperationException("Provided transref have no entry with account "+targetAccId);
+        }
+        em.merge(e1);
+        em.merge(e2);
     }
     
     public Map<Integer, BigDecimal> aggregateEach(List<Integer> accs, Date start, Date end) {

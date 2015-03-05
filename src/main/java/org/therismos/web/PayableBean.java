@@ -7,9 +7,12 @@ import javax.faces.bean.ManagedBean;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 import org.therismos.ejb.EntryEjb;
+import org.therismos.entity.Account;
 import org.therismos.entity.Entry;
 
 /**
@@ -82,6 +85,12 @@ public class PayableBean implements java.io.Serializable {
     private Map<Integer, BigDecimal> aggregates;
     private final Map<Integer, Entry[]> entriesCMA, entriesCMAM;
     private SelectItem[] choicesCMA;
+    private Entry entry;
+    private Integer transref;
+
+    public Entry getEntry() {
+        return entry;
+    }
 
     @Inject
     EntryEjb entryEjb;
@@ -106,6 +115,55 @@ public class PayableBean implements java.io.Serializable {
         entriesCMA= new HashMap<>();
         entriesCMAM=new HashMap<>();
         choicesCMA = new SelectItem[0];
+        entry = new Entry();
+        entry.setId(0);
+        transref = 0;
+        entry.setTransref(transref);
+        entry.setDate1(new Date());
+    }
+    
+    public void updateCMAEntry() {
+        logger.log(Level.FINE, "Finding transref {0}", transref);
+        FacesMessage msg = new FacesMessage();
+        List<Entry> entries = entryEjb.findByTransref(transref);
+        try {
+        if (transref == 0) {
+            entry.setId(null);
+            entry.setTransref(0);
+            Account a = new Account();
+            a.setId(CMADEBT);
+            entry.setAccount(a);
+            entry.setAmount(getDue1());
+            entryEjb.chargePayableShortfall(entry, CMAEXP);
+            msg.setSummary("Success");
+            msg.setDetail("Created new entries");
+        }
+        else if (entries.isEmpty()) {
+            entry.setId(null);
+            entry.setTransref(transref);
+            entry.setAmount(BigDecimal.ZERO);
+            entry.setDetail("ERROR!");
+            entry.setDate1(new Date());
+            msg.setSummary("Failure");
+            msg.setDetail("Error");
+            msg.setSeverity(FacesMessage.SEVERITY_ERROR);
+        }
+        else {
+            Entry e = entryEjb.findByTransref(transref).get(0);
+            entry.setAmount(e.getAmount().add(this.getDue1()));
+            entryEjb.chargePayableShortfall(entry, CMAEXP);
+            msg.setSummary("Success");
+            msg.setDetail("Updated entries");
+            msg.setSeverity(FacesMessage.SEVERITY_INFO);
+        }
+        }
+        catch (RuntimeException ex) {
+            logger.log(Level.SEVERE, null, ex);
+            msg.setSummary(ex.getClass().getName());
+            msg.setDetail(ex.getMessage());
+            msg.setSeverity(FacesMessage.SEVERITY_ERROR);
+        }
+        FacesContext.getCurrentInstance().addMessage(null, msg);
     }
     
     public void execute() {
@@ -116,7 +174,6 @@ public class PayableBean implements java.io.Serializable {
         entriesCMA.clear();
         List<Integer> blacklist = new ArrayList<>();
         for (Entry e : entryEjb.findByEachAccount(accs, startdate, cutoffdate)) {
-//            logger.log(Level.FINE, e.getDetail());
             if (blacklist.contains(e.getTransref()))
                 continue;
             Entry[] ar = entriesCMA.get(e.getTransref());
@@ -219,6 +276,10 @@ public class PayableBean implements java.io.Serializable {
         return aggregates; //new ArrayList<>(aggregates.entrySet());
     }
     
+    public BigDecimal getDue1() {
+        return getIncome1().multiply(new BigDecimal(0.04));
+    }
+    
     public BigDecimal getIncome1() {
         if (aggregates.containsKey(GENINC) && aggregates.containsKey(THANKINC))
             return aggregates.get(GENINC).add(aggregates.get(THANKINC));
@@ -252,6 +313,20 @@ public class PayableBean implements java.io.Serializable {
      */
     public Map<Integer, Entry[]> getEntriesCMAM() {
         return entriesCMAM;
+    }
+
+    /**
+     * @return the transref
+     */
+    public Integer getTransref() {
+        return transref;
+    }
+
+    /**
+     * @param transref the transref to set
+     */
+    public void setTransref(Integer transref) {
+        this.transref = transref;
     }
     
 }
