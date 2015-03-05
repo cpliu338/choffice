@@ -41,7 +41,7 @@ public class EntryEjb implements java.io.Serializable {
         List<Entry> r = em.createQuery("SELECT e FROM Entry e WHERE e.account.id IN :acclist AND (e.date1 BETWEEN :start AND :end)", Entry.class)
             .setParameter("start", start)
             .setParameter("end", end).setParameter("acclist", accs).getResultList();
-        logger.log(Level.INFO, "Result size{0}", r.size());
+//        logger.log(Level.INFO, "Result size{0}", r.size());
         return r;
     }
     

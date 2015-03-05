@@ -21,14 +21,27 @@
                     <p:commandButton value="Execute" action="#{payableBean.execute()}" process="cutoff" update=":entriesCMA"/>
                 </h:form>
                 <h:form id="entriesCMA">
-                    <h:outputFormat value="[{0,number,#.##}()] = {1,number,#.##}()">
-                        <f:param value="#{payableBean.income1}"/>
-                        <f:param value="#{payableBean.income1*0.04}"/>
-                    </h:outputFormat>
-                    <p:selectOneMenu>
-                        <f:selectItem itemLabel="Create new" itemValue="0"/>
-                        <f:selectItems value="#{payableBean.choicesCMA}"/>
-                    </p:selectOneMenu>
+                    <p:fieldset legend="CMA">
+                        <p:panelGrid columns="2">
+                            <p:outputLabel value="General +Thanksgiving"/>
+                            <h:outputFormat value="{0,number,#.##}">
+                                <f:param value="#{payableBean.income1}"/>
+                            </h:outputFormat>
+                            <p:outputLabel value="Due (4%)"/>
+                            <h:outputFormat value="{0,number,#.##}">
+                                <f:param value="#{payableBean.income1*0.04}"/>
+                            </h:outputFormat>
+                            <p:outputLabel value="Shortfall (Due-expenses)"/>
+                            <h:outputFormat value="{0,number,#.##}">
+                                <f:param value="#{payableBean.income1*0.04 + payableBean.expense1 + payableBean.debt1}"/>
+                            </h:outputFormat>
+                            <p:outputLabel for="acc1" value="Charge to"/>
+                            <p:selectOneMenu id="acc1">
+                                <f:selectItem itemLabel="Create new" itemValue="0"/>
+                                <f:selectItems value="#{payableBean.choicesCMA}"/>
+                            </p:selectOneMenu>
+                        </p:panelGrid>
+                    </p:fieldset>
                 <p:dataTable value="#{payableBean.entriesCMA}" var="item">
                     <p:column>
                         <f:facet name="header">

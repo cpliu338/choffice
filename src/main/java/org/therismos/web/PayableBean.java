@@ -116,7 +116,7 @@ public class PayableBean implements java.io.Serializable {
         entriesCMA.clear();
         List<Integer> blacklist = new ArrayList<>();
         for (Entry e : entryEjb.findByEachAccount(accs, startdate, cutoffdate)) {
-            logger.log(Level.FINE, e.getDetail());
+//            logger.log(Level.FINE, e.getDetail());
             if (blacklist.contains(e.getTransref()))
                 continue;
             Entry[] ar = entriesCMA.get(e.getTransref());
@@ -186,7 +186,7 @@ public class PayableBean implements java.io.Serializable {
             Entry e = entriesCMA.get(id)[0];
             choicesCMA[i] = new SelectItem(id, fmt.format(new Object[]{e.getDetail(),e.getAmount()}));
         }
-        logger.log(Level.INFO, "41001: {0,number,#.##}", aggregates.get(41001));
+//        logger.log(Level.FINE, "41001: {0,number,#.##}", aggregates.get(41001));
     }
 
     /**
@@ -225,6 +225,17 @@ public class PayableBean implements java.io.Serializable {
         return BigDecimal.ZERO;
     }
 
+    public BigDecimal getExpense1() {
+        if (aggregates.containsKey(CMAEXP))
+            return aggregates.get(PayableBean.CMAEXP);
+        return BigDecimal.ZERO;
+    }
+
+    public BigDecimal getDebt1() {
+        if (aggregates.containsKey(CMADEBT))
+            return aggregates.get(PayableBean.CMADEBT);
+        return BigDecimal.ZERO;
+    }
     /**
      * @return the entriesCMA
      */
