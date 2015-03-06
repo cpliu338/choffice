@@ -83,10 +83,14 @@ public class PayableBean implements java.io.Serializable {
     private Date startdate;
     private Date cutoffdate;
     private Map<Integer, BigDecimal> aggregates;
-    private final Map<Integer, Entry[]> entriesCMA, entriesCMAM;
-    private SelectItem[] choicesCMA;
-    private Entry entry;
-    private Integer transref;
+    private Map<Integer, Entry[]> entriesCMA, entriesCMAM;
+    private SelectItem[] choicesCMA, choicesCMAM;
+    private Entry entry, entry2;
+
+    public Entry getEntry2() {
+        return entry2;
+    }
+    private Integer transref, transref2;
 
     public Entry getEntry() {
         return entry;
@@ -115,11 +119,65 @@ public class PayableBean implements java.io.Serializable {
         entriesCMA= new HashMap<>();
         entriesCMAM=new HashMap<>();
         choicesCMA = new SelectItem[0];
+        choicesCMAM = new SelectItem[0];
         entry = new Entry();
         entry.setId(0);
         transref = 0;
+        entry2 = new Entry();
+        entry2.setId(0);
+        transref2 = 0;
         entry.setTransref(transref);
         entry.setDate1(new Date());
+        entry.setAmount(BigDecimal.ZERO);
+        entry2.setTransref(transref2);
+        entry2.setDate1(new Date());
+        entry2.setAmount(BigDecimal.ZERO);
+    }
+    
+    public boolean isGoodToCommit() {
+        boolean r = (entry!=null && entry.getAmount()!=null && entry.getAmount().abs().doubleValue()>1.0);
+        if (!r) {
+            if (entry==null) logger.info("Entry is NULL");
+            else logger.log(Level.INFO, "Entry amount is {0,number}", entry.getAmount());
+        }
+        return r;
+    }
+    
+    public boolean isGoodToCommit2() {
+        boolean r= (entry2!=null && entry2.getAmount()!=null && entry2.getAmount().abs().doubleValue()>1.0);
+        if (!r) {
+            if (entry2==null) logger.info("Entry2 is NULL");
+            else logger.log(Level.INFO, "Entry2 amount is {0,number}", entry2.getAmount());
+        }
+        return r;
+    }
+    
+    public void updateCMAMEntry() {
+        if (transref2 == 0) {
+            entry2 = new Entry();
+            entry2.setId(0);
+            entry2.setTransref(transref2);
+            entry2.setDate1(cutoffdate);
+            entry2.setDetail("CMAM Debt up to "+formatter.format(cutoffdate));
+            entry2.setAmount(getDue2().add(this.getExpense2()));
+        }
+        else {
+            List<Entry> entries = entryEjb.findByTransref(transref2);
+            if (entries.isEmpty()) {
+                logger.log(Level.INFO, "Transref2 found none");
+                entry2.setDetail("ERROR!");
+                entry2.setDate1(new Date());
+            }
+            else {
+                logger.log(Level.INFO, "Cutoff date is {0,date}", cutoffdate);
+                logger.log(Level.INFO, "Transref2 is {0}", transref2);
+                entry2 = entryEjb.findByTransref(transref2).get(0);
+                entry2.setDate1(cutoffdate);
+                entry2.setDetail("CMAM Debt up to "+formatter.format(cutoffdate));
+                entry2.setAmount(this.getDue2().add(this.getExpense2()));
+            }
+        }
+        logger.log(Level.INFO, "Entry2 amount is {0,number}", entry2.getAmount());
     }
     
     public void updateCMAEntry() {
@@ -129,6 +187,7 @@ public class PayableBean implements java.io.Serializable {
             entry.setTransref(transref);
             entry.setDate1(cutoffdate);
             entry.setDetail("CMA Debt up to "+formatter.format(cutoffdate));
+            entry.setAmount(this.getDue1().add(this.getExpense1()));
         }
         else {
             List<Entry> entries = entryEjb.findByTransref(transref);
@@ -138,31 +197,29 @@ public class PayableBean implements java.io.Serializable {
                 entry.setDate1(new Date());
             }
             else {
-            logger.log(Level.INFO, "Cutoff date is {0,date}", cutoffdate);
-            logger.log(Level.INFO, "Transref is {0}", transref);
-                Entry e = entryEjb.findByTransref(transref).get(0);
-                String olddetail = e.getDetail();
-                entry = e;
+            logger.log(Level.FINE, "Cutoff date is {0,date}", cutoffdate);
+            logger.log(Level.FINE, "Transref is {0}", transref);
+                entry = entryEjb.findByTransref(transref).get(0);
                 entry.setDate1(cutoffdate);
-                entry.setDetail(olddetail + formatter.format(cutoffdate));
+                entry.setDetail("CMA Debt up to "+formatter.format(cutoffdate));
                 entry.setAmount(this.getDue1().add(this.getExpense1()));
-            logger.log(Level.INFO, "Entry amount is {0,number}", entry.getAmount());
             }
         }
+            logger.log(Level.INFO, "Entry amount is {0,number}", entry.getAmount());
     }
-    
+
     public void commitCMAEntry() {
         FacesMessage msg = new FacesMessage();
         try {
             logger.log(Level.INFO, "Entry amount is {0,number}", entry.getAmount());
             logger.log(Level.INFO, "Detail is {0}", entry.getDetail());
-            logger.log(Level.INFO, "Entry date is {0,date}", entry.getDate1());
             entryEjb.chargePayableShortfall(entry, CMAEXP);
             msg.setSummary("Success");
             if (transref == 0)
                 msg.setDetail("Created new entries");
             else
                 msg.setDetail("Modified new entries");
+            execute(); // update other portions
         }
         catch (RuntimeException ex) {
             logger.log(Level.SEVERE, null, ex);
@@ -170,38 +227,97 @@ public class PayableBean implements java.io.Serializable {
             msg.setDetail(ex.getMessage());
             msg.setSeverity(FacesMessage.SEVERITY_ERROR);
         }
-        FacesContext.getCurrentInstance().addMessage(null, msg);
+        FacesContext.getCurrentInstance().addMessage("entriesCMA", msg);
+    }
+
+    public void commitCMAMEntry() {
+        FacesMessage msg = new FacesMessage();
+        try {
+            logger.log(Level.FINE, "Entry2 amount is {0,number}", entry2.getAmount());
+//            logger.log(Level.FINE, "Detail is {0}", entry2.getDetail());
+//            logger.log(Level.FINE, "Entry date is {0,date}", entry2.getDate1());
+            entryEjb.chargePayableShortfall(entry2, CMAMEXP);
+            msg.setSummary("Success");
+            if (transref2 == 0)
+                msg.setDetail("Created new entries");
+            else
+                msg.setDetail("Modified new entries");
+            execute(); // update other portions
+        }
+        catch (RuntimeException ex) {
+            logger.log(Level.SEVERE, null, ex);
+            msg.setSummary(ex.getClass().getName());
+            msg.setDetail(ex.getMessage());
+            msg.setSeverity(FacesMessage.SEVERITY_ERROR);
+        }
+        FacesContext.getCurrentInstance().addMessage("entriesCMAM", msg);
     }
     
     public void execute() {
         startdate = findYearStart(cutoffdate);
+        entriesCMA = this.gleanDebtPairs(CMADEBT, CMAEXP);
+        entriesCMAM = gleanDebtPairs(CMAMDEBT, CMAMEXP);
         List<Integer> accs = new ArrayList<>();
-        accs.add(CMAEXP);
         accs.add(CMADEBT);
-        entriesCMA.clear();
+        accs.add(CMAMDEBT);
+        accs.add(GENINC);
+        accs.add(THANKINC);
+        accs.add(MISSIONINC);
+        accs.add(CMAEXP);
+        accs.add(CMAMEXP);
+        aggregates = entryEjb.aggregateEach(accs, startdate, cutoffdate);
+        choicesCMA = buildChoices(entriesCMA);
+        choicesCMAM = buildChoices(entriesCMAM);
+        transref = 0;
+        entry.setDetail("CMA Debt up to "+formatter.format(cutoffdate));
+        entry.setDate1(cutoffdate);
+        this.updateCMAEntry();
+        transref2 = 0;
+        entry2.setDetail("CMAM Debt up to "+formatter.format(cutoffdate));
+        entry2.setDate1(cutoffdate);
+        this.updateCMAMEntry();
+    }
+
+    private SelectItem[] buildChoices(Map<Integer,Entry[]> entriesPair) {
+        logger.log(Level.FINE, "EntriesPair has {0,number} items", entriesPair.size());
+        SelectItem[] results = new SelectItem[entriesPair.size()];
+        Iterator<Integer> it = entriesPair.keySet().iterator();
+        MessageFormat fmt = new MessageFormat("{0}(${1,number,#.##})");
+        for (int i=0; i<entriesPair.size() && it.hasNext(); i++) {
+            int id=it.next();
+            Entry e = entriesPair.get(id)[0];
+            results[i] = new SelectItem(id, fmt.format(new Object[]{e.getDetail(),e.getAmount()}));
+        }
+        return results;
+    }
+    
+    private Map<Integer,Entry[]> gleanDebtPairs(int debtacc, int expacc) {
+        Map<Integer,Entry[]> entriesPair = new HashMap<>();
+        List<Integer> accs = new ArrayList<>();
+        accs.add(expacc);
+        accs.add(debtacc);
         List<Integer> blacklist = new ArrayList<>();
         for (Entry e : entryEjb.findByEachAccount(accs, startdate, cutoffdate)) {
             if (blacklist.contains(e.getTransref()))
                 continue;
-            Entry[] ar = entriesCMA.get(e.getTransref());
+            Entry[] ar = entriesPair.get(e.getTransref());
             if (ar != null) {
-                switch (e.getAccount().getId()) {
-                    case CMADEBT:
+                if (debtacc==e.getAccount().getId()) {
                         if (ar[0] == null)
                             ar[0] = e;
                         else
                             // blacklist when same account occurs twice
                             blacklist.add(e.getTransref());
-                        break;
-                    case CMAEXP:
+                }
+                else if (expacc==e.getAccount().getId()) {
                         if (ar[1] == null)
                             ar[1] = e;
                         else
                             // blacklist when same account occurs twice
                             blacklist.add(e.getTransref());
-                        break;
-                    default:
-                        // blacklist when account is neither CMADEBT nor CMAEXP
+                }
+                else {
+                        // blacklist when account is neither DEBT nor EXP
                         blacklist.add(e.getTransref());
                 }
             }
@@ -209,50 +325,37 @@ public class PayableBean implements java.io.Serializable {
                 ar = new Entry[2];
                 ar[0] = null;
                 ar[1] = null;
-                switch (e.getAccount().getId()) {
-                    case CMADEBT:
-                        ar[0] = e; break;
-                    case CMAEXP:
-                        ar[1] = e; break;
-                    default:
-                        blacklist.add(e.getTransref());
+                if (debtacc==e.getAccount().getId()) {
+                        ar[0] = e;
+                }
+                else if (expacc==e.getAccount().getId()) {
+                        ar[1] = e; 
+                }
+                else {
+                    blacklist.add(e.getTransref());
                 }
                 try {
-                    entriesCMA.put(e.getTransref(), ar);
+                    entriesPair.put(e.getTransref(), ar);
                 }
                 catch (RuntimeException ex) {
                     logger.log(Level.SEVERE, null, ex);
                 }
             }
         }
-        accs.add(CMAMDEBT);
-        accs.add(GENINC);
-        accs.add(THANKINC);
-        accs.add(CMAMEXP);
-        accs.add(MISSIONINC);
-        aggregates = entryEjb.aggregateEach(accs, startdate, cutoffdate);
-        Iterator<Integer> it = entriesCMA.keySet().iterator();
+        Iterator<Integer> it = entriesPair.keySet().iterator();
         while (it.hasNext()) {
             int id=it.next();
-            Entry[] ar = entriesCMA.get(id);
-            // blacklist when either CMADEBT or CMAEXP is absent
+            Entry[] ar = entriesPair.get(id);
+            // blacklist when either DEBT or EXP is absent
             if (ar[0]==null || ar[1] == null)
                 blacklist.add(id);
         }
         for (int blacksheep : blacklist) {
-            entriesCMA.remove(blacksheep);
+            entriesPair.remove(blacksheep);
         }
-        choicesCMA = new SelectItem[entriesCMA.size()];
-        it = entriesCMA.keySet().iterator();
-        MessageFormat fmt = new MessageFormat("{0}(${1,number,#.##})");
-        for (int i=0; i<entriesCMA.size() && it.hasNext(); i++) {
-            int id=it.next();
-            Entry e = entriesCMA.get(id)[0];
-            choicesCMA[i] = new SelectItem(id, fmt.format(new Object[]{e.getDetail(),e.getAmount()}));
-        }
-//        logger.log(Level.FINE, "41001: {0,number,#.##}", aggregates.get(41001));
+        logger.log(Level.FINER, "EntriesPair has {0,number} items", entriesPair.size());
+        return entriesPair;
     }
-
     /**
      * @return the startdate
      */
@@ -288,22 +391,45 @@ public class PayableBean implements java.io.Serializable {
     }
     
     public BigDecimal getIncome1() {
-        if (aggregates.containsKey(GENINC) && aggregates.containsKey(THANKINC))
-            return aggregates.get(GENINC).add(aggregates.get(THANKINC));
-        return BigDecimal.ZERO;
+        return (aggregates.containsKey(GENINC) && aggregates.containsKey(THANKINC)) ?
+            aggregates.get(GENINC).add(aggregates.get(THANKINC)):
+            BigDecimal.ZERO;
     }
 
     public BigDecimal getExpense1() {
-        if (aggregates.containsKey(CMAEXP))
-            return aggregates.get(PayableBean.CMAEXP);
-        return BigDecimal.ZERO;
+        return (aggregates.containsKey(CMAEXP)) ?
+            aggregates.get(PayableBean.CMAEXP):
+           BigDecimal.ZERO;
     }
 
     public BigDecimal getDebt1() {
-        if (aggregates.containsKey(CMADEBT))
-            return aggregates.get(PayableBean.CMADEBT);
-        return BigDecimal.ZERO;
+        return (aggregates.containsKey(CMADEBT)) ?
+            aggregates.get(PayableBean.CMADEBT):
+        BigDecimal.ZERO;
     }
+
+    public BigDecimal getIncome2() {
+        return (aggregates.containsKey(MISSIONINC)) ?
+            aggregates.get(MISSIONINC) :
+            BigDecimal.ZERO;
+    }
+    
+    public BigDecimal getDue2() {
+        return getIncome2().multiply(new BigDecimal(0.7));
+    }
+    
+    public BigDecimal getExpense2() {
+        return (aggregates.containsKey(CMAMEXP)) ?
+            aggregates.get(PayableBean.CMAMEXP) :
+            BigDecimal.ZERO;
+    }
+
+    public BigDecimal getDebt2() {
+        return (aggregates.containsKey(CMAMDEBT)) ?
+            aggregates.get(PayableBean.CMAMDEBT):
+            BigDecimal.ZERO;
+    }
+
     /**
      * @return the entriesCMA
      */
@@ -334,6 +460,27 @@ public class PayableBean implements java.io.Serializable {
      */
     public void setTransref(Integer transref) {
         this.transref = transref;
+    }
+
+    /**
+     * @return the transref2
+     */
+    public Integer getTransref2() {
+        return transref2;
+    }
+
+    /**
+     * @param transref2 the transref2 to set
+     */
+    public void setTransref2(Integer transref2) {
+        this.transref2 = transref2;
+    }
+
+    /**
+     * @return the choicesCMAM
+     */
+    public SelectItem[] getChoicesCMAM() {
+        return choicesCMAM;
     }
     
 }

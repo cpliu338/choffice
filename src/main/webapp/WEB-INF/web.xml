@@ -2,10 +2,9 @@
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
     <display-name>choffice</display-name>
     <context-param>
-        <description>Development or Production
-</description>
+        <description>Development or Production</description>
         <param-name>javax.faces.PROJECT_STAGE</param-name>
-        <param-value>Development</param-value>
+        <param-value>Production</param-value>
     </context-param>
     <context-param>
         <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
@@ -85,7 +84,7 @@
         <web-resource-collection>
             <web-resource-name>Account entries</web-resource-name>
             <description/>
-            <url-pattern>/x_entries/*</url-pattern>
+            <url-pattern>/entries/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <description/>

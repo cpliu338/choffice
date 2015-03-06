@@ -9,6 +9,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.therismos.entity.Account;
 import org.therismos.entity.Entry;
+import org.therismos.web.PayableBean;
 
 /**
  *
@@ -63,11 +64,14 @@ public class EntryEjb implements java.io.Serializable {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void chargePayableShortfall(Entry sample, int counterpart) {
+        if (sample == null || sample.getAmount()==null)
+            throw  new UnsupportedOperationException("Invalid sample");
         Entry e1, e2;
         if (sample.getTransref() == 0) {
             e1 = sample; e1.setId(null);
-            Account a = em.find(Account.class, counterpart);
-            Next line, BigDecimal::subtract caused a NullPointerException
+            Account a = em.find(Account.class, counterpart==PayableBean.getCMAEXP()?PayableBean.getCMADEBT():PayableBean.getCMAMDEBT());
+            e1.setAccount(a);
+            a = em.find(Account.class, counterpart);
             e2 = new Entry(); e2.setAccount(a); e2.setAmount(BigDecimal.ZERO.subtract(e1.getAmount()));
             e2.setDate1(e1.getDate1()); e2.setExtra1(""); e2.setDetail(e1.getDetail());
             Entry lastTrans = em.createQuery("SELECT e FROM Entry e ORDER BY e.transref DESC", Entry.class).setMaxResults(1).getResultList().get(0);

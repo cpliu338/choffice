@@ -8,17 +8,44 @@
 
         <ui:composition template="./../WEB-INF/mainTemplate.xhtml">
 
+            <ui:define name="left">
+                <h:form>
+                    <p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">Log out</h:commandLink>
+                    </p><p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="report?faces-redirect=true">Monthly Report</h:commandLink>
+                    </p><p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="reconcile?faces-redirect=true">Monthly Reconcile</h:commandLink>
+                     </p><p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="cheques?faces-redirect=true">List past unpresented cheques</h:commandLink>
+                    </p><p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="export?faces-redirect=true">Export entries to Excel (CSV format)</h:commandLink>
+                    </p><p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="payable?faces-redirect=true">payable</h:commandLink>
+                   </p>
+                </h:form>
+            </ui:define>
             <ui:define name="content">
                 <h:form id="form">
-                    <p:panelGrid columns="2">
+                    <p:panelGrid columns="3">
                         <h:outputLabel value="Start date"/>
                         <h:outputFormat value="{0, date, yyyy-MM-dd}">
                             <f:param value="#{payableBean.startdate}"/>
                         </h:outputFormat>
+                        <h:outputText value="" />
                         <h:outputLabel value="Cutoff date"/>
-                        <p:calendar id="cutoff" value="#{payableBean.cutoffdate}" pattern="yyyy-MM-dd"/>
+                        <p:calendar id="cutoff" value="#{payableBean.cutoffdate}" pattern="yyyy-MM-dd">
+                            <p:ajax event="dateSelect" listener="#{payableBean.execute()}" update=":entriesCMA :entriesCMAM"/>
+                        </p:calendar>
+                        <p:ajaxStatus>
+                            <f:facet name="start">
+                                <h:graphicImage library="images" name="ajaxloading.gif" />
+                            </f:facet>
+                            <f:facet name="complete">
+                                <h:outputText value="" />
+                            </f:facet>
+                        </p:ajaxStatus>
                     </p:panelGrid>
-                    <p:commandButton value="Execute" action="#{payableBean.execute()}" process="cutoff" update=":entriesCMA"/>
                 </h:form>
                 <h:form id="entriesCMA">
                     <p:fieldset legend="CMA">
@@ -48,22 +75,41 @@
                                 <f:param value="#{payableBean.entry.date1}"/>
                             </h:outputFormat>
                         </p:panelGrid>
-                        <p:commandButton value="Commit" action="#{payableBean.commitCMAEntry()}" update="@form"/>
+                        <p:commandButton disabled="#{!payableBean.goodToCommit}" value="Commit" action="#{payableBean.commitCMAEntry()}" update="@form"/>
+                        <p:messages showDetail="true" showSummary="true" autoUpdate="true" for="entriesCMA"/>
                     </p:fieldset>
-                <p:dataTable value="#{payableBean.entriesCMA}" var="item">
-                    <p:column>
-                        <f:facet name="header">
-                            Trans ref
-                        </f:facet>
-                        <h:outputText value="#{item.key}"/>
-                    </p:column>
-                    <p:column>
-                        <f:facet name="header">
-                            Entry
-                        </f:facet>
-                        <h:outputText value="#{item.value[0]}"/>
-                    </p:column>
-                </p:dataTable>
+                </h:form>
+                <h:form id="entriesCMAM">
+                    <p:fieldset legend="CMAM">
+                        <p:panelGrid columns="2">
+                            <p:outputLabel value="Mission"/>
+                            <h:outputFormat value="{0,number,#.##}">
+                                <f:param value="#{payableBean.income2}"/>
+                            </h:outputFormat>
+                            <p:outputLabel value="Due (70%)"/>
+                            <h:outputFormat value="{0,number,#.##}">
+                                <f:param value="#{payableBean.due2}"/>
+                            </h:outputFormat>
+                            <p:outputLabel value="Shortfall (Due-expenses)"/>
+                            <h:outputFormat value="{0,number,#.##}">
+                                <f:param value="#{payableBean.due2 + payableBean.expense2}"/>
+                            </h:outputFormat>
+                            <p:outputLabel for="acc2" value="Charge to"/>
+                            <p:selectOneMenu id="acc2" value="#{payableBean.transref2}">
+                                <f:selectItem itemLabel="Create new" itemValue="0"/>
+                                <f:selectItems value="#{payableBean.choicesCMAM}"/>
+                                <p:ajax listener="#{payableBean.updateCMAMEntry()}" process="@this" update="detail2 date2"/>
+                            </p:selectOneMenu>
+                            <p:outputLabel value="Detail"/>
+                            <p:inputText id="detail2" value="#{payableBean.entry2.detail}"/>
+                            <p:outputLabel value="Date"/>
+                            <h:outputFormat id="date2" value="{0,date,yyyy-MM-dd}">
+                                <f:param value="#{payableBean.entry2.date1}"/>
+                            </h:outputFormat>
+                        </p:panelGrid>
+                        <p:commandButton disabled="#{!payableBean.goodToCommit2}" value="Commit" action="#{payableBean.commitCMAMEntry()}" update="@form"/>
+                        <p:messages showDetail="true" showSummary="true" autoUpdate="true" for="entriesCMAM"/>
+                    </p:fieldset>
                 </h:form>
                 <p:messages autoUpdate="true" showDetail="true" showSummary="true"/>
             </ui:define>
