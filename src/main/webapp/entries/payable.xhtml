@@ -12,28 +12,25 @@
                 <h:form>
                     <p>
                     <h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">Log out</h:commandLink>
-                    </p><p>
-                    <h:commandLink rendered="#{userBean.loggedIn}" action="report?faces-redirect=true">Monthly Report</h:commandLink>
-                    </p><p>
-                    <h:commandLink rendered="#{userBean.loggedIn}" action="reconcile?faces-redirect=true">Monthly Reconcile</h:commandLink>
-                     </p><p>
-                    <h:commandLink rendered="#{userBean.loggedIn}" action="cheques?faces-redirect=true">List past unpresented cheques</h:commandLink>
-                    </p><p>
-                    <h:commandLink rendered="#{userBean.loggedIn}" action="export?faces-redirect=true">Export entries to Excel (CSV format)</h:commandLink>
-                    </p><p>
-                    <h:commandLink rendered="#{userBean.loggedIn}" action="payable?faces-redirect=true">payable</h:commandLink>
                    </p>
                 </h:form>
             </ui:define>
             <ui:define name="content">
+                <p:tabMenu activeIndex="4">
+                    <p:menuitem value="Monthly report" outcome="/entries/report"/>
+                    <p:menuitem value="Monthly reconcile" outcome="/entries/reconcile"/>
+                    <p:menuitem value="Unpresented cheques" outcome="/entries/cheques"/>
+                    <p:menuitem value="Export for audit" outcome="/entries/export"/>
+                    <p:menuitem value="Payable" outcome="/entries/payable"/>
+                </p:tabMenu>
                 <h:form id="form">
                     <p:panelGrid columns="3">
-                        <h:outputLabel value="Start date"/>
+                        <h:outputLabel value="#{msg['legend.startdate']}"/>
                         <h:outputFormat value="{0, date, yyyy-MM-dd}">
                             <f:param value="#{payableBean.startdate}"/>
                         </h:outputFormat>
                         <h:outputText value="" />
-                        <h:outputLabel value="Cutoff date"/>
+                        <h:outputLabel value="#{msg['legend.cutoffdate']}"/>
                         <p:calendar id="cutoff" value="#{payableBean.cutoffdate}" pattern="yyyy-MM-dd">
                             <p:ajax event="dateSelect" listener="#{payableBean.execute()}" update=":entriesCMA :entriesCMAM"/>
                         </p:calendar>
@@ -48,17 +45,17 @@
                     </p:panelGrid>
                 </h:form>
                 <h:form id="entriesCMA">
-                    <p:fieldset legend="CMA">
+                    <p:fieldset legend="#{msg['legend.cma']}">
                         <p:panelGrid columns="2">
-                            <p:outputLabel value="General +Thanksgiving"/>
+                            <p:outputLabel value="#{msg['legend.general']}"/>
                             <h:outputFormat value="{0,number,#.##}">
                                 <f:param value="#{payableBean.income1}"/>
                             </h:outputFormat>
-                            <p:outputLabel value="Due (4%)"/>
+                            <p:outputLabel value="#{msg['legend.due']} (4%)"/>
                             <h:outputFormat value="{0,number,#.##}">
                                 <f:param value="#{payableBean.due1}"/>
                             </h:outputFormat>
-                            <p:outputLabel value="Shortfall (Due-expenses)"/>
+                            <p:outputLabel value="#{msg['legend.shortfall']}"/>
                             <h:outputFormat value="{0,number,#.##}">
                                 <f:param value="#{payableBean.due1 + payableBean.expense1}"/>
                             </h:outputFormat>
@@ -70,27 +67,27 @@
                             </p:selectOneMenu>
                             <p:outputLabel value="Detail"/>
                             <p:inputText id="detail" value="#{payableBean.entry.detail}"/>
-                            <p:outputLabel value="Date"/>
+                            <p:outputLabel value="#{msg['date']}"/>
                             <h:outputFormat id="date1" value="{0,date,yyyy-MM-dd}">
                                 <f:param value="#{payableBean.entry.date1}"/>
                             </h:outputFormat>
                         </p:panelGrid>
-                        <p:commandButton disabled="#{!payableBean.goodToCommit}" value="Commit" action="#{payableBean.commitCMAEntry()}" update="@form"/>
+                        <p:commandButton disabled="#{!payableBean.goodToCommit}" value="#{msg['cmd.confirm']}" action="#{payableBean.commitCMAEntry()}" update="@form"/>
                         <p:messages showDetail="true" showSummary="true" autoUpdate="true" for="entriesCMA"/>
                     </p:fieldset>
                 </h:form>
                 <h:form id="entriesCMAM">
-                    <p:fieldset legend="CMAM">
+                    <p:fieldset legend="#{msg['legend.cmam']}">
                         <p:panelGrid columns="2">
-                            <p:outputLabel value="Mission"/>
+                            <p:outputLabel value="#{msg['legend.mission']}"/>
                             <h:outputFormat value="{0,number,#.##}">
                                 <f:param value="#{payableBean.income2}"/>
                             </h:outputFormat>
-                            <p:outputLabel value="Due (70%)"/>
+                            <p:outputLabel value="#{msg['legend.due']} (70%)"/>
                             <h:outputFormat value="{0,number,#.##}">
                                 <f:param value="#{payableBean.due2}"/>
                             </h:outputFormat>
-                            <p:outputLabel value="Shortfall (Due-expenses)"/>
+                            <p:outputLabel value="#{msg['legend.shortfall']}"/>
                             <h:outputFormat value="{0,number,#.##}">
                                 <f:param value="#{payableBean.due2 + payableBean.expense2}"/>
                             </h:outputFormat>
@@ -102,16 +99,15 @@
                             </p:selectOneMenu>
                             <p:outputLabel value="Detail"/>
                             <p:inputText id="detail2" value="#{payableBean.entry2.detail}"/>
-                            <p:outputLabel value="Date"/>
+                            <p:outputLabel value="#{msg['date']}"/>
                             <h:outputFormat id="date2" value="{0,date,yyyy-MM-dd}">
                                 <f:param value="#{payableBean.entry2.date1}"/>
                             </h:outputFormat>
                         </p:panelGrid>
-                        <p:commandButton disabled="#{!payableBean.goodToCommit2}" value="Commit" action="#{payableBean.commitCMAMEntry()}" update="@form"/>
+                        <p:commandButton disabled="#{!payableBean.goodToCommit2}" value="#{msg['cmd.confirm']}" action="#{payableBean.commitCMAMEntry()}" update="@form"/>
                         <p:messages showDetail="true" showSummary="true" autoUpdate="true" for="entriesCMAM"/>
                     </p:fieldset>
                 </h:form>
-                <p:messages autoUpdate="true" showDetail="true" showSummary="true"/>
             </ui:define>
 
         </ui:composition>

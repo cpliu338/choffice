@@ -12,22 +12,19 @@
                 <h:form>
                     <p>
                     <h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">Log out</h:commandLink>
-                    </p><p>
-                    <h:commandLink rendered="#{userBean.loggedIn}" action="report?faces-redirect=true">Monthly Report</h:commandLink>
-                    </p><p>
-                    <h:commandLink rendered="#{userBean.loggedIn}" action="reconcile?faces-redirect=true">Monthly Reconcile</h:commandLink>
-                     </p><p>
-                    <h:commandLink rendered="#{userBean.loggedIn}" action="cheques?faces-redirect=true">List past unpresented cheques</h:commandLink>
-                    </p><p>
-                    <h:commandLink rendered="#{userBean.loggedIn}" action="export?faces-redirect=true">Export entries to Excel (CSV format)</h:commandLink>
-                    </p><p>
-                    <h:commandLink rendered="#{userBean.loggedIn}" action="payable?faces-redirect=true">payable</h:commandLink>
                    </p>
                 </h:form>
             </ui:define>
-
             <ui:define name="content">
+                <p:tabMenu activeIndex="2">
+                    <p:menuitem value="Monthly report" outcome="/entries/report"/>
+                    <p:menuitem value="Monthly reconcile" outcome="/entries/reconcile"/>
+                    <p:menuitem value="Unpresented cheques" outcome="/entries/cheques"/>
+                    <p:menuitem value="Export for audit" outcome="/entries/export"/>
+                    <p:menuitem value="Payable" outcome="/entries/payable"/>
+                </p:tabMenu>
                 <h:form id="form">
+                    <p:outputLabel value="#{msg['date']}"/>
                     <h:selectOneMenu value="#{chequeBean.enddate}">
                         <f:selectItems value="#{chequeBean.dateChoices}"/>
                     </h:selectOneMenu>

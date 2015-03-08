@@ -86,6 +86,7 @@ public class PayableBean implements java.io.Serializable {
     private Map<Integer, Entry[]> entriesCMA, entriesCMAM;
     private SelectItem[] choicesCMA, choicesCMAM;
     private Entry entry, entry2;
+    private ResourceBundle bundle; 
 
     public Entry getEntry2() {
         return entry2;
@@ -113,6 +114,7 @@ public class PayableBean implements java.io.Serializable {
     }
 
     public PayableBean() {
+        bundle = ResourceBundle.getBundle("messages", Locale.TRADITIONAL_CHINESE);
         cutoffdate = new Date();
         startdate = findYearStart(cutoffdate);
         aggregates = Collections.EMPTY_MAP;
@@ -158,7 +160,7 @@ public class PayableBean implements java.io.Serializable {
             entry2.setId(0);
             entry2.setTransref(transref2);
             entry2.setDate1(cutoffdate);
-            entry2.setDetail("CMAM Debt up to "+formatter.format(cutoffdate));
+            entry2.setDetail(MessageFormat.format(bundle.getString("fmt.cmamdebt"), cutoffdate));
             entry2.setAmount(getDue2().add(this.getExpense2()));
         }
         else {
@@ -173,7 +175,7 @@ public class PayableBean implements java.io.Serializable {
                 logger.log(Level.INFO, "Transref2 is {0}", transref2);
                 entry2 = entryEjb.findByTransref(transref2).get(0);
                 entry2.setDate1(cutoffdate);
-                entry2.setDetail("CMAM Debt up to "+formatter.format(cutoffdate));
+                entry2.setDetail(MessageFormat.format(bundle.getString("fmt.cmamdebt"), cutoffdate));
                 entry2.setAmount(this.getDue2().add(this.getExpense2()));
             }
         }
@@ -186,22 +188,19 @@ public class PayableBean implements java.io.Serializable {
             entry.setId(0);
             entry.setTransref(transref);
             entry.setDate1(cutoffdate);
-            entry.setDetail("CMA Debt up to "+formatter.format(cutoffdate));
+            entry.setDetail(MessageFormat.format(bundle.getString("fmt.cmadebt"), cutoffdate));
             entry.setAmount(this.getDue1().add(this.getExpense1()));
         }
         else {
             List<Entry> entries = entryEjb.findByTransref(transref);
             if (entries.isEmpty()) {
-            logger.log(Level.INFO, "Transref found none");
                 entry.setDetail("ERROR!");
                 entry.setDate1(new Date());
             }
             else {
-            logger.log(Level.FINE, "Cutoff date is {0,date}", cutoffdate);
-            logger.log(Level.FINE, "Transref is {0}", transref);
                 entry = entryEjb.findByTransref(transref).get(0);
                 entry.setDate1(cutoffdate);
-                entry.setDetail("CMA Debt up to "+formatter.format(cutoffdate));
+                entry.setDetail(MessageFormat.format(bundle.getString("fmt.cmadebt"), cutoffdate));
                 entry.setAmount(this.getDue1().add(this.getExpense1()));
             }
         }
@@ -269,11 +268,12 @@ public class PayableBean implements java.io.Serializable {
         choicesCMA = buildChoices(entriesCMA);
         choicesCMAM = buildChoices(entriesCMAM);
         transref = 0;
-        entry.setDetail("CMA Debt up to "+formatter.format(cutoffdate));
+//        logger.info(MessageFormat.format(bundle.getString("fmt.cmadebt"), cutoffdate));
+        entry.setDetail(MessageFormat.format(bundle.getString("fmt.cmadebt"), cutoffdate));
         entry.setDate1(cutoffdate);
         this.updateCMAEntry();
         transref2 = 0;
-        entry2.setDetail("CMAM Debt up to "+formatter.format(cutoffdate));
+        entry2.setDetail(MessageFormat.format(bundle.getString("fmt.cmamdebt"), cutoffdate));
         entry2.setDate1(cutoffdate);
         this.updateCMAMEntry();
     }
