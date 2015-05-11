@@ -24,30 +24,19 @@ public class MonthlyReportTask implements Runnable {
     //@Inject
     private MongoService mongoDao;
     
-    //@Inject @RemoteServer
-    // private AccountService accountService;
-
     public static final long serialVersionUID = 8634594537L;
     private int level;
     private java.util.Date cutoffDate;
     private File targetFile;
-    private double[] grandtotal;
-    private CellStyle styleHeader1;
-    private CellStyle styleHeader2;
-    private CellStyle styleSummary;
-    private CellStyle styleEntry;
-    private CellStyle styleText;
-    private CellStyle styleBoldText;
-    private CellStyle styleBoldEntry;
-    private CellStyle styleCheckSum;
+    private final double[] grandtotal;
+    private final CellStyle styleHeader1;
+    private final CellStyle styleHeader2, styleSummary, styleEntry, styleText;
+    private final CellStyle styleBoldText, styleBoldEntry, styleCheckSum;
     private Sheet sheet;
-    private Workbook workbook;
+    private final Workbook workbook;
     private double accum;
-    private DataFormat format;
-    private Font fontBold;
-    private Font fontNormal;
-    private Font fontHeader1;
-    private Font fontHeader2;
+    private final DataFormat format;
+    private final Font fontBold, fontNormal, fontHeader1, fontHeader2;
     private String message;
     private List<Entry> entries;
 
@@ -64,7 +53,7 @@ public class MonthlyReportTask implements Runnable {
         this.entries = entries;
     }
     private short rowno;
-    private Properties translate;
+    private final Properties translate;
     private int errLevel;
     
     public static final String prefix="legend.";
@@ -155,7 +144,7 @@ public class MonthlyReportTask implements Runnable {
         String[] types = {"1","2","3"};
         //String [] codes = {"110","1110","1120","120","1310","1320","190","210","220","230","30"};
         message = "Scanning subtypes";
-        logger.info(message);
+//        logger.info(message);
         for (String subtype : types) {
             try {
                 accounts = mongoDao.getAccountsBelow(subtype);
@@ -177,7 +166,7 @@ public class MonthlyReportTask implements Runnable {
                 cell = row.createCell(0);
                 cell.setCellValue(name);
                 cell.setCellStyle(styleText);
-                if (isIncome(subtype))
+                if (isIncByCR(subtype))
                     grandtotal[0] += tot;
                 else
                     grandtotal[1] -= tot;
@@ -198,12 +187,12 @@ public class MonthlyReportTask implements Runnable {
                     cell.setCellStyle(styleEntry);
                 }
             }
-            if (!isIncome(subtype)) {
+            if (!isIncByCR(subtype)) {
                 rowno=this.insertBlankLine(rowno); // insert blank line after each income/expense pair
             }
         }
         message = "Building Balance Sheet";
-        logger.info(message);
+//        logger.info(message);
         row = sheet.createRow(rowno++);
         cell = row.createCell(0);
         if (grandtotal[0] > grandtotal[1]) {
@@ -251,9 +240,9 @@ public class MonthlyReportTask implements Runnable {
         rowno = 6;
         Row row;// = sheet.createRow(rowno++);
         Cell cell;
-        String[] types = {"41","51","42","52","46","56"};
+        String[] types = {"41","51","59","42","52","46","56"};
         message = "Scanning subtypes";
-        logger.info(message);
+//        logger.info(message);
         for (String subtype : types) {
             try {
                 accounts = mongoDao.getAccountsBelow(subtype);
@@ -276,7 +265,7 @@ public class MonthlyReportTask implements Runnable {
             cell.setCellStyle(styleBoldText);
             if (size==1) {
                 double tot = totals.get((String)(accounts.get(0).get("code")));
-                if (isIncome(subtype))
+                if (isIncByCR(subtype))
                     grandtotal[0] += tot;
                 else
                     grandtotal[1] -= tot;
@@ -306,7 +295,7 @@ public class MonthlyReportTask implements Runnable {
                 cell.setCellValue("");
                 cell.setCellStyle(styleText);
                 rowno = this.processEntry(accounts, rowno);
-                if (isIncome(subtype))
+                if (isIncByCR(subtype))
                     grandtotal[0] += accum;
                 else
                     grandtotal[1] -= accum;
@@ -331,7 +320,7 @@ public class MonthlyReportTask implements Runnable {
                     cell.setCellStyle(styleSummary);
                 }
             }
-            if (!isIncome(subtype)) {
+            if (!isIncByCR(subtype)) {
                 rowno=this.insertBlankLine(rowno); // insert blank line after each income/expense pair
             }
         }
@@ -401,7 +390,7 @@ public class MonthlyReportTask implements Runnable {
         return true;
     }
     
-    private boolean isIncome(String subtype) {
+    private boolean isIncByCR(String subtype) {
         return subtype.startsWith("4") ||
                 subtype.startsWith("2") || subtype.startsWith("3");
     }
@@ -417,15 +406,18 @@ public class MonthlyReportTask implements Runnable {
         try {
             translate.load(MonthlyReportTask.class.getResourceAsStream("/config.properties"));
         } catch (Exception ex) {
-            Logger.getLogger(MonthlyReportTask.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, null, ex);
             message = "Cannot load config";
             return;
         }
         message = "Downloading entries up to "+cutoffDate;
-        logger.info(message);
-        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-        downloadEntries(level);//, fmt.format(cutoffDate));
+        scanEntries(level); 
         totals = mongoDao.getTotals();
+//        logger.log(Level.INFO, "Depreciation {0},{1}", 
+//                new Object[]{590, totals.get("590")});
+//        logger.log(Level.INFO, "Depreciation {0},{1}", 
+//                new Object[]{591, totals.get("591")});
+//        if (level>0) return;
         sheet = workbook.createSheet("P and L");
         if (!BuildPandL()) return;
         sheet = workbook.createSheet("Balance Sheet");
@@ -490,30 +482,24 @@ public class MonthlyReportTask implements Runnable {
         return (short) (n+1);
     }
     
-    private void downloadEntries(int level) {//, String endDate) {
-        Map<Integer,String> codeLookup = new HashMap<Integer,String>();
+    private void scanEntries(int level) {//, String endDate) {
+        Map<Integer,String> codeLookup = new HashMap<>();
         for (AccountModel a : mongoDao.getAccounts()) {
             codeLookup.put(a.getId(), a.getCode());
         }
 //        try {
-            mongoDao.clearTotals();
-//            Object objects = accountService.download(endDate);
-//            if (objects==null) throw new IOException("null pointer");
-//            if(!NodeList.class.isAssignableFrom(objects.getClass())) throw new IOException("response parse error");
-//            NodeList entries = (NodeList)objects;
-            for (int i = 0; i<entries.size(); i++) {
-                Entry entry = entries.get(i);
-//                Thread.sleep(50);
-                mongoDao.reckon(level, codeLookup.get(entry.getAccount().getId()), entry.getAmount().doubleValue());
-            }
+        mongoDao.clearTotals();
+        for (Entry entry : entries) {
+            mongoDao.reckon(level, codeLookup.get(entry.getAccount().getId()), entry.getAmount().doubleValue());
+        }
 //        }
 //        catch (Exception ex) {
 //            logger.log(Level.SEVERE, null, ex);
-//            //ex.printStackTrace();
+//            ex.printStackTrace();
 //            error = ex.getClass().getName() +" : "+ex.getMessage();
 //            return;
 //        }
-        message = "downloaded entries";
+        message = "scanned entries";
     }
     
     private CellStyle createHeaderStyle(Font f) {
@@ -563,10 +549,10 @@ public class MonthlyReportTask implements Runnable {
 
     /**
      * @param accountService the accountService to set
-     */
     public void setAccountService(MongoService accountService) {
         mongoDao = accountService;
     }
+     */
 
     /**
      * @return the message

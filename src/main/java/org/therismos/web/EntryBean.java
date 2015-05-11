@@ -111,7 +111,7 @@ public class EntryBean implements java.io.Serializable {
     
     public void report() {
         task = new MonthlyReportTask();
-        task.setAccountService(mongoService);
+        task.setMongoDao(mongoService);
         task.setCutoffDate(end);
         begin.setYear(end.getYear());
         begin.setMonth(0);
