@@ -166,11 +166,15 @@ public class MonthlyReportTask implements Runnable {
                 cell = row.createCell(0);
                 cell.setCellValue(name);
                 cell.setCellStyle(styleText);
+                /*
+                Should check whether tot is +ve or -ve, rather than isIncByCR
                 if (isIncByCR(subtype))
                     grandtotal[0] += tot;
                 else
                     grandtotal[1] -= tot;
+                */
                 if (tot < 0) {
+                    grandtotal[1] -= tot;
                     cell = row.createCell(1);
                     cell.setCellValue(0.0-tot);
                     cell.setCellStyle(styleEntry);
@@ -179,6 +183,7 @@ public class MonthlyReportTask implements Runnable {
                     cell.setCellStyle(styleText);
                 }
                 else {
+                    grandtotal[0] += tot;
                     cell = row.createCell(1);
                     cell.setCellValue("");
                     cell.setCellStyle(styleText);
