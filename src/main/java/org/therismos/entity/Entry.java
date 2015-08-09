@@ -30,7 +30,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Entry.findById", query = "SELECT e FROM Entry e WHERE e.id = :id"),
     @NamedQuery(name = "Entry.findByDate1", query = "SELECT e FROM Entry e WHERE e.date1 = :date1"),
 */
-    @NamedQuery(name = "Entry.findBetweenDates", query = "SELECT e FROM Entry e WHERE e.date1 BETWEEN :date1 AND :date2 ORDER BY e.account.code"),
+    @NamedQuery(name = "Entry.findBetweenDates", query = "SELECT e FROM Entry e WHERE e.date1 BETWEEN :date1 AND :date2 ORDER BY e.account.code,e.date1"),
     @NamedQuery(name = "Entry.findByTransref", query = "SELECT e FROM Entry e WHERE e.transref = :transref ORDER BY e.account.id"),
     @NamedQuery(name = "Entry.findUnchequesBeforeDate", query = "SELECT e FROM Entry e WHERE e.date1 <= :enddate AND e.account.id = :accountid AND e.extra1 LIKE '$%'"),
     @NamedQuery(name = "Entry.aggregate", query = "SELECT e.account.id, SUM(e.amount) FROM Entry e WHERE e.account.id IN :acclist AND (e.date1 BETWEEN :start AND :end) GROUP BY e.account.id ORDER BY e.account.id"),

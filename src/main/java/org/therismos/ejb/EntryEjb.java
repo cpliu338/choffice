@@ -168,6 +168,7 @@ public class EntryEjb implements java.io.Serializable {
         SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
         if (results.size() > 1) {
             StringBuilder buf = new StringBuilder();
+            buf.append("\"Ref\",\"Date\",\"Account code\",\"Account name\",\"Amount\",\"Detail\"\n");
             for (Entry e : results) {
                 buf.append(String.format("%d,\"%s\", %d, \"%s\", %.2f, \"%s\"\n",
                 e.getTransref(), fmt.format(e.getDate1()),e.getAccount().getId(),e.getAccount().getNameChi(),
