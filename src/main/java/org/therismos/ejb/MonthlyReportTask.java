@@ -495,7 +495,10 @@ public class MonthlyReportTask implements Runnable {
 //        try {
         mongoDao.clearTotals();
         for (Entry entry : entries) {
-            mongoDao.reckon(level, codeLookup.get(entry.getAccount().getId()), entry.getAmount().doubleValue());
+            if (codeLookup.containsKey(entry.getAccount().getId()))
+                mongoDao.reckon(level, codeLookup.get(entry.getAccount().getId()), entry.getAmount().doubleValue());
+            else
+                Logger.getLogger(MonthlyReportTask.class.getName()).log(Level.INFO, "code for {0}", entry.toString());
         }
 //        }
 //        catch (Exception ex) {
