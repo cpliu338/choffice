@@ -26,13 +26,13 @@
                 <h:form id="form">
                     <p:panelGrid columns="3">
                         <h:outputLabel value="#{msg['legend.startdate']}"/>
-                        <h:outputFormat value="{0, date, yyyy-MM-dd}">
+                        <h:outputFormat id="start-date" value="{0, date, yyyy-MM-dd}">
                             <f:param value="#{payableBean.startdate}"/>
                         </h:outputFormat>
                         <h:outputText value="" />
                         <h:outputLabel value="#{msg['legend.cutoffdate']}"/>
                         <p:calendar id="cutoff" value="#{payableBean.cutoffdate}" pattern="yyyy-MM-dd">
-                            <p:ajax event="dateSelect" listener="#{payableBean.execute()}" update=":entriesCMA :entriesCMAM"/>
+                            <p:ajax event="dateSelect" listener="#{payableBean.execute()}" update=":entriesCMA :entriesCMAM :form:start-date"/>
                         </p:calendar>
                         <p:ajaxStatus>
                             <f:facet name="start">
