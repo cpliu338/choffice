@@ -12,7 +12,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 import org.therismos.ejb.EntryEjb;
-import org.therismos.entity.Account;
+//import org.therismos.entity.Account;
 import org.therismos.entity.Entry;
 
 /**
@@ -31,6 +31,7 @@ public class PayableBean implements java.io.Serializable {
     private static final int MISSIONINC = 49001;
     private static final int CMAEXP = 59001;
     private static final int CMAMEXP = 59101;
+    private List<Integer> localmission;
 
     /**
      * @return the CMADEBT
@@ -82,11 +83,12 @@ public class PayableBean implements java.io.Serializable {
     }
     private Date startdate;
     private Date cutoffdate;
+    private BigDecimal localMission;
     private Map<Integer, BigDecimal> aggregates;
     private Map<Integer, Entry[]> entriesCMA, entriesCMAM;
     private SelectItem[] choicesCMA, choicesCMAM;
     private Entry entry, entry2;
-    private ResourceBundle bundle; 
+    private final ResourceBundle bundle; 
 
     public Entry getEntry2() {
         return entry2;
@@ -117,6 +119,7 @@ public class PayableBean implements java.io.Serializable {
         bundle = ResourceBundle.getBundle("messages", Locale.TRADITIONAL_CHINESE);
         cutoffdate = new Date();
         startdate = findYearStart(cutoffdate);
+        localMission = BigDecimal.ZERO;
         aggregates = Collections.EMPTY_MAP;
         entriesCMA= new HashMap<>();
         entriesCMAM=new HashMap<>();
@@ -134,6 +137,8 @@ public class PayableBean implements java.io.Serializable {
         entry2.setTransref(transref2);
         entry2.setDate1(new Date());
         entry2.setAmount(BigDecimal.ZERO);
+        localMission = BigDecimal.ZERO;
+        localmission = java.util.Arrays.asList(59201,59202,59203,59204);
     }
     
     public boolean isGoodToCommit() {
@@ -269,6 +274,7 @@ public class PayableBean implements java.io.Serializable {
         choicesCMAM = buildChoices(entriesCMAM);
         transref = 0;
 //        logger.info(MessageFormat.format(bundle.getString("fmt.cmadebt"), cutoffdate));
+        localMission = BigDecimal.ZERO.subtract(entryEjb.aggregate(localmission, startdate, cutoffdate));
         entry.setDetail(MessageFormat.format(bundle.getString("fmt.cmadebt"), cutoffdate));
         entry.setDate1(cutoffdate);
         this.updateCMAEntry();
@@ -415,9 +421,15 @@ public class PayableBean implements java.io.Serializable {
     }
     
     public BigDecimal getDue2() {
-        return getIncome2().multiply(new BigDecimal(0.7));
+        BigDecimal t = getIncome2().multiply(new BigDecimal(0.7));
+        BigDecimal l = localMission.multiply(new BigDecimal(2.333333));
+        return l.compareTo(t)>=0 ? l : t;
     }
     
+    public BigDecimal getLocalMission() {
+        return localMission;
+    }
+
     public BigDecimal getExpense2() {
         return (aggregates.containsKey(CMAMEXP)) ?
             aggregates.get(PayableBean.CMAMEXP) :

@@ -79,11 +79,15 @@
                 <h:form id="entriesCMAM">
                     <p:fieldset legend="#{msg['legend.cmam']}">
                         <p:panelGrid columns="2">
-                            <p:outputLabel value="#{msg['legend.mission']}"/>
+                                <p:outputLabel value="#{msg['legend.mission']} (A)"/>
                             <h:outputFormat value="{0,number,#.##}">
                                 <f:param value="#{payableBean.income2}"/>
                             </h:outputFormat>
-                            <p:outputLabel value="#{msg['legend.due']} (70%)"/>
+                            <p:outputLabel value="#{msg['legend.localMission']} (B)"/>
+                            <h:outputFormat value="{0,number,#.##}">
+                                <f:param value="#{payableBean.localMission}"/>
+                            </h:outputFormat>
+                            <p:outputLabel value="#{msg['legend.due']} (0.7xA OR Bx7/3)"/>
                             <h:outputFormat value="{0,number,#.##}">
                                 <f:param value="#{payableBean.due2}"/>
                             </h:outputFormat>
