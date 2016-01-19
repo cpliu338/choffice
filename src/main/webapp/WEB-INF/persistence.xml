@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="1.0" xmlns="http://java.sun.com/xml/ns/persistence">
   <persistence-unit name="churchPU" transaction-type="JTA">
-    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <jta-data-source>churchDB</jta-data-source>
     <!-- non-jta-data-source > churchDBUnmanaged < / non-jta-data-source -->
     <properties>
