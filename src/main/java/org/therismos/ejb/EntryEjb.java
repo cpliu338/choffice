@@ -1,5 +1,6 @@
 package org.therismos.ejb;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -170,16 +171,26 @@ public class EntryEjb implements java.io.Serializable {
     }
     
     public BigDecimal aggregate(List<Integer> accs, Date start, Date end) {
-        javax.persistence.Query q = em.createNamedQuery("Entry.aggregate").setParameter("start", start)
-        .setParameter("end", end).setParameter("acclist", accs);
-        BigDecimal o1 = BigDecimal.ZERO;
-        for (Object o : q.getResultList()) {
-            Object[] ar = (Object[])o;
-            logger.log(Level.FINE, "entry {0}:{1}", ar);
-            logger.log(Level.FINE, "class name {0}", ar[1].getClass().getName());
-            o1 = o1.add((BigDecimal)(ar[1]));
+//        javax.persistence.Query q = em.createNamedQuery("Entry.aggregate").setParameter("start", start)
+//        .setParameter("end", end).setParameter("acclist", accs);
+//        BigDecimal o1 = BigDecimal.ZERO;
+//        for (Object o : q.getResultList()) {
+//            Object[] ar = (Object[])o;
+//            logger.log(Level.FINE, "entry {0}:{1}", ar);
+//            logger.log(Level.FINE, "class name {0}", ar[1].getClass().getName());
+//            o1 = o1.add((BigDecimal)(ar[1]));
+//        }
+//        return o1;
+        try {
+            Object o = em.createQuery("SELECT SUM(e.amount) FROM Entry e WHERE e.account.id IN :acclist AND (e.date1 BETWEEN :start AND :end)")
+                    .setParameter("start", start).setParameter("end", end).setParameter("acclist", accs).getSingleResult();
+            logger.log(Level.INFO, "object class {0}", o.getClass().getName());
+            return (BigDecimal)o;
+        } catch (RuntimeException ex) {
+            logger.log(Level.SEVERE, null, ex);
         }
-        return o1;
+        return BigDecimal.ZERO; // should never happen
+        
     }
 
     public BigDecimal getOpening29001(Date begin, Date end) {
