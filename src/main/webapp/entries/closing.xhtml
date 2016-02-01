@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+    <body>
+
+        <ui:composition template="./../WEB-INF/mainTemplate.xhtml">
+
+            <ui:define name="left">
+                <h:form>
+                    <p>
+                    <h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">Log out</h:commandLink>
+                   </p>
+                </h:form>
+            </ui:define>
+            <ui:define name="content">
+                <p:tabMenu activeIndex="2">
+                    <p:menuitem value="Monthly report" outcome="/entries/report"/>
+                    <p:menuitem value="Monthly reconcile" outcome="/entries/reconcile"/>
+                    <p:menuitem value="Unpresented cheques" outcome="/entries/cheques"/>
+                    <p:menuitem value="Export for audit" outcome="/entries/export"/>
+                    <p:menuitem value="Payable" outcome="/entries/payable"/>
+                </p:tabMenu>
+                <h:form id="form">
+                    <p:panelGrid columns="2">
+                        <h:outputLabel value="#{msg['legend.cutoffdate']}"/>
+                        <p:calendar pattern="yyyy-MM-dd" value="#{entryBean.end}"/>
+                    </p:panelGrid>
+                    <p:commandButton update=":results" value="Close Year" action="#{entryBean.closeYear()}"/>
+                </h:form>
+                <p:dataTable id="results" value="#{entryBean.entries}" var="entry">
+                    <p:column>
+                        <f:facet name="header">Account id</f:facet>
+                        #{entry.account.id}
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">Account name</f:facet>
+                        #{entry.account.nameChi}
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">Amount</f:facet>
+                        <h:outputFormat value="{0,number,#,###.##}">
+                            <f:param value="#{entry.amount}"/>
+                        </h:outputFormat>
+                    </p:column>
+                </p:dataTable>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>

@@ -58,6 +58,17 @@ public class EntryBean implements java.io.Serializable {
         dbobject.append("uncheq", 0.0);
     }
     
+    public void closeYear() {
+        /*
+        List<Integer> ids = new ArrayList<>();
+        ids.add(11201);
+        ids.add(11001);
+        ids.add(11002);
+        ids.add(11101);
+        */
+        entries = entryEjb.closeYear(end);
+    }
+    
     public void export() {
         csv = entryEjb.exportEntries(begin, end);
     }

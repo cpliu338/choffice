@@ -7,6 +7,7 @@ import java.util.logging.*;
 import javax.ejb.*;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import org.joda.time.DateTime;
 import org.therismos.entity.Account;
 import org.therismos.entity.Entry;
 import org.therismos.web.PayableBean;
@@ -33,6 +34,52 @@ public class EntryEjb implements java.io.Serializable {
         setParameter("date1", begin).setParameter("date2", end).getResultList();
     }
 
+    public List<Entry> closeYear(Date end1) {
+        List<Integer> accept_ids = new ArrayList<>();
+        for (Account a : em.createNamedQuery("Account.findAll", Account.class).getResultList()) {
+            if (a.getCode().endsWith("0")) continue;
+            accept_ids.add(a.getId());
+        }
+        DateTime end = new DateTime(end1.getTime());
+        DateTime begin = end.withMonthOfYear(1).withDayOfMonth(1);
+        DateTime nextYr = begin.withYear(begin.getYear()+1);
+        javax.persistence.Query q = em.createQuery("SELECT e.account.id, SUM(e.amount) FROM Entry e WHERE e.date1>=:begin "
+                + "AND e.date1<=:end AND e.account.id IN (:ids) GROUP BY e.account.id ORDER BY e.account.code");
+        List<Object[]> results = q.setParameter("begin", begin.toDate()).setParameter("end", end.toDate())
+                .setParameter("ids", accept_ids).getResultList();
+        List<Entry> entries = new ArrayList<>();
+        // Account 3xx comes before 4xx and 5xx
+        Entry equity = null; // Account code 31 General funds
+        BigDecimal earnings=BigDecimal.ZERO;
+        for (Object[] result : results) {
+            Account a = em.find(Account.class, ((Number)result[0]).intValue());
+            Entry e = new Entry();
+            logger.log(Level.INFO, "Account id:code {0}:{1}", new Object[]{a.getId(), a.getCode()});
+            if (a.getCode().startsWith("4") || a.getCode().startsWith("5")) {
+                earnings = earnings.add((BigDecimal)result[1]);
+                logger.log(Level.INFO, "Add {0} and earning became {1}", new Object[]{(BigDecimal)result[1], earnings});
+            }
+            else {
+                e.setDate1(nextYr.toDate());
+                e.setAccount(a);
+                e.setAmount((BigDecimal)result[1]);
+                e.setDetail("Closing Balance");
+                e.setExtra1("");
+                e.setTransref(0);
+                if (a.getCode().equals("31")) {
+                    equity = e;
+                }
+                else
+                    entries.add(e);
+            }
+        }
+        if (equity != null) {
+            equity.setAmount(equity.getAmount().add(earnings));
+            entries.add(equity);
+        }
+        return entries;
+    }
+    
     public List<Entry> getUncheques(Date end, int accountid) {
         List<Entry> r = em.createNamedQuery("Entry.findUnchequesBeforeDate", Entry.class).
             setParameter("enddate", end).setParameter("accountid", accountid).getResultList();
