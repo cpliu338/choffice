@@ -40,7 +40,9 @@ public class MongoService {
     public void reckon(int level, String code2, Double amount) {
         if (level < 1) throw new java.lang.IllegalArgumentException("Level must be at least 1");
         String code = code2;
-        if (code2.length()>level && (code2.charAt(0)=='4' || code2.charAt(0)=='5'))
+        if (code2.length()>level && (code2.charAt(0)=='4' || code2.charAt(0)=='5'
+            || (code2.charAt(0)=='1' && code2.charAt(1)!='1') // not to summarize code 11xxx for bank accounts
+        ))
             code = code2.substring(0, level).concat("0");
         if (totals.containsKey(code)) 
             totals.put(code, totals.get(code)+amount);
