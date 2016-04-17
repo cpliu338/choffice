@@ -8,6 +8,7 @@ import java.util.logging.*;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
+import org.therismos.ejb.AccountService;
 import org.therismos.ejb.EntryEjb;
 import org.therismos.ejb.MongoService;
 import org.therismos.ejb.MonthlyReportTask;
@@ -43,6 +44,9 @@ public class EntryBean implements java.io.Serializable {
     @javax.ejb.EJB
     private MongoService mongoService;
 
+    @javax.ejb.EJB
+    private AccountService accountService;
+    
     public String getCsv() {
         return csv;
     }
@@ -122,13 +126,13 @@ public class EntryBean implements java.io.Serializable {
     
     public void report() {
         task = new MonthlyReportTask();
-        task.setMongoDao(mongoService);
+        task.setAccountService(this.accountService);
         task.setCutoffDate(end);
         begin.setYear(end.getYear());
         begin.setMonth(0);
         begin.setDate(1);
         task.setLevel(3);
-        task.setEntries(entryEjb.getEntries(begin, end));
+        //task.setEntries(entryEjb.getEntries(begin, end));
         task.setOpening231(entryEjb.getOpening29001(begin, end));
         runner = new Thread(task);
         runner.start();
