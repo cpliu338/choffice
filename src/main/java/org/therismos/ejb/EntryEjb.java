@@ -34,7 +34,7 @@ public class EntryEjb implements java.io.Serializable {
         em.createNamedQuery("Entry.findBetweenDates", Entry.class).
         setParameter("date1", begin).setParameter("date2", end).getResultList();
     }
-
+    
     public List<Entry> closeYear(Date end1) {
         List<Integer> accept_ids = new ArrayList<>();
         for (Account a : em.createNamedQuery("Account.findAll", Account.class).getResultList()) {

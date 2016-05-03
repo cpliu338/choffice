@@ -105,6 +105,17 @@ public class MongoService {
             mongoClient.close();
     }
     
+    public DBObject getCheques(String endDate) {
+        DBObject match = new BasicDBObject("end", endDate);
+        DBCursor cursor = collCheques.find(match);
+        Logger.getLogger(MongoService.class.getName()).log(Level.INFO, 
+            "{0} Documents ending {1}", new Object[]{cursor.count(), endDate});
+        if (cursor.count()>0) {
+            return cursor.sort(new BasicDBObject("_id", -1)).next();
+        }
+        return null;
+    }
+    
     public List<DBObject> getAccountsBelow(String summaryCode) throws UnknownHostException {
         DBObject match = new BasicDBObject("code", new BasicDBObject("$regex", "^"+summaryCode) );
         DBCursor cursor = collAccounts.find(match);

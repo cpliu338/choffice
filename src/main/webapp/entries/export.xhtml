@@ -29,10 +29,23 @@
                         <h:outputLabel value="#{msg['legend.cutoffdate']}"/>
                         <p:calendar pattern="yyyy-MM-dd" value="#{entryBean.end}"/>
                     </p:panelGrid>
-                    <p:commandButton update=":results" value="#{msg['cmd.export']}" action="#{entryBean.export()}"/>
+                    <p><h:outputText id="progress" value="#{entryBean.progress}"/></p>
+                    <h:commandButton value="#{msg['cmd.export']}" action="#{entryBean.export()}"/>
+                    <p:poll interval="5" listener="#{entryBean.refresh}" update=":form2 :form"/>
                 </h:form>
-                <p:inputTextarea id="results" value="#{entryBean.csv}"/>
                 <h:messages id="msg" />
+        <h:form id="form2">
+            <dl>
+                <dt>Available reports</dt>
+            <ui:repeat value="#{auditFileDownload.reports}" var="fname">
+                <dd><p:commandLink id="downloadLink" ajax="false">
+                    <h:outputText value="#{auditFileDownload.translate(fname)}"/>
+                    <f:setPropertyActionListener target="#{auditFileDownload.fname}" value="#{fname}"/>
+                    <p:fileDownload value="#{auditFileDownload.file}" />  
+                </p:commandLink>  </dd>
+            </ui:repeat>
+            </dl>
+        </h:form>  
             </ui:define>
         </ui:composition>
     </body>

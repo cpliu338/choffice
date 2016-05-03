@@ -11,6 +11,8 @@ import javax.faces.context.FacesContext;
 import org.therismos.ejb.AccountService;
 import org.therismos.ejb.EntryEjb;
 import org.therismos.ejb.MongoService;
+import org.therismos.ejb.AbstractXlsxTask;
+import org.therismos.ejb.AuditExportTask;
 import org.therismos.ejb.MonthlyReportTask;
 import org.therismos.entity.Entry;
 
@@ -74,7 +76,20 @@ public class EntryBean implements java.io.Serializable {
     }
     
     public void export() {
+        /*
+        Replaced since Version 5.1 
         csv = entryEjb.exportEntries(begin, end);
+        Find unpresented cheques:
+        db.reconcile.find({end:'2016-03-31'}).sort({_id:-1}).limit(1)
+        */
+        AuditExportTask task2 = new AuditExportTask();
+        this.task = task2;
+        task2.setCutoffDate(end);
+        task2.setFinYear(begin.getYear()+1900);
+        task2.setEntryEjb(entryEjb);
+        task2.setMongoService(mongoService);
+        runner = new Thread(task2);
+        runner.start();
     }
     
     /**
@@ -106,7 +121,7 @@ public class EntryBean implements java.io.Serializable {
     }
     
     private Thread runner;
-    private MonthlyReportTask task;
+    private AbstractXlsxTask task;
     
     public boolean isTaskRunning() {
         return runner!=null && runner.isAlive();
@@ -125,16 +140,17 @@ public class EntryBean implements java.io.Serializable {
     }
     
     public void report() {
-        task = new MonthlyReportTask();
-        task.setAccountService(this.accountService);
-        task.setCutoffDate(end);
+        MonthlyReportTask task2 = new MonthlyReportTask();
+        this.task = task2;
+        task2.setAccountService(this.accountService);
+        task2.setCutoffDate(end);
         begin.setYear(end.getYear());
         begin.setMonth(0);
         begin.setDate(1);
-        task.setLevel(3);
+        task2.setLevel(3);
         //task.setEntries(entryEjb.getEntries(begin, end));
-        task.setOpening231(entryEjb.getOpening29001(begin, end));
-        runner = new Thread(task);
+        task2.setOpening231(entryEjb.getOpening29001(begin, end));
+        runner = new Thread(task2);
         runner.start();
     }
     
