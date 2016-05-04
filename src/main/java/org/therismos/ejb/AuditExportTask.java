@@ -84,11 +84,12 @@ public class AuditExportTask extends AbstractXlsxTask implements Runnable {
         message = "Exporting year "+year;
         logger.info(message);
         sheet = workbook.createSheet(year.toString());
-        sheet.setColumnWidth(1, 200);
-        sheet.setColumnWidth(2, 320);
-        sheet.setColumnWidth(3, 320);
-        sheet.setColumnWidth(4, 600);
-        sheet.setColumnWidth(5, 800);
+        sheet.setColumnWidth(0, 256*8); // trans
+        sheet.setColumnWidth(1, 256*11); // date
+        sheet.setColumnWidth(2, 256*6); //code
+        sheet.setColumnWidth(3, 256*16); // account
+        sheet.setColumnWidth(4, 256*12); // amount
+        sheet.setColumnWidth(5, 256*16); // detail
         Row row = sheet.createRow(rowno++);
         Cell cell = row.createCell(0);
         cell.setCellValue("Ref");

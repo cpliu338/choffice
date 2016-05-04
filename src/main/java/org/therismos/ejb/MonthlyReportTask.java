@@ -60,12 +60,13 @@ public class MonthlyReportTask extends AbstractXlsxTask implements Runnable {
         sheet.setColumnWidth(1, 18*256);
         sheet.setColumnWidth(2, 18*256);
         Row row=sheet.createRow(0);
-        row.setHeight((short)800);
+        row.setHeight((short)(20*36)); // 36 pt height
         Cell cell = row.createCell(0);
         cell.setCellValue(translate.getProperty(prefix+"header", "Church Name"));
         cell.setCellStyle(this.styleHeader1);
         sheet.addMergedRegion(new CellRangeAddress(0,0,0,2));
         row = sheet.createRow(2);
+        row.setHeight((short)(20*36)); // 36 pt height
         cell = row.createCell(0);
         cell.setCellValue(MessageFormat.format(format, this.cutoffDate));
         cell.setCellStyle(this.styleHeader2);

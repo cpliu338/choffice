@@ -84,7 +84,7 @@
         <web-resource-collection>
             <web-resource-name>Account entries</web-resource-name>
             <description/>
-            <url-pattern>/xentries/*</url-pattern>
+            <url-pattern>/entries/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <description/>
