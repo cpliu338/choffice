@@ -2,12 +2,15 @@ package org.therismos.ejb;
 
 import com.mongodb.*;
 import java.net.UnknownHostException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.*;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import org.joda.time.DateTime;
 import org.therismos.model.AccountModel;
 import org.therismos.model.BudgetModel;
 
@@ -24,6 +27,7 @@ public class MongoService {
     DBCollection collBudgets, collAccounts, collCheques;
     List<AccountModel> results;
     private java.util.Map<String, Double> totals;
+    static final Logger logger = Logger.getLogger(MongoService.class.getName());
 
     public MongoService() {
         results = new ArrayList<>();
@@ -64,7 +68,7 @@ public class MongoService {
         try {
             mongoClient = new MongoClient(); //"ds043358.mongolab.com", 43358);
         } catch (UnknownHostException ex) {
-            Logger.getLogger(MongoService.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, null, ex);
             return;
         }
         db = mongoClient.getDB("therismos");
@@ -84,6 +88,21 @@ public class MongoService {
     }
     
     public void saveCheques(DBObject o) {
+        String end = o.get("end").toString();
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+        int nDeleted = collCheques.remove(new BasicDBObject("end",end)).getN();
+        logger.log(Level.INFO, "Deleted {0} records with the same end date", nDeleted);
+        DateTime dt;
+        try {
+            dt = new DateTime(fmt.parse(end)).minusYears(2);
+            String yearAgo = fmt.format(dt.toDate());
+            int nDeleted2 = collCheques.remove(new BasicDBObject("end",
+                new BasicDBObject("$lt", yearAgo)
+            )).getN();
+            logger.log(Level.INFO, "Deleted {0} records before {1}", new Object[]{nDeleted2, yearAgo});
+        } catch (ParseException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        }
         collCheques.insert(o);
     }
     

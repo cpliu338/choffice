@@ -173,7 +173,7 @@ public class EntryBean implements java.io.Serializable {
         double sum=0.0;
         BasicDBList list = new BasicDBList();
         for (Entry e : entries) {
-            logger.log(Level.INFO, "Sum is now {0}", sum);
+            //logger.log(Level.INFO, "Sum is now {0}", sum);
             BasicDBObject o = new BasicDBObject("id", e.getId());
             o.append("amount", e.getAmount().doubleValue());
             o.append("extra1", e.getExtra1());
