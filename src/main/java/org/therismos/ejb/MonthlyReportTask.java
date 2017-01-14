@@ -228,22 +228,6 @@ public class MonthlyReportTask extends AbstractXlsxTask implements Runnable {
                 cell.setCellValue(tot);
                 cell.setCellStyle(styleEntry);
             }
-                if (tot < 0) {
-                    cell = row.createCell(1);
-                    cell.setCellValue(0.0-tot);
-                    cell.setCellStyle(styleBoldEntry);
-                    cell = row.createCell(2);
-                    cell.setCellValue("");
-                    cell.setCellStyle(styleText);
-                }
-                else {
-                    cell = row.createCell(1);
-                    cell.setCellValue("");
-                    cell.setCellStyle(styleText);
-                    cell = row.createCell(2);
-                    cell.setCellValue(tot);
-                    cell.setCellStyle(styleBoldEntry);
-                }
         }
         message = "Building P and L";
         logger.info(message);
@@ -283,8 +267,8 @@ public class MonthlyReportTask extends AbstractXlsxTask implements Runnable {
             cell2.setCellValue(grandtotal.get("4"));
         }        
         else {
-            cell1.setCellValue(grandtotal.get("4"));
-            cell2.setCellValue(grandtotal.get("5")-surplus);
+            cell1.setCellValue(grandtotal.get("5"));
+            cell2.setCellValue(grandtotal.get("4")-surplus);
         }
         // print how much mortgage principal was repaid
         //accounts=this.getAccountsLike("231"); // Bank loan for mortgage
