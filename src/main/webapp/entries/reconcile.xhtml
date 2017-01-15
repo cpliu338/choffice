@@ -26,9 +26,11 @@
                 <h:form id="form">
                     <p:panelGrid columns="2">
                         <h:outputLabel value="#{msg['legend.startdate']}"/>
-                        <p:calendar value="#{entryBean.begin}" pattern="yyyy-MM-dd"/>
+                        <p:calendar disabled="#{true}" value="#{entryBean.begin}" id="start" pattern="yyyy-MM-dd"/>
                         <h:outputLabel value="#{msg['legend.cutoffdate']}"/>
-                        <p:calendar value="#{entryBean.end}" pattern="yyyy-MM-dd"/>
+                        <p:calendar value="#{entryBean.end}" pattern="yyyy-MM-dd">
+                            <p:ajax event="dateSelect" listener="#{entryBean.endDateChanged()}" update="start"/>
+                        </p:calendar>
                     </p:panelGrid>
                     <p:commandButton update="save results balance" value="Reconcile" action="#{entryBean.reconcile()}">
                     </p:commandButton>

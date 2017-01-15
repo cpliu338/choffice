@@ -25,9 +25,11 @@
                 <h:form id="form">
                     <p:panelGrid columns="2">
                         <h:outputLabel for="start" value="#{msg['legend.startdate']}"/>
-                        <p:calendar id="start" pattern="yyyy-MM-dd" value="#{entryBean.begin}"/>
+                        <p:calendar disabled="#{true}" id="start" pattern="yyyy-MM-dd" value="#{entryBean.begin}"/>
                         <h:outputLabel for="end" value="#{msg['legend.cutoffdate']}"/>
-                        <p:calendar id="end" pattern="yyyy-MM-dd" value="#{entryBean.end}"/>
+                        <p:calendar id="end" pattern="yyyy-MM-dd" value="#{entryBean.end}">
+                            <p:ajax event="dateSelect" listener="#{entryBean.endDateChanged()}" update="start"/>
+                        </p:calendar>
                     </p:panelGrid>
             <p><h:outputText id="progress" value="#{entryBean.progress}"/></p>
             <p:messages id="msg"/>

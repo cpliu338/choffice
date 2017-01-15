@@ -24,7 +24,7 @@ public class ChequeDao {
     
     public Stack<String> getChequeDates() {
         DBCursor results=coll.find(new BasicDBObject("accountId","11201")).
-            sort(new BasicDBObject("end",-1));
+            sort(new BasicDBObject("end",1));
         java.util.Iterator<DBObject> it = results.iterator();
         Stack<String> ar = new Stack<>();
         while (it.hasNext()) {

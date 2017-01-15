@@ -120,6 +120,13 @@ public class EntryBean implements java.io.Serializable {
         this.end = end;
     }
     
+    public void endDateChanged() {
+        //logger.log(Level.INFO, "End date is {0}", end);
+        begin.setYear(end.getYear());
+        begin.setMonth(0);
+        begin.setDate(1);
+    }
+    
     private Thread runner;
     private AbstractXlsxTask task;
     
@@ -173,7 +180,6 @@ public class EntryBean implements java.io.Serializable {
         double sum=0.0;
         BasicDBList list = new BasicDBList();
         for (Entry e : entries) {
-            //logger.log(Level.INFO, "Sum is now {0}", sum);
             BasicDBObject o = new BasicDBObject("id", e.getId());
             o.append("amount", e.getAmount().doubleValue());
             o.append("extra1", e.getExtra1());
