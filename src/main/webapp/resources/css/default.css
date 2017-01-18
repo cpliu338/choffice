@@ -1,3 +1,19 @@
+@font-face {
+  font-family: Cipher;
+  src: 
+    local('Doulos SIL Cipher'),
+    url(DoulosSILCipher-R.woff) format('woff');
+}
+
+.jianpu {
+    margin-top: 1em; 
+  font-family: Cipher, Arial;
+    /* fall back to sans-serif so that it's really obvious if the fonts don't load */
+  font-size: 12pt;
+    /* Chinese style slur on the top */
+  -moz-font-feature-settings: "slur" 2;  
+}
+
 body {
     background-color: #ffffff;
     font-size: 12px;
