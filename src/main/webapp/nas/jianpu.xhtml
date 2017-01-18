@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+    <body>
+        <ui:composition template="../WEB-INF/mainTemplate.xhtml">
+            <ui:define name="left">
+            </ui:define>
+            <ui:define name="content">
+                    <h1>Welcome to Jianpu</h1>
+                    <h:form>
+                        <h:panelGrid columns="2">
+                        <p:outputLabel >Measure: </p:outputLabel>
+                        <p:inputText value="#{jianpuBean.measure}"></p:inputText>
+                        <p:outputLabel >Melody </p:outputLabel>
+                        <p:inputText value="#{jianpuBean.melody}"></p:inputText>
+                        </h:panelGrid>
+                        <p:commandButton action="#{jianpuBean.convert()}" process="@form" update="phrase" value="Convert"/>
+                        <div style="margin-top:1em; font-family: 'Doulos SIL Cipher'; background-color: #88ff88; width: 50%">
+                        <h:outputText id="phrase" value="#{jianpuBean.phrase}"/>
+                        </div>
+                    </h:form>
+                    <div style="margin-top:1em; font-family: 'Doulos SIL Cipher:slur=2'">
+    &#x1d101; start &#x1d106; 1234 &#x1d100; 43 &#x1d177; 21 &#x1d178; &#x1d107; end &#x1d102;
+                    </div>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>
