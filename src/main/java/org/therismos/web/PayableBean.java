@@ -422,7 +422,7 @@ public class PayableBean implements java.io.Serializable {
     
     public BigDecimal getDue2() {
         BigDecimal t = getIncome2().multiply(new BigDecimal(0.7));
-        BigDecimal l = localMission.multiply(new BigDecimal(2.333333));
+        BigDecimal l = localMission.multiply(new BigDecimal(7)).divide(new BigDecimal(3));
         return l.compareTo(t)>=0 ? l : t;
     }
     
