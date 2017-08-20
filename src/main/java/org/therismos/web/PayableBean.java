@@ -138,7 +138,8 @@ public class PayableBean implements java.io.Serializable {
         entry2.setDate1(new Date());
         entry2.setAmount(BigDecimal.ZERO);
         localMission = BigDecimal.ZERO;
-        localmission = java.util.Arrays.asList(59201,59202,59203,59204);
+// 59203(code 5X30)->53113(5X31) - 2017-08-20
+        localmission = java.util.Arrays.asList(59201,59202,53113,59204);
     }
     
     public boolean isGoodToCommit() {
@@ -422,7 +423,7 @@ public class PayableBean implements java.io.Serializable {
     
     public BigDecimal getDue2() {
         BigDecimal t = getIncome2().multiply(new BigDecimal(0.7));
-        BigDecimal l = localMission.multiply(new BigDecimal(7)).divide(new BigDecimal(3));
+        BigDecimal l = localMission.multiply(new BigDecimal(7)).divide(new BigDecimal(3),BigDecimal.ROUND_HALF_UP);
         return l.compareTo(t)>=0 ? l : t;
     }
     
