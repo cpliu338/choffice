@@ -15,6 +15,13 @@
             <ui:define name="content">
         <h:form prependId="true" id="form">
             <p:growl id="growl"/>
+            <div align="center">
+                <p:selectOneMenu rendered="#{userBean.isInRole('pastors')}" style="width: 150px" value="#{nasBean.nasSelector}">
+                <p:ajax update="dirs files" listener="#{nasBean.init()}"/>
+                    <f:selectItem itemLabel="NAS" itemValue="NAS"/>
+                    <f:selectItem itemLabel="Pastor NAS" itemValue="Pastor NAS"/>
+                </p:selectOneMenu>
+            </div>
             <div>
                 <h:commandLink>NAS
                     <f:setPropertyActionListener target="#{nasBean.path}" value="."/>
@@ -28,14 +35,14 @@
                 </ui:repeat>
             </div>
             <p:panel header="Folders">
-            <p:dataGrid columns="4" value="#{nasBean.subdirs}" var="subdir">
+            <p:dataGrid id="dirs" columns="4" value="#{nasBean.subdirs}" var="subdir">
                 <h:commandLink action="#{nasBean.refresh()}">
                     <h:outputText value="#{subdir.name}"/>
                     <f:setPropertyActionListener target="#{nasBean.path}" value="#{subdir.strStrippedBase}"/>
                 </h:commandLink>
             </p:dataGrid>
             </p:panel>
-            <p:dataTable value="#{nasBean.files}" var="file" paginator="true" rows="15"
+            <p:dataTable id="files" value="#{nasBean.files}" var="file" paginator="true" rows="15"
                  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} ">
                 <f:facet name="header">Files</f:facet>
                 <p:column>

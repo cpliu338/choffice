@@ -53,6 +53,20 @@ public class UserBean implements java.io.Serializable {
         }
     }
     
+    public File getNasPath2() {
+        javax.naming.Context initCtx;
+        String base1;
+        try {
+            initCtx = new javax.naming.InitialContext();
+            javax.naming.Context envCtx = (javax.naming.Context) initCtx.lookup("java:comp/env");
+            base1 = envCtx.lookup("naspath2").toString();
+            return new File(base1);
+        } catch (javax.naming.NamingException ex) {
+            Logger.getLogger(PublisherBean.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
+    }
+    
     public Map getUserMap() {
         return userMap;
     }

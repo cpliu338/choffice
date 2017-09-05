@@ -27,24 +27,35 @@ public class NasBean implements java.io.Serializable {
     private List<FolderModel> subdirs;
     private StreamedContent content;
     private String path;
+    private String nasSelector;
     
     @javax.inject.Inject
     transient UserBean userBean;
     
     @javax.annotation.PostConstruct
     public void init() {
-        base = userBean.getNasPath();
-        currentPath = base;
         path = ".";
         files = new ArrayList<>();
         subdirs = new ArrayList<>();
         content = null;
+        if ("NAS".equals(nasSelector)) {
+            base = userBean.getNasPath();
+        }
+        else {
+            base = userBean.getNasPath2();
+        }
+        currentPath = base;
         try {
             refresh();
         } catch (Exception ex) {
             this.files = Collections.EMPTY_LIST;
             this.subdirs = Collections.EMPTY_LIST;
         }
+        
+    }
+    
+    public NasBean() {
+        nasSelector = "NAS";
     }
     
     public List<FolderModel> getBreadCrumbs() {
@@ -174,5 +185,20 @@ public class NasBean implements java.io.Serializable {
             this.files = Collections.EMPTY_LIST;
             this.subdirs = Collections.EMPTY_LIST;
         }
+    }
+
+    /**
+     * @return the nasSelector
+     */
+    public String getNasSelector() {
+        return nasSelector;
+    }
+
+    /**
+     * @param nasSelector the nasSelector to set
+     */
+    public void setNasSelector(String nasSelector) {
+        this.nasSelector = nasSelector;
+        init();
     }
 }
