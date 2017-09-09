@@ -198,7 +198,10 @@ public class NasBean implements java.io.Serializable {
      * @param nasSelector the nasSelector to set
      */
     public void setNasSelector(String nasSelector) {
-        this.nasSelector = nasSelector;
-        init();
+        if (!this.nasSelector.equals(nasSelector)) {
+// Only init() when changing nas
+            this.nasSelector = nasSelector;
+            init();
+        }
     }
 }
