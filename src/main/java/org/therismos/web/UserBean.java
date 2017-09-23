@@ -34,7 +34,7 @@ public class UserBean implements java.io.Serializable {
             base1 = envCtx.lookup("datapath").toString();
             return new File(base1);
         } catch (javax.naming.NamingException ex) {
-            Logger.getLogger(PublisherBean.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(UserBean.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
     }
@@ -104,11 +104,13 @@ public class UserBean implements java.io.Serializable {
         if (req.getUserPrincipal() == null) {
             user = null;
             userMap = Collections.EMPTY_MAP;
+        Logger.getLogger(UserBean.class.getName()).log(Level.FINE, "Not logged in");
             return false;
         }
         // if just logged in via j_security check, set user
         user = (UserPrincipal) req.getUserPrincipal();
         userMap = user.getMap();
+        Logger.getLogger(UserBean.class.getName()).log(Level.FINE, "User:"+user.getName());
         return user!=null;
     }
 

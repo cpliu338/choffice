@@ -12,16 +12,15 @@
             </f:metadata>
             <ui:define name="left">
                 <h:form>
-                    <p><h:commandLink action="#{userBean.logout()}"><h:outputText value="#{msg['menu.logout']}"/></h:commandLink></p>
-                    <p><h:outputLink value="books.jsf">
-                        <h:outputText value="#{msg['legend.book']}"/>
-                    </h:outputLink></p>
+                    <p><h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">
+                        <h:outputText value="#{msg['menu.logout']}"/>
+                        </h:commandLink></p>
                     <p><h:outputLink value="home.jsf">
                         <h:outputText value="#{msg['legend.borrow']}"/> /
                         <h:outputText value="#{msg['legend.return']}"/>
                     </h:outputLink></p>
-                    <p><h:outputLink value="book.jsf">
-                        <h:outputText value="New book"/>
+                    <p><h:outputLink value="books.jsf">
+                        <h:outputText value="#{msg['legend.book']}"/>
                     </h:outputLink></p>
                 </h:form>
             </ui:define>

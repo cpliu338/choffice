@@ -25,7 +25,7 @@
     </filter>
     <filter-mapping>
         <filter-name>AuthFilter</filter-name>
-        <url-pattern>/library/*</url-pattern>
+        <url-pattern>/library/home*</url-pattern>
     </filter-mapping>
     <filter-mapping>
         <filter-name>PrimeFaces FileUpload Filter</filter-name>
@@ -97,7 +97,8 @@
         <web-resource-collection>
             <web-resource-name>Librarians and staff</web-resource-name>
             <description/>
-            <url-pattern>/library_bak/*</url-pattern>
+            <url-pattern>/library/book.jsf</url-pattern>
+            <url-pattern>/library/books.jsf</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <description/>
