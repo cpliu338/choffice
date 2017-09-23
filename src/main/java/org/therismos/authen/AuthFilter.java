@@ -12,6 +12,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -91,41 +92,22 @@ public class AuthFilter implements Filter {
             if (req.getUserPrincipal() == null) {
                 String ip = req.getRemoteAddr();
                 if (debug) log(ip);
-                if (!ip.startsWith("127.0.0.") && !ip.startsWith("192.168.") )
-                    filterConfig.getServletContext().getRequestDispatcher("/index.jsf").forward(req, response);
+                if (!ip.startsWith("0:0:0:0") && !ip.startsWith("127.0.0.") && !ip.startsWith("192.168.") ) {
+                    HttpServletResponse httpResponse = (HttpServletResponse) response;
+                    httpResponse.sendRedirect("books.jsf");
+                    //filterConfig.getServletContext().getRequestDispatcher("/index.jsf").forward(req, response);
+                }
             }
             else {
                 if (debug) log(req.getUserPrincipal().getName());
-                if (!req.isUserInRole("deacons") && !req.isUserInRole("librarians"))
-                    filterConfig.getServletContext().getRequestDispatcher("/index.jsf").forward(req, response);
+                if (!req.isUserInRole("deacons") && !req.isUserInRole("librarians")) {
+                    HttpServletResponse httpResponse = (HttpServletResponse) response;
+                    httpResponse.sendRedirect("books.jsf");
+                    //filterConfig.getServletContext().getRequestDispatcher("/index.jsf").forward(req, response);
+                }
             }
             String uri = req.getRequestURI();
             if (debug) log(uri.toString());
-/*
-            HttpSession session = req.getSession(true);
-            Object o = session.getAttribute("user");
-            String uri = req.getRequestURI();
-            HashMap user = null;
-            if (o instanceof HashMap) {
-                user = (HashMap)o;
-            }
-            boolean forward = false;
-            if (uri.contains("/offers/")) {
-                log("offers");
-                forward = !(user!=null && user.containsKey("role:deacons"));
-            }
-            else if (uri.contains("privileged office thing")) {
-                log("staff");
-                forward = !(user!=null && user.containsKey("role:staff"));
-            }
-            else // includes if (uri.contains("/index.jsf") || uri.endsWith("/")) {
-                forward = false;
-            if (forward) {
-                log("forwarding");
-                session.setAttribute("target", req.getRequestURI());
-                filterConfig.getServletContext().getRequestDispatcher("/index.jsf").forward(req, response);
-            }
-*/        
         }
         Throwable problem = null;
         try {
