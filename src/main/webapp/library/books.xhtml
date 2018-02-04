@@ -21,6 +21,7 @@
                 </h:form>
             </ui:define>
             <ui:define name="content">
+                <h1><h:outputText value="#{msg['legend.book']}"/></h1>
         <h:form id="form1">
             <p:message id="msg1" for="form1" showDetail="#{true}" />
             <h:outputLabel for="crit" value="#{msg['legend.barcode']}, #{msg['legend.book']}, #{msg['legend.indexStr']} (part)"/>

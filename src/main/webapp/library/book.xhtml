@@ -26,6 +26,7 @@
             </ui:define>
 
             <ui:define name="content">
+                <h1><h:outputText value="#{msg['cmd.edit']}#{msg['legend.book']}"/></h1>
                 <h:form>
                     <h:panelGrid columns="3" id="book">
                         <h:outputLabel value="Call no"/>
@@ -34,7 +35,7 @@
                         <h:outputLabel value="#{msg['legend.indexStr']}"/>
                         <h:inputText id="indexStr" value="#{bookBean.indexStr}"/>
                         <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="bookid indexStr" action="#{bookBean.saveIndexStr()}" value="Update"/>
-                        <h:outputLabel value="Title"/>
+                        <h:outputLabel value="#{msg['legend.title']}"/>
                         <p:autoComplete id="title" value="#{bookBean.title}"
                          minQueryLength="2" completeMethod="#{bookBean.suggestBook}"/>
                         <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="create bookid title" action="#{bookBean.saveTitle()}" value="Update"/>

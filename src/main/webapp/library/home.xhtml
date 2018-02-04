@@ -20,6 +20,8 @@
                 </h:form>
             </ui:define>
             <ui:define name="content">
+                <h1><h:outputText value="#{msg['legend.borrow']}"/> /
+                        <h:outputText value="#{msg['legend.return']}"/></h1>
                 <h:form id="borrowForm">
                     <p:growl id="borrowmsg" showDetail="#{true}" showSummary="#{true}" />
                     <h:panelGrid columns="3">
