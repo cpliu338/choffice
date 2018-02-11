@@ -31,6 +31,15 @@
                     <p:commandButton update="results" value="refresh" action="#{chequeBean.updateCheques()}">
                     </p:commandButton>
         <p:dataTable id="results" value="#{chequeBean.result['pending']}" var="cheq">
+            <f:facet name="header">
+                Book balance: <h:outputText value="#{0.0 - chequeBean.result['bookBalance']}">
+                    <f:convertNumber pattern="¤#,###.##" currencySymbol="$"/>
+                </h:outputText>
+                <br/>
+                Bank balance: <h:outputText value="#{chequeBean.result['uncheq'] - chequeBean.result['bookBalance']}">
+                    <f:convertNumber pattern="¤#,###.##" currencySymbol="$"/>
+                </h:outputText>
+            </f:facet>
             <p:column>
                 <f:facet name="header">Cheque No.</f:facet>
                 <h:outputText value="#{cheq['extra1']}"/>
@@ -39,6 +48,11 @@
                 <f:facet name="header">Amount</f:facet>
                 <h:outputText value="#{cheq['amount']}"/>
             </p:column>
+            <f:facet name="footer">
+                Total: <h:outputText value="#{chequeBean.result['uncheq']}">
+                    <f:convertNumber pattern="¤#,###.##" currencySymbol="$"/>
+                </h:outputText>
+            </f:facet>
         </p:dataTable>
                 </h:form>
             </ui:define>
