@@ -3,7 +3,6 @@ package org.therismos.web;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.text.ParseException;
-import javax.faces.bean.ManagedBean;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,11 +18,11 @@ import org.therismos.entity.Entry;
  *
  * @author cp_liu
  */
-@ManagedBean
-@javax.faces.bean.ViewScoped
+@javax.inject.Named
+@javax.faces.view.ViewScoped
 public class PayableBean implements java.io.Serializable {
     
-    public static final long serialVersionUID = 59400432L;
+    //public static final long serialVersionUID = 59400432L;
     private static final int CMADEBT = 21002;
     private static final int CMAMDEBT = 22002;
     private static final int GENINC = 41001;
@@ -31,7 +30,7 @@ public class PayableBean implements java.io.Serializable {
     private static final int MISSIONINC = 49001;
     private static final int CMAEXP = 59001;
     private static final int CMAMEXP = 59101;
-    private List<Integer> localmission;
+    private final List<Integer> localmission;
 
     /**
      * @return the CMADEBT
@@ -102,7 +101,7 @@ public class PayableBean implements java.io.Serializable {
     @Inject
     EntryEjb entryEjb;
     
-    public static java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("yyyy-MM-dd");
+    private static final java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("yyyy-MM-dd");
     
     static Date findYearStart(Date end) {
         String s2 = formatter.format(end);
@@ -110,7 +109,7 @@ public class PayableBean implements java.io.Serializable {
         try {
             d1=formatter.parse(s2.substring(0, 4).concat("-01-01"));
         } catch (ParseException ex) {
-            Logger.getLogger(PayableBean.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
         return d1;
     }
@@ -145,8 +144,8 @@ public class PayableBean implements java.io.Serializable {
     public boolean isGoodToCommit() {
         boolean r = (entry!=null && entry.getAmount()!=null && entry.getAmount().abs().doubleValue()>1.0);
         if (!r) {
-            if (entry==null) logger.info("Entry is NULL");
-            else logger.log(Level.INFO, "Entry amount is {0,number}", entry.getAmount());
+            if (entry==null) LOG.info("Entry is NULL");
+            else LOG.log(Level.INFO, "Entry amount is {0,number}", entry.getAmount());
         }
         return r;
     }
@@ -154,8 +153,8 @@ public class PayableBean implements java.io.Serializable {
     public boolean isGoodToCommit2() {
         boolean r= (entry2!=null && entry2.getAmount()!=null && entry2.getAmount().abs().doubleValue()>1.0);
         if (!r) {
-            if (entry2==null) logger.info("Entry2 is NULL");
-            else logger.log(Level.INFO, "Entry2 amount is {0,number}", entry2.getAmount());
+            if (entry2==null) LOG.info("Entry2 is NULL");
+            else LOG.log(Level.INFO, "Entry2 amount is {0,number}", entry2.getAmount());
         }
         return r;
     }
@@ -172,20 +171,20 @@ public class PayableBean implements java.io.Serializable {
         else {
             List<Entry> entries = entryEjb.findByTransref(transref2);
             if (entries.isEmpty()) {
-                logger.log(Level.INFO, "Transref2 found none");
+                LOG.log(Level.INFO, "Transref2 found none");
                 entry2.setDetail("ERROR!");
                 entry2.setDate1(new Date());
             }
             else {
-                logger.log(Level.INFO, "Cutoff date is {0,date}", cutoffdate);
-                logger.log(Level.INFO, "Transref2 is {0}", transref2);
+                LOG.log(Level.INFO, "Cutoff date is {0,date}", cutoffdate);
+                LOG.log(Level.INFO, "Transref2 is {0}", transref2);
                 entry2 = entryEjb.findByTransref(transref2).get(0);
                 entry2.setDate1(cutoffdate);
                 entry2.setDetail(MessageFormat.format(bundle.getString("fmt.cmamdebt"), cutoffdate));
                 entry2.setAmount(this.getDue2().add(this.getExpense2()));
             }
         }
-        logger.log(Level.INFO, "Entry2 amount is {0,number}", entry2.getAmount());
+        LOG.log(Level.INFO, "Entry2 amount is {0,number}", entry2.getAmount());
     }
     
     public void updateCMAEntry() {
@@ -210,14 +209,14 @@ public class PayableBean implements java.io.Serializable {
                 entry.setAmount(this.getDue1().add(this.getExpense1()));
             }
         }
-            logger.log(Level.INFO, "Entry amount is {0,number}", entry.getAmount());
+            LOG.log(Level.INFO, "Entry amount is {0,number}", entry.getAmount());
     }
 
     public void commitCMAEntry() {
-        FacesMessage msg = new FacesMessage();
+        FacesMessage msg = new FacesMessage("Commit CMA");
         try {
-            logger.log(Level.INFO, "Entry amount is {0,number}", entry.getAmount());
-            logger.log(Level.INFO, "Detail is {0}", entry.getDetail());
+            LOG.log(Level.INFO, "Entry amount is {0,number}", entry.getAmount());
+            LOG.log(Level.INFO, "Detail is {0}", entry.getDetail());
             entryEjb.chargePayableShortfall(entry, CMAEXP);
             msg.setSummary("Success");
             if (transref == 0)
@@ -227,7 +226,7 @@ public class PayableBean implements java.io.Serializable {
             execute(); // update other portions
         }
         catch (RuntimeException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             msg.setSummary(ex.getClass().getName());
             msg.setDetail(ex.getMessage());
             msg.setSeverity(FacesMessage.SEVERITY_ERROR);
@@ -236,11 +235,9 @@ public class PayableBean implements java.io.Serializable {
     }
 
     public void commitCMAMEntry() {
-        FacesMessage msg = new FacesMessage();
+        FacesMessage msg = new FacesMessage("Commit CMAM");
         try {
-            logger.log(Level.FINE, "Entry2 amount is {0,number}", entry2.getAmount());
-//            logger.log(Level.FINE, "Detail is {0}", entry2.getDetail());
-//            logger.log(Level.FINE, "Entry date is {0,date}", entry2.getDate1());
+            LOG.log(Level.FINE, "Entry2 amount is {0,number}", entry2.getAmount());
             entryEjb.chargePayableShortfall(entry2, CMAMEXP);
             msg.setSummary("Success");
             if (transref2 == 0)
@@ -250,7 +247,7 @@ public class PayableBean implements java.io.Serializable {
             execute(); // update other portions
         }
         catch (RuntimeException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             msg.setSummary(ex.getClass().getName());
             msg.setDetail(ex.getMessage());
             msg.setSeverity(FacesMessage.SEVERITY_ERROR);
@@ -274,7 +271,7 @@ public class PayableBean implements java.io.Serializable {
         choicesCMA = buildChoices(entriesCMA);
         choicesCMAM = buildChoices(entriesCMAM);
         transref = 0;
-//        logger.info(MessageFormat.format(bundle.getString("fmt.cmadebt"), cutoffdate));
+//        LOG.info(MessageFormat.format(bundle.getString("fmt.cmadebt"), cutoffdate));
         localMission = BigDecimal.ZERO.subtract(entryEjb.aggregate(localmission, startdate, cutoffdate));
         entry.setDetail(MessageFormat.format(bundle.getString("fmt.cmadebt"), cutoffdate));
         entry.setDate1(cutoffdate);
@@ -286,7 +283,7 @@ public class PayableBean implements java.io.Serializable {
     }
 
     private SelectItem[] buildChoices(Map<Integer,Entry[]> entriesPair) {
-        logger.log(Level.FINE, "EntriesPair has {0,number} items", entriesPair.size());
+        LOG.log(Level.FINE, "EntriesPair has {0,number} items", entriesPair.size());
         SelectItem[] results = new SelectItem[entriesPair.size()];
         Iterator<Integer> it = entriesPair.keySet().iterator();
         MessageFormat fmt = new MessageFormat("{0}(${1,number,#.##})");
@@ -345,7 +342,7 @@ public class PayableBean implements java.io.Serializable {
                     entriesPair.put(e.getTransref(), ar);
                 }
                 catch (RuntimeException ex) {
-                    logger.log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -360,7 +357,7 @@ public class PayableBean implements java.io.Serializable {
         for (int blacksheep : blacklist) {
             entriesPair.remove(blacksheep);
         }
-        logger.log(Level.FINER, "EntriesPair has {0,number} items", entriesPair.size());
+        LOG.log(Level.FINER, "EntriesPair has {0,number} items", entriesPair.size());
         return entriesPair;
     }
     /**
@@ -384,7 +381,7 @@ public class PayableBean implements java.io.Serializable {
         this.cutoffdate = cutoffdate;
     }
 
-    public static final Logger logger = Logger.getLogger(PayableBean.class.getName());
+    private static final Logger LOG = Logger.getLogger(PayableBean.class.getName());
     
     /**
      * @return the aggregates
