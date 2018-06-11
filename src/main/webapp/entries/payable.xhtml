@@ -72,8 +72,9 @@
                                 <f:param value="#{payableBean.entry.date1}"/>
                             </h:outputFormat>
                         </p:panelGrid>
-                        <p:commandButton disabled="#{!payableBean.goodToCommit}" value="#{msg['cmd.confirm']}" action="#{payableBean.commitCMAEntry()}" update="@form"/>
-                        <p:messages showDetail="true" showSummary="true" autoUpdate="true" for="entriesCMA"/>
+                        <p:commandButton id="confirm-cma" value="#{msg['cmd.confirm']}" 
+                              disabled="#{!payableBean.goodToCommit}"
+                                 action="#{payableBean.commitCMAEntry}" update="@form"/>
                     </p:fieldset>
                 </h:form>
                 <h:form id="entriesCMAM">
@@ -108,10 +109,11 @@
                                 <f:param value="#{payableBean.entry2.date1}"/>
                             </h:outputFormat>
                         </p:panelGrid>
-                        <p:commandButton disabled="#{!payableBean.goodToCommit2}" value="#{msg['cmd.confirm']}" action="#{payableBean.commitCMAMEntry()}" update="@form"/>
-                        <p:messages showDetail="true" showSummary="true" autoUpdate="true" for="entriesCMAM"/>
+                        <p:commandButton id="confirm-cmam" disabled="#{!payableBean.goodToCommit2}" 
+                                     value="#{msg['cmd.confirm']}" action="#{payableBean.commitCMAMEntry()}" update="@form"/>
                     </p:fieldset>
                 </h:form>
+                <p:growl showDetail="true" showSummary="true" autoUpdate="true"/>
             </ui:define>
 
         </ui:composition>

@@ -5,7 +5,7 @@
     <groupId>hk.org.therismos</groupId>
     <artifactId>choffice</artifactId>
     <packaging>war</packaging>
-    <version>5.3</version>
+    <version>5.4</version>
 
     <name>choffice</name>
     <url>http://maven.apache.org</url>
@@ -48,13 +48,13 @@
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>
-            <version>6.0</version>
+            <version>7.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
           <groupId>org.primefaces</groupId>
           <artifactId>primefaces</artifactId>
-          <version>3.5</version>
+          <version>5.3</version>
         </dependency>
         <dependency>
           <groupId>commons-fileupload</groupId>
