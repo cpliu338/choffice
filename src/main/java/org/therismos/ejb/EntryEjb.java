@@ -45,7 +45,7 @@ public class EntryEjb implements java.io.Serializable {
         DateTime begin = end.withMonthOfYear(1).withDayOfMonth(1);
         DateTime nextYr = begin.withYear(begin.getYear()+1);
         javax.persistence.Query q = em.createQuery("SELECT e.account.id, SUM(e.amount) FROM Entry e WHERE e.date1>=:begin "
-                + "AND e.date1<=:end AND e.account.id IN (:ids) GROUP BY e.account.id ORDER BY e.account.code");
+                + "AND e.date1<=:end AND e.account.id IN :ids GROUP BY e.account.id ORDER BY e.account.code");
         List<Object[]> results = q.setParameter("begin", begin.toDate()).setParameter("end", end.toDate())
                 .setParameter("ids", accept_ids).getResultList();
         List<Entry> entries = new ArrayList<>();
@@ -55,10 +55,10 @@ public class EntryEjb implements java.io.Serializable {
         for (Object[] result : results) {
             Account a = em.find(Account.class, ((Number)result[0]).intValue());
             Entry e = new Entry();
-            logger.log(Level.INFO, "Account id:code {0}:{1}", new Object[]{a.getId(), a.getCode()});
+            logger.log(Level.FINE, "Account id:code {0}:{1}", new Object[]{a.getId(), a.getCode()});
             if (a.getCode().startsWith("4") || a.getCode().startsWith("5")) {
                 earnings = earnings.add((BigDecimal)result[1]);
-                logger.log(Level.INFO, "Add {0} and earning became {1}", new Object[]{(BigDecimal)result[1], earnings});
+                logger.log(Level.FINE, "Add {0} and earning became {1}", new Object[]{(BigDecimal)result[1], earnings});
             }
             else {
                 e.setDate1(nextYr.toDate());
@@ -84,7 +84,7 @@ public class EntryEjb implements java.io.Serializable {
     public List<Entry> getUncheques(Date end, int accountid) {
         List<Entry> r = em.createNamedQuery("Entry.findUnchequesBeforeDate", Entry.class).
             setParameter("enddate", end).setParameter("accountid", accountid).getResultList();
-        logger.log(Level.INFO, "Result size{0}", r.size());
+        logger.log(Level.FINE, "Result size{0}", r.size());
         return r;
     }
     
@@ -152,8 +152,8 @@ public class EntryEjb implements java.io.Serializable {
             else
                 throw new UnsupportedOperationException("Provided transref have no entry with account "+targetAccId);
         }
-        logger.log(Level.INFO, "e1: {0,number} and {1,number}", new Object[]{e1.getAccount().getId(), e1.getAmount()});
-        logger.log(Level.INFO, "e2: {0,number} and {1,number}", new Object[]{e2.getAccount().getId(), e2.getAmount()});
+        logger.log(Level.FINE, "e1: {0,number} and {1,number}", new Object[]{e1.getAccount().getId(), e1.getAmount()});
+        logger.log(Level.FINE, "e2: {0,number} and {1,number}", new Object[]{e2.getAccount().getId(), e2.getAmount()});
         em.merge(e1);
         em.merge(e2);
     }
@@ -174,7 +174,7 @@ public class EntryEjb implements java.io.Serializable {
         try {
             Object o = em.createQuery("SELECT SUM(e.amount) FROM Entry e WHERE e.account.id IN :acclist AND (e.date1 BETWEEN :start AND :end)")
                     .setParameter("start", start).setParameter("end", end).setParameter("acclist", accs).getSingleResult();
-            logger.log(Level.INFO, "object class {0}", o.getClass().getName());
+            logger.log(Level.FINE, "object class {0}", o.getClass().getName());
             return (BigDecimal)o;
         } catch (RuntimeException ex) {
             logger.log(Level.SEVERE, null, ex);
