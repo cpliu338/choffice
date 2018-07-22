@@ -47,6 +47,9 @@
                         <p:commandButton update="borrowForm" value="#{msg['legend.checkin']}"
 disabled="#{not (bookCopyBean.checkinable and (userBean.isInRole('deacons') or userBean.isInRole('staff')))}" 
                                          action="#{bookCopyBean.return1()}"/>
+                        <p:commandButton update="borrowForm" value="#{msg['legend.retire']}"
+disabled="#{not (bookCopyBean.retirable and (userBean.isInRole('deacons') or userBean.isInRole('staff')))}" 
+                                        action="#{bookCopyBean.retire()}"/>
                     </p:panelGrid>
                         <h:outputText id="actionString" value="#{bookCopyBean.actionString}"/>
                 </h:form>

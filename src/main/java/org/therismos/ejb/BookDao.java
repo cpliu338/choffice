@@ -121,6 +121,7 @@ public class BookDao {
                 c.setEnddate(endDate);
                 break;
             case BookCopy.ONSHELF:
+            case BookCopy.RETIRED:
                 c.setUserId(Member1.XXXid);
                 break;
             default:

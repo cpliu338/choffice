@@ -54,6 +54,7 @@ public class BookCopy implements Serializable {
     public static final int ONSHELF=1;
     public static final int LOANED=2;
     public static final int STOCKTAKING=3;
+    public static final int RETIRED=4;
     public static final int MISSING=6;
 
     public Book getBook() {

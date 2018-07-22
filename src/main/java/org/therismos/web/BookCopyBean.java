@@ -5,7 +5,6 @@ import java.util.logging.*;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
-import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import org.therismos.ejb.*;
 import org.therismos.entity.Book;
@@ -50,6 +49,7 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
     
     private boolean returnable;
     private boolean checkinable;
+    private boolean retirable;
 
     public boolean isCheckinable() {
         return checkinable;
@@ -100,7 +100,24 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
         }
         logger.log(Level.INFO, "Returning {0}", actionString);
     }
-    
+    public void retire() {
+        FacesMessage msg = new FacesMessage();
+        try {
+            bookDao.updateBookCopyStatus(new BookCopyPK(this.bookCode.trim()), BookCopy.RETIRED, null, 
+                    null, null, "");
+            msg.setSeverity(FacesMessage.SEVERITY_INFO);
+            msg.setSummary(bundle.getString("legend.retire"));
+            msg.setDetail(this.bookCode);//.actionString);
+            this.blankCopy();
+        }
+        catch (PersistenceException ex) {
+            logger.log(Level.WARNING, "Database error");
+            msg.setSeverity(FacesMessage.SEVERITY_WARN);
+            msg.setDetail(ex.getMessage());
+            msg.setSummary(ex.getClass().getName());
+        }
+        FacesContext.getCurrentInstance().addMessage(null, msg);
+    }
     public void return1() {
         FacesMessage msg = new FacesMessage();
         try {
@@ -173,6 +190,7 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
             returnable = (copy.getStatus() == BookCopy.LOANED);
             borrowable = (copy.getStatus() == BookCopy.ONSHELF && this.member!=null);
             checkinable = (copy.getStatus() == BookCopy.STOCKTAKING);
+            retirable =  (copy.getStatus() == BookCopy.ONSHELF || copy.getStatus() == BookCopy.STOCKTAKING);
             logger.log(Level.INFO, "Copy found: {0}", copy.getBook().getTitle());
         }
         catch (NumberFormatException | PersistenceException | NullPointerException ex) {
@@ -227,5 +245,12 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
      */
     public void setMemberCode(String memberCode) {
         this.memberCode = memberCode;
+    }
+
+    /**
+     * @return the retirable
+     */
+    public boolean isRetirable() {
+        return retirable;
     }
 }
