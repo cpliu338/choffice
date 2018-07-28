@@ -100,6 +100,13 @@ public class BookDao {
         }
         else throw new javax.persistence.EntityExistsException("Already exists");
     }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public int stockTakeAll() {
+        return em.createQuery("UPDATE BookCopy b SET b.status=:tobe WHERE b.status=:orig")
+                .setParameter("orig", BookCopy.ONSHELF)
+                .setParameter("tobe", BookCopy.STOCKTAKING).executeUpdate();
+    }
     /**
      * 
      * @param pk the primary key of the copy to be updated

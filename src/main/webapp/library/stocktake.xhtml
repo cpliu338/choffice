@@ -4,7 +4,7 @@
       xmlns:p="http://primefaces.org/ui" xmlns:h="http://java.sun.com/jsf/html"
       xmlns:ui="http://java.sun.com/jsf/facelets">
 
-    <body>
+    <h:body>
         <ui:composition template="../WEB-INF/mainTemplate.xhtml">
             <ui:define name="left">
                 <h:form>
@@ -18,34 +18,28 @@
                     <p><h:outputLink value="book.jsf">
                         <h:outputText value="#{msg['cmd.add']}#{msg['legend.book']}"/>
                     </h:outputLink></p>
-                    <p><h:outputLink value="stocktake.jsf">
-                        <h:outputText value="#{msg['copy.3']}"/>
+                    <p><h:outputLink value="books.jsf">
+                        <h:outputText value="#{msg['legend.book']}"/>
                     </h:outputLink></p>
                 </h:form>
             </ui:define>
             <ui:define name="content">
                 <h1><h:outputText value="#{msg['legend.book']}"/></h1>
-        <h:form id="form1">
-            <p:message id="msg1" for="form1" showDetail="#{true}" />
-            <h:outputLabel for="crit" value="#{msg['legend.barcode']}, #{msg['legend.book']}, #{msg['legend.indexStr']} (part)"/>
-            <br/>
-            <p:inputText id="crit" value="#{bookBean.crit}"/>
-            <p:commandButton process="@form" update="data msg1" icon="ui-icon-search" action="#{bookBean.fullTextSearch()}"/>
-            <p:dataTable id="data" emptyMessage="#{msg['legend.notfound']}" value="#{bookBean.foundBooks}" var="book" scrollable="true" scrollHeight="150">
-                <p:column>
-                    <f:facet name="header">#{msg['legend.book']}</f:facet>
-                    <h:outputText value="#{book.title}"/>
-                </p:column>
-                <p:column>
-                    <h:outputLink value="book.jsf">
-                        <f:param name="id" value="#{book.callNo}"/>
-                        Edit
-                    </h:outputLink>
-                </p:column>
-            </p:dataTable>
-        </h:form>
+                <h:form id="form1">
+                    <p>
+                        <h:outputFormat value="#{msg['message.stocktake']}">
+                            <f:param value="#{msg['legend.all']}" />
+                        </h:outputFormat>
+                        <h2><h:outputText value="#{msg['copy.3']}"/></h2>
+                    </p>
+                    <p><p:commandButton value="#{msg['cmd.confirm']}"
+                        disabled="#{not (userBean.isInRole('deacons') or userBean.isInRole('staff'))}" 
+                        action="#{bookCopyBean.stockTake()}"/>
+                    </p>
+                </h:form>
+                <p:growl showDetail="true" showSummary="true" autoUpdate="true" />
             </ui:define>
         </ui:composition>
-    </body>
+    </h:body>
 </html>
 

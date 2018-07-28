@@ -1,5 +1,6 @@
 package org.therismos.web;
 
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.logging.*;
 import javax.ejb.EJB;
@@ -99,6 +100,23 @@ public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
             }
         }
         logger.log(Level.INFO, "Returning {0}", actionString);
+    }
+    
+    public void stockTake() {
+        FacesMessage msg = new FacesMessage();
+        try {
+            Integer changed = bookDao.stockTakeAll();
+            msg.setSeverity(FacesMessage.SEVERITY_INFO);
+            msg.setSummary(MessageFormat.format(bundle.getString("message.stocktake"), changed.toString()));
+            msg.setDetail("Done");//.actionString);
+        }
+        catch (RuntimeException ex) {
+            logger.log(Level.WARNING, "Database error");
+            msg.setSeverity(FacesMessage.SEVERITY_WARN);
+            msg.setDetail(ex.getMessage());
+            msg.setSummary(ex.getClass().getName());
+        }
+        FacesContext.getCurrentInstance().addMessage(null, msg);
     }
     public void retire() {
         FacesMessage msg = new FacesMessage();
