@@ -1,30 +1,46 @@
 package org.therismos.ejb;
 
-import com.mongodb.*;
-import java.net.UnknownHostException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import com.mongodb.Block;
+import com.mongodb.MongoClient;
+import com.mongodb.client.*;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Projections;
+import com.mongodb.client.model.Sorts;
+import com.mongodb.client.result.DeleteResult;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.*;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import org.joda.time.DateTime;
+import org.bson.Document;
+import org.bson.codecs.configuration.CodecProvider;
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
+import org.bson.conversions.Bson;
+//import org.joda.time.DateTime;
 import org.therismos.model.AccountModel;
-import org.therismos.model.BudgetModel;
 
 /**
  *
  * @author USER
  */
-@Singleton
-@Startup
-public class MongoService {
+@javax.inject.Named
+@javax.enterprise.context.ApplicationScoped
+public class MongoService implements java.io.Serializable {
     
-    MongoClient mongoClient;
-    DB db;
-    DBCollection collBudgets, collAccounts, collCheques;
+    @Resource(name="java:comp/env/mongodb/MyMongoClient")
+    private MongoClient mongoClient;
+    MongoDatabase db;
+    CodecRegistry pojoCodecRegistry;
+    /*  
+        CodecProvider pojoCodecProvider = PojoCodecProvider.builder().automatic(true).build();
+        pojoCodecRegistry = fromRegistries(MongoClient.getDefaultCodecRegistry(), fromProviders(pojoCodecProvider));
+*/
+    MongoCollection collCheques;
+    MongoCollection<AccountModel> collAccounts;
     List<AccountModel> results;
     private java.util.Map<String, Double> totals;
     static final Logger logger = Logger.getLogger(MongoService.class.getName());
@@ -66,79 +82,78 @@ public class MongoService {
     public void init() {
         results.clear();
         try {
-            mongoClient = new MongoClient(); //"ds043358.mongolab.com", 43358);
-        } catch (UnknownHostException ex) {
+            db = mongoClient.getDatabase("therismos");
+            CodecProvider pojoCodecProvider = PojoCodecProvider.builder().automatic(true).build();
+            pojoCodecRegistry = fromRegistries(MongoClient.getDefaultCodecRegistry(), fromProviders(pojoCodecProvider));
+        } catch (RuntimeException ex) {
             logger.log(Level.SEVERE, null, ex);
             return;
         }
-        db = mongoClient.getDB("therismos");
         /*
         if (!db.authenticate("therismos","26629066".toCharArray()))
             throw new RuntimeException("Cannot authenticate");
+        collBudgets = db.getCollection("budget", BudgetModel.class);
                 */
-        collBudgets = db.getCollection("budget");
         //collBudgets.setObjectClass(BudgetModel.class);
-        collAccounts = db.getCollection("accounts");
-        collAccounts.setObjectClass(AccountModel.class);
+        collAccounts = db.getCollection("accounts", AccountModel.class).withCodecRegistry(this.pojoCodecRegistry);
         collCheques = db.getCollection("reconcile");
-        Iterator<DBObject> it = collAccounts.find().sort(new BasicDBObject("code",1)).iterator();
-        while (it.hasNext()) {
-            results.add((AccountModel)it.next());
-        }
+        logger.log(Level.INFO, "Number of documents in reconcile: {0}", collCheques.countDocuments());
+        collAccounts.find(AccountModel.class).sort(Sorts.ascending("code")).forEach(new Block<AccountModel>() {
+            @Override
+            public void apply(AccountModel t) {
+                results.add(t);
+            }
+        });
     }
     
-    public void saveCheques(DBObject o) {
-        String end = o.get("end").toString();
-        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-        int nDeleted = collCheques.remove(new BasicDBObject("end",end)).getN();
+    public void saveCheques(Document o) {
+        String end = o.getString("end");
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DeleteResult r = collCheques.deleteMany(Filters.eq("end", end));
+        long nDeleted = r.getDeletedCount();
         logger.log(Level.INFO, "Deleted {0} records with the same end date", nDeleted);
-        DateTime dt;
+        LocalDate yearAgo;
         try {
-            dt = new DateTime(fmt.parse(end)).minusYears(2);
-            String yearAgo = fmt.format(dt.toDate());
-            int nDeleted2 = collCheques.remove(new BasicDBObject("end",
-                new BasicDBObject("$lt", yearAgo)
-            )).getN();
-            logger.log(Level.INFO, "Deleted {0} records before {1}", new Object[]{nDeleted2, yearAgo});
-        } catch (ParseException ex) {
+            yearAgo = java.time.LocalDate.parse(end, fmt).minusYears(2);
+            r = collCheques.deleteMany(Filters.lt("end", yearAgo.format(fmt)));
+            logger.log(Level.INFO, "Deleted {0} records before {1}", 
+                    new Object[]{r.getDeletedCount(), yearAgo});
+        } catch (RuntimeException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
-        collCheques.insert(o);
+        collCheques.insertOne(o);
     }
     
-    public DBCollection getBudgetCollection() {
-        return (mongoClient==null) ? null : collBudgets;
-    }
-            
-    public DBCollection getAccountCollection() {
+    public MongoCollection<AccountModel> getAccountCollection() {
         return (mongoClient==null) ? null : collAccounts;
     }
     
-    public DBCollection getChequeCollection() {
+    public MongoCollection getChequeCollection() {
         return (mongoClient==null) ? null : collCheques;
     }
 
-    @PreDestroy
+    //@PreDestroy
     public void cleanup() {
         if (mongoClient != null)
             mongoClient.close();
     }
     
-    public DBObject getCheques(String endDate) {
-        DBObject match = new BasicDBObject("end", endDate);
-        DBCursor cursor = collCheques.find(match);
-        Logger.getLogger(MongoService.class.getName()).log(Level.INFO, 
-            "{0} Documents ending {1}", new Object[]{cursor.count(), endDate});
-        if (cursor.count()>0) {
-            return cursor.sort(new BasicDBObject("_id", -1)).next();
-        }
-        return null;
+    public Document getCheques(String endDate) {
+        FindIterable<Document> it = collCheques.
+                find(Filters.eq("end", endDate), Document.class);
+        return it.first();
     }
     
-    public List<DBObject> getAccountsBelow(String summaryCode) throws UnknownHostException {
-        DBObject match = new BasicDBObject("code", new BasicDBObject("$regex", "^"+summaryCode) );
-        DBCursor cursor = collAccounts.find(match);
-        return cursor.toArray();
+    public Stack<String> getChequeDates() {
+        Stack<String> stack = new Stack<>();
+        collCheques.find(Document.class)
+            .sort(Sorts.ascending("end")).forEach(new Block<Document>() {
+            @Override
+            public void apply(Document t) {
+                stack.add(t.getString("end"));
+            }
+        });
+        return stack;
     }
 
     public AccountModel getAccountByCode(String code) {
@@ -146,19 +161,6 @@ public class MongoService {
             if (a.getCode().equals(code)) return a;
         }
         return null;
-    }
-    
-    public Object getConfig(String key) {
-        try {
-            return db.getCollection("config").findOne(new BasicDBObject("key",key)).get("value");
-        }
-        catch (Exception npe) {
-            return npe;
-        }
-    }
-    
-    public java.util.List<AccountModel> getAccounts() {
-        return results;
     }
     
 }

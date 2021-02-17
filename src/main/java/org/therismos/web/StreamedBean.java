@@ -1,14 +1,12 @@
 package org.therismos.web;
 
 import java.io.FileNotFoundException;
-import javax.faces.bean.ManagedBean;
 import barcode.GenBarcode;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.DefaultStreamedContent;
@@ -17,7 +15,7 @@ import org.primefaces.model.DefaultStreamedContent;
  *
  * @author cpliu
  */
-@ManagedBean
+@javax.inject.Named
 public class StreamedBean implements java.io.Serializable {
 
     private DefaultStreamedContent barcode;

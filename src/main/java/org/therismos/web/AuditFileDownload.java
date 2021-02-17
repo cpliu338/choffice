@@ -1,14 +1,11 @@
 package org.therismos.web;
 
 import java.io.File;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+//import java.text.ParseException;
+import java.util.*;
+//import java.util.logging.*;
 import javax.enterprise.inject.Model;
-import org.therismos.ejb.MonthlyReportTask;
+//import org.therismos.ejb.MonthlyReportTask;
 
 /**
  *

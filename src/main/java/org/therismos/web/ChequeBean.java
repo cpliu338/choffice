@@ -1,41 +1,41 @@
 package org.therismos.web;
 
-import com.mongodb.DBObject;
 import java.util.*;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.faces.model.SelectItem;
-import javax.inject.Inject;
-import org.therismos.ejb.ChequeDao;
+import org.bson.Document;
+import org.therismos.ejb.MongoService;
 
 /**
  *
  * @author cpliu
  */
-@javax.faces.bean.ManagedBean
-@javax.faces.bean.ViewScoped
-public class ChequeBean {
+@javax.inject.Named
+@javax.faces.view.ViewScoped
+public class ChequeBean implements java.io.Serializable {
     private final List<SelectItem> dateChoices;
     private String enddate;
-    private DBObject result;
+    private Document result;
 
-    public DBObject getResult() {
+    public Document getResult() {
         return result;
     }
     
-    @Inject
-    ChequeDao chequeDao;
     static final Logger logger = Logger.getLogger(ChequeBean.class.getName());
     
     public ChequeBean() {
         dateChoices = new ArrayList<>();
     }
     
+    @javax.inject.Inject
+    MongoService mongoService;
+    
     @PostConstruct
     public void init() {
         if (!dateChoices.isEmpty())
             getDateChoices().clear();
-        Stack<String> dates = chequeDao.getChequeDates();
+        Stack<String> dates = mongoService.getChequeDates();
         enddate = dates.peek();
         while (!dates.isEmpty()) {
             String s = dates.pop();
@@ -44,7 +44,7 @@ public class ChequeBean {
     }
     
     public void updateCheques() {
-        result = chequeDao.findCheques(enddate);
+        result = mongoService.getCheques(enddate);
 //        logger.info(result.get("pending").getClass().getName());
     }
 

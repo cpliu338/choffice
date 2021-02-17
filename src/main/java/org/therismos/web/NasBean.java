@@ -5,7 +5,6 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
 import org.therismos.model.FileModel;
 import org.therismos.model.FolderModel;
@@ -16,8 +15,8 @@ import org.primefaces.model.StreamedContent;
  *
  * @author cpliu
  */
-@ManagedBean
-@javax.faces.bean.SessionScoped
+@javax.inject.Named
+@javax.enterprise.context.SessionScoped
 public class NasBean implements java.io.Serializable {
 
     private File base;
@@ -56,6 +55,7 @@ public class NasBean implements java.io.Serializable {
     
     public NasBean() {
         nasSelector = "NAS";
+        Logger.getLogger(NasBean.class.getName()).log(Level.INFO, "constructed NasBean");
     }
     
     public List<FolderModel> getBreadCrumbs() {
@@ -87,7 +87,7 @@ public class NasBean implements java.io.Serializable {
      * @return the selectedFile
      */
     public String getSelectedFile() {
-        Logger.getLogger(NasBean.class.getName()).info("Get selectedFile");
+        //Logger.getLogger(NasBean.class.getName()).info("Get selectedFile");
         return selectedFile;
     }
 
@@ -113,7 +113,7 @@ public class NasBean implements java.io.Serializable {
         return files;
     }
 
-    public final void refresh() throws Exception {
+    public void refresh() throws Exception {
         Logger.getLogger(NasBean.class.getName()).log(Level.INFO, "refresh base:{0}, currentPath:{1}", 
                 new Object[]{base.getAbsolutePath(), currentPath.getAbsolutePath()});
         File[] subfolders = currentPath.listFiles(new java.io.FileFilter() {

@@ -3,8 +3,6 @@ package org.therismos.web;
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.enterprise.inject.Model;
-import javax.faces.bean.ManagedBean;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 
@@ -12,9 +10,9 @@ import org.primefaces.model.StreamedContent;
  *
  * @author cpliu
  */
-@ManagedBean
-@javax.faces.bean.SessionScoped
-public class ReceiptsFileDownload {
+@javax.inject.Named
+@javax.enterprise.context.SessionScoped
+public class ReceiptsFileDownload implements java.io.Serializable {
     
     @javax.inject.Inject
     UserBean userBean;

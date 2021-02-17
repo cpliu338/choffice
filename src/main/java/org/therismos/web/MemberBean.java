@@ -1,24 +1,17 @@
 package org.therismos.web;
 
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
-import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
-import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
 import org.therismos.entity.Member1;
 
 /**
  *
  * @author cpliu
  */
-@ManagedBean
-@ViewScoped
+@javax.inject.Named
+@javax.faces.view.ViewScoped
 public class MemberBean implements java.io.Serializable {
     
     private int id;

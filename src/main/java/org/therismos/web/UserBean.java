@@ -3,8 +3,7 @@ package org.therismos.web;
 import java.io.*;
 import java.util.*;
 import java.util.logging.*;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.annotation.Resource;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
@@ -15,54 +14,62 @@ import org.therismos.jaas.UserPrincipal;
  *
  * @author cpliu
  */
-@ManagedBean
-@SessionScoped
+@javax.inject.Named
+@javax.enterprise.context.SessionScoped
 public class UserBean implements java.io.Serializable {
     private UserPrincipal user;
     private Map userMap;
+    Logger logger = Logger.getLogger(UserBean.class.getName());
+            
+    @Resource(name="naspath")// type="java.lang.String")
+    String naspath;
+    @Resource(name="naspath2")// type="java.lang.String")
+    String naspath2;
+    @Resource(name="datapath")// type="java.lang.String")
+    String datapath;
     
     public UserBean() {
         userMap = Collections.EMPTY_MAP;
     }
+    
+    @javax.annotation.PostConstruct
+    public void init() {
+        logger.log(Level.INFO, "Naspath is {0}, datapath is {1}", new Object[]{
+            naspath, datapath});        
+    }
 
     public File getBasePath() {
-        javax.naming.Context initCtx;
-        String base1;
         try {
-            initCtx = new javax.naming.InitialContext();
-            javax.naming.Context envCtx = (javax.naming.Context) initCtx.lookup("java:comp/env");
-            base1 = envCtx.lookup("datapath").toString();
-            return new File(base1);
-        } catch (javax.naming.NamingException ex) {
-            Logger.getLogger(UserBean.class.getName()).log(Level.SEVERE, null, ex);
+            File f = new File(datapath);
+            if (f.isDirectory() && f.canExecute())
+                return f;
+            throw new RuntimeException ("Fail to look up datapath directory");
+        } catch (RuntimeException ex) {
+            logger.log(Level.SEVERE, null, ex);
             return null;
         }
     }
 
     public File getNasPath() {
-        javax.naming.Context initCtx;
-        String base1;
         try {
-            initCtx = new javax.naming.InitialContext();
-            javax.naming.Context envCtx = (javax.naming.Context) initCtx.lookup("java:comp/env");
-            base1 = envCtx.lookup("naspath").toString();
-            return new File(base1);
-        } catch (javax.naming.NamingException ex) {
-            Logger.getLogger(PublisherBean.class.getName()).log(Level.SEVERE, null, ex);
+            File f = new File(naspath);
+            if (f.isDirectory() && f.canExecute())
+                return f;
+            throw new RuntimeException ("Fail to look up Naspath directory");
+        } catch (RuntimeException ex) {
+            logger.log(Level.SEVERE, null, ex);
             return null;
         }
     }
     
     public File getNasPath2() {
-        javax.naming.Context initCtx;
-        String base1;
         try {
-            initCtx = new javax.naming.InitialContext();
-            javax.naming.Context envCtx = (javax.naming.Context) initCtx.lookup("java:comp/env");
-            base1 = envCtx.lookup("naspath2").toString();
-            return new File(base1);
-        } catch (javax.naming.NamingException ex) {
-            Logger.getLogger(PublisherBean.class.getName()).log(Level.SEVERE, null, ex);
+            File f = new File(naspath2);
+            if (f.isDirectory() && f.canExecute())
+                return f;
+            throw new RuntimeException ("Fail to look up Naspath2 directory");
+        } catch (RuntimeException ex) {
+            logger.log(Level.SEVERE, null, ex);
             return null;
         }
     }
@@ -75,7 +82,7 @@ public class UserBean implements java.io.Serializable {
         return Locale.TRADITIONAL_CHINESE;
     }
     
-    public static final String[] groups = {"deacons","librarians","staff"};
+    static final String[] groups = {"deacons","librarians","staff"};
    
     public String logout() {
         user = null;

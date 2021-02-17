@@ -37,17 +37,17 @@
                         <p:messages id="msg" showDetail="#{true}" showSummary="#{true}" />
                         <h:outputLabel value="#{msg['legend.indexStr']}"/>
                         <h:inputText id="indexStr" value="#{bookBean.indexStr}"/>
-                        <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="bookid indexStr" action="#{bookBean.saveIndexStr()}" value="Update"/>
+                        <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="bookid indexStr @this" action="#{bookBean.saveIndexStr()}" value="Update"/>
                         <h:outputLabel value="#{msg['legend.title']}"/>
                         <p:autoComplete id="title" value="#{bookBean.title}"
                          minQueryLength="2" completeMethod="#{bookBean.suggestBook}"/>
-                        <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="create bookid title" action="#{bookBean.saveTitle()}" value="Update"/>
+                        <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="create bookid title @this" action="#{bookBean.saveTitle}" value="Update"/>
                         <h:outputLabel value="#{msg['legend.author']}"/>
                         <p:autoComplete id="author" value="#{bookBean.author1}" minQueryLength="2" completeMethod="#{bookBean.suggestAuthor}" />
-                        <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="bookid author create" action="#{bookBean.saveAuthor()}" value="Update"/>
+                        <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="bookid author create @this" action="#{bookBean.saveAuthor()}" value="Update"/>
                         <h:outputLabel value="#{msg['legend.publisher']}"/>
                         <p:autoComplete id="publisher" value="#{bookBean.publisher1}" minQueryLength="2" completeMethod="#{bookBean.suggestPublisher}" />
-                        <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="bookid publisher create" action="#{bookBean.savePublisher()}" value="Update"/>
+                        <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid==0}" update="@form" process="bookid publisher create @this" action="#{bookBean.savePublisher()}" value="Update"/>
                         <h:outputText value=""/>
                         <p:selectBooleanCheckbox id="create" itemLabel="create" label="Create" value="#{bookBean.creative}"/>
                         <p:commandButton disabled="#{not userBean.librarian or bookBean.bookid!=0}" value="Create" ajax="#{false}" action="#{bookBean.createBook}"/>

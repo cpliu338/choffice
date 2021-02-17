@@ -3,7 +3,6 @@ package org.therismos.web;
 import java.util.*;
 import java.util.logging.*;
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
 import javax.persistence.PersistenceException;
 import org.therismos.ejb.BookDao;
@@ -13,8 +12,8 @@ import org.therismos.entity.*;
  *
  * @author Administrator
  */
-@ManagedBean
-@javax.faces.bean.ViewScoped
+@javax.inject.Named
+@javax.faces.view.ViewScoped
 public class BookBean extends BookBaseBean implements java.io.Serializable {
     private String indexStr, author1, publisher1, title;
     private boolean creative;
@@ -58,7 +57,7 @@ public class BookBean extends BookBaseBean implements java.io.Serializable {
     
     private String crit;
     List<Book> foundBooks;
-    @javax.ejb.EJB
+    @javax.inject.Inject
     private BookDao dao;
     
     private int bookid;
@@ -156,7 +155,6 @@ public class BookBean extends BookBaseBean implements java.io.Serializable {
             book = dao.searchBookById(bookid);
             book.setIndexStr(this.indexStr);
             dao.updateBook(book);
-            logger.log(Level.INFO, "Save indexStr for: {0}", book.getTitle());
             msg.setSeverity(FacesMessage.SEVERITY_INFO);
             msg.setSummary("Saved ");
             msg.setDetail(book.getIndexStr());
@@ -235,8 +233,8 @@ public class BookBean extends BookBaseBean implements java.io.Serializable {
         msg.setSeverity(FacesMessage.SEVERITY_INFO);
         try {
             book = dao.searchBookById(bookid);
-            msg.setDetail(book.getTitle());
             title = title.trim();
+            msg.setDetail(title);
             if (title.length()>0) {
                 book.setTitle(title);
                 dao.updateBook(book);

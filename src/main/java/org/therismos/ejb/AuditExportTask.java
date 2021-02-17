@@ -1,10 +1,9 @@
 package org.therismos.ejb;
-import com.mongodb.DBObject;
 import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 import org.apache.poi.ss.usermodel.*;
-import com.mongodb.BasicDBList;
+import org.bson.Document;
 import org.therismos.entity.*;
 
 /**
@@ -20,14 +19,14 @@ public class AuditExportTask extends AbstractXlsxTask implements Runnable {
 
     public AuditExportTask() {
         super();
-        styleText.setBorderLeft(CellStyle.BORDER_NONE);
-        styleText.setBorderBottom(CellStyle.BORDER_NONE);
-        styleText.setBorderTop(CellStyle.BORDER_NONE);
-        styleText.setBorderRight(CellStyle.BORDER_NONE);
-        styleEntry.setBorderLeft(CellStyle.BORDER_NONE);
-        styleEntry.setBorderBottom(CellStyle.BORDER_NONE);
-        styleEntry.setBorderTop(CellStyle.BORDER_NONE);
-        styleEntry.setBorderRight(CellStyle.BORDER_NONE);
+        styleText.setBorderLeft(BorderStyle.NONE);
+        styleText.setBorderBottom(BorderStyle.NONE);
+        styleText.setBorderTop(BorderStyle.NONE);
+        styleText.setBorderRight(BorderStyle.NONE);
+        styleEntry.setBorderLeft(BorderStyle.NONE);
+        styleEntry.setBorderBottom(BorderStyle.NONE);
+        styleEntry.setBorderTop(BorderStyle.NONE);
+        styleEntry.setBorderRight(BorderStyle.NONE);
     }
     
     public void setMongoService(MongoService mongoService) {
@@ -59,21 +58,21 @@ public class AuditExportTask extends AbstractXlsxTask implements Runnable {
         //db.reconcile.find({end:'2016-03-31'}).sort({_id:-1}).limit(1)
         String endDate = AbstractXlsxTask.fmtYmd.format(end);
         logger.log(Level.INFO, "Uncheque entries as at: {0}", endDate);
-        DBObject cheques = mongoService.getCheques(endDate);
+        Document cheques = mongoService.getCheques(endDate);
         if (cheques == null) return;
-        BasicDBList pending = (BasicDBList)cheques.get("pending");
+        List<Document> pending = cheques.getList("pending", Document.class);
         logger.log(Level.INFO, "reconciliation id: {0}", cheques.get("_id"));
         sheet = workbook.createSheet("Bank Reconciliation");
         int rowno = 0;
-        Iterator it = pending.iterator();
+        Iterator<Document> it = pending.iterator();
         while (it.hasNext()) {
             Row row = sheet.createRow(rowno++);
-            DBObject o = (DBObject)it.next();
+            Document o = it.next();
             logger.log(Level.INFO, "Cheque: {0}", o.toString());
             Cell cell = row.createCell(0);
-            cell.setCellValue(o.get("extra1").toString());
+            cell.setCellValue(o.getString("extra1"));
             cell = row.createCell(1);
-            cell.setCellValue(o.get("amount").toString());
+            cell.setCellValue(o.getString("amount"));
         }
         
     }

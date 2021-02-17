@@ -3,12 +3,13 @@ package org.therismos.ejb;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.logging.*;
 import javax.ejb.*;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import org.joda.time.DateTime;
 import org.therismos.entity.Account;
 import org.therismos.entity.Entry;
 import org.therismos.web.PayableBean;
@@ -41,12 +42,17 @@ public class EntryEjb implements java.io.Serializable {
             if (a.getCode().endsWith("0")) continue;
             accept_ids.add(a.getId());
         }
+        /*
         DateTime end = new DateTime(end1.getTime());
         DateTime begin = end.withMonthOfYear(1).withDayOfMonth(1);
         DateTime nextYr = begin.withYear(begin.getYear()+1);
+        */
+        LocalDate end = end1.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate begin = end.withMonth(1).withDayOfMonth(1);
+        LocalDate nextYr = begin.plusYears(1);
         javax.persistence.Query q = em.createQuery("SELECT e.account.id, SUM(e.amount) FROM Entry e WHERE e.date1>=:begin "
                 + "AND e.date1<=:end AND e.account.id IN :ids GROUP BY e.account.id ORDER BY e.account.code");
-        List<Object[]> results = q.setParameter("begin", begin.toDate()).setParameter("end", end.toDate())
+        List<Object[]> results = q.setParameter("begin", java.sql.Date.valueOf(begin)).setParameter("end", java.sql.Date.valueOf(end))
                 .setParameter("ids", accept_ids).getResultList();
         List<Entry> entries = new ArrayList<>();
         // Account 3xx comes before 4xx and 5xx
@@ -61,7 +67,7 @@ public class EntryEjb implements java.io.Serializable {
                 logger.log(Level.FINE, "Add {0} and earning became {1}", new Object[]{(BigDecimal)result[1], earnings});
             }
             else {
-                e.setDate1(nextYr.toDate());
+                e.setDate1(java.sql.Date.valueOf(nextYr));
                 e.setAccount(a);
                 e.setAmount((BigDecimal)result[1]);
                 e.setDetail("Closing Balance");
@@ -174,8 +180,13 @@ public class EntryEjb implements java.io.Serializable {
         try {
             Object o = em.createQuery("SELECT SUM(e.amount) FROM Entry e WHERE e.account.id IN :acclist AND (e.date1 BETWEEN :start AND :end)")
                     .setParameter("start", start).setParameter("end", end).setParameter("acclist", accs).getSingleResult();
-            logger.log(Level.FINE, "object class {0}", o.getClass().getName());
+            if (o == null) {
+                return BigDecimal.ZERO;
+            }
+            else {
+                logger.log(Level.INFO, "result: {0}", o);
             return (BigDecimal)o;
+            }
         } catch (RuntimeException ex) {
             logger.log(Level.SEVERE, null, ex);
         }

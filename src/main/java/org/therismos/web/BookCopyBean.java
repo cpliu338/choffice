@@ -17,17 +17,17 @@ import org.therismos.entity.Member1;
  *
  * @author cpliu
  */
-@javax.faces.bean.ManagedBean
-@javax.faces.bean.ViewScoped
+@javax.inject.Named
+@javax.faces.view.ViewScoped
 public class BookCopyBean extends BookBaseBean implements java.io.Serializable {
 
     private BookCopy copy;
     private String bookCode;
     private String memberCode;
     private Member1 member;
-    @EJB
+    @javax.inject.Inject
     private BookDao bookDao;
-    @EJB
+    @javax.inject.Inject
     private MemberDao memberDao;
 
     public Member1 getMember() {

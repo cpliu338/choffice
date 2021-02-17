@@ -1,13 +1,13 @@
 package org.therismos.web;
 
-import com.mongodb.*;
+//import com.mongodb.*;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.*;
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
+import org.bson.Document;
 import org.therismos.ejb.AccountService;
 import org.therismos.ejb.EntryEjb;
 import org.therismos.ejb.MongoService;
@@ -20,16 +20,16 @@ import org.therismos.entity.Entry;
  *
  * @author cpliu
  */
-@ManagedBean
-@javax.faces.bean.ViewScoped
+@javax.inject.Named
+@javax.faces.view.ViewScoped
 public class EntryBean implements java.io.Serializable {
     private Date begin;
     private Date end;
     private String csv;
     private List<Entry> entries;
-    private BasicDBObject dbobject;
+    private Document dbobject;
 
-    public BasicDBObject getDbobject() {
+    public Document getDbobject() {
         return dbobject;
     }
     /*
@@ -43,10 +43,10 @@ public class EntryBean implements java.io.Serializable {
     @javax.inject.Inject
     private EntryEjb entryEjb;
     
-    @javax.ejb.EJB
+    @javax.inject.Inject
     private MongoService mongoService;
 
-    @javax.ejb.EJB
+    @javax.inject.Inject
     private AccountService accountService;
     
     public String getCsv() {
@@ -59,7 +59,7 @@ public class EntryBean implements java.io.Serializable {
         begin = new Date();
         end = new Date();
         entries = Collections.EMPTY_LIST;
-        dbobject = new BasicDBObject();
+        dbobject = new Document();
         dbobject.append("bookBalance", BigDecimal.ZERO);
         dbobject.append("uncheq", 0.0);
     }
@@ -121,7 +121,6 @@ public class EntryBean implements java.io.Serializable {
     }
     
     public void endDateChanged() {
-        //logger.log(Level.INFO, "End date is {0}", end);
         begin.setYear(end.getYear());
         begin.setMonth(0);
         begin.setDate(1);
@@ -162,11 +161,11 @@ public class EntryBean implements java.io.Serializable {
     }
     
     public void saveCheques() {
-        if (dbobject.containsKey((Object)("end"))) {
+        if (dbobject.containsKey("end")) {
             mongoService.saveCheques(dbobject);
         }
         // if dbobject does not contains key "end", will not save
-        dbobject.removeField("end");
+        dbobject.remove("end");
     }
     
     public boolean isChequesSaveable() {
@@ -175,30 +174,33 @@ public class EntryBean implements java.io.Serializable {
     
     public void reconcile() {
         // if dbobject does not contains key "end", will not save
-        dbobject.removeField("end");
+        dbobject.remove("end");
         entries = entryEjb.getUncheques(end, 11201);
         double sum=0.0;
-        BasicDBList list = new BasicDBList();
+        List<Document> list = new ArrayList<>();
         for (Entry e : entries) {
-            BasicDBObject o = new BasicDBObject("id", e.getId());
+            Document o = new Document("id", e.getId());
             o.append("amount", e.getAmount().doubleValue());
             o.append("extra1", e.getExtra1());
             list.add(o);
             sum += e.getAmount().doubleValue();
         }
-        dbobject = new BasicDBObject("accountId", "11201");
+        dbobject = new Document("accountId", "11201");
         SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
         dbobject.append("start", fmt.format(begin));
         dbobject.append("end", fmt.format(end));
         List<Integer> accs = new ArrayList<>();
         accs.add(11201);
+                logger.log(Level.INFO, "start: {0}, end: {1}, acc: {2}", new Object[]{
+                    begin, end, accs.get(0)
+                });
         java.math.BigDecimal bbal = entryEjb.aggregate(accs, begin, end);
         logger.log(Level.INFO, "Book Balance is {0}", bbal);
         dbobject.append("bookBalance", bbal.doubleValue());
         dbobject.append("uncheq", sum);
         dbobject.append("pending", list);
         //accountId, end, bookBalance, uncheq (sum), pending [list of entries],
-        logger.log(Level.INFO, "Result: {0}", dbobject.toString());
+        logger.log(Level.FINE, "Result: {0}", dbobject.toString());
     }
     
 }

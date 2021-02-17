@@ -4,14 +4,12 @@ import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 import org.therismos.ejb.EntryEjb;
-//import org.therismos.entity.Account;
 import org.therismos.entity.Entry;
 
 /**

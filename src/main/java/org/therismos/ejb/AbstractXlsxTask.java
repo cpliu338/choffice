@@ -4,9 +4,11 @@ import java.io.File;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -47,24 +49,25 @@ public class AbstractXlsxTask {
         format = workbook.createDataFormat();
         fontBold = workbook.createFont();
         fontBold.setFontHeight((short)240);
-        fontBold.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        fontBold.setBold(true);
         fontNormal = workbook.createFont();
         fontNormal.setFontHeight((short)240);
-        fontNormal.setBoldweight(Font.BOLDWEIGHT_NORMAL);
+        fontNormal.setBold(false);
         fontHeader1 =workbook.createFont();
         fontHeader1.setFontHeight((short)720);
-        fontHeader1.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        fontHeader1.setBold(true);
         fontHeader2 =workbook.createFont();
         fontHeader2.setFontHeight((short)400);
         fontHeader2.setUnderline(Font.U_SINGLE);
         styleHeader1 = this.createHeaderStyle(fontHeader1);
         styleHeader2 = this.createHeaderStyle(fontHeader2);
-        //styleSummary = this.createStyle(CellStyle.ALIGN_RIGHT, true, true, (short)1);
-        styleText = this.createStyle(CellStyle.ALIGN_CENTER, false, false, (short)0);
-        styleEntry = this.createStyle(CellStyle.ALIGN_RIGHT, false, true, (short)0);
-        styleBoldText = this.createStyle(CellStyle.ALIGN_CENTER, true, false, (short)0);
-        styleBoldEntry = this.createStyle(CellStyle.ALIGN_RIGHT, true, true, (short)0);
-        styleCheckSum = this.createStyle(CellStyle.ALIGN_RIGHT, true, true, (short)2);
+        
+        styleText = this.createStyle(HorizontalAlignment.CENTER, true, true, (short)1);
+        styleText = this.createStyle(HorizontalAlignment.CENTER, false, false, (short)0);
+        styleEntry = this.createStyle(HorizontalAlignment.RIGHT, false, true, (short)0);
+        styleBoldText = this.createStyle(HorizontalAlignment.CENTER, true, false, (short)0);
+        styleBoldEntry = this.createStyle(HorizontalAlignment.RIGHT, true, true, (short)0);
+        styleCheckSum = this.createStyle(HorizontalAlignment.RIGHT, true, true, (short)2);
         //DataFormat format = workbook.createDataFormat();
         styleDate = workbook.createCellStyle();
         styleDate.setDataFormat(format.getFormat("yyyy-mm-dd"));
@@ -73,7 +76,7 @@ public class AbstractXlsxTask {
     
     protected final CellStyle createHeaderStyle(Font f) {
         CellStyle style = workbook.createCellStyle();
-        style.setAlignment(CellStyle.ALIGN_CENTER);
+        style.setAlignment(HorizontalAlignment.CENTER);
         style.setFont(f);
         return style;
     }
@@ -86,22 +89,26 @@ public class AbstractXlsxTask {
      * @param isSummary 0 for normal, 1 for summary (underline), 2 for checksum (double underline)
      * @return 
      */
-    protected final CellStyle createStyle(short align, boolean isBold, boolean isNumber, short isSummary) {
+    protected final CellStyle createStyle(HorizontalAlignment align, boolean isBold, boolean isNumber, short isSummary) {
         CellStyle style = workbook.createCellStyle();
         style.setFont(isBold ? fontBold : fontNormal);
         switch (isSummary) {
-            case 0: case 1: style.setBorderBottom(CellStyle.BORDER_THIN); break;
-            case 2: style.setBorderBottom(CellStyle.BORDER_DOUBLE); break;
+            case 0: case 1: 
+                style.setBorderBottom(BorderStyle.THIN);
+                break;
+            case 2: 
+                style.setBorderBottom(BorderStyle.DOUBLE); 
+                break;
         }
         style.setBottomBorderColor(IndexedColors.BLACK.getIndex());
-        style.setBorderLeft(CellStyle.BORDER_THIN);
+        style.setBorderLeft(BorderStyle.THIN);
         style.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-        style.setBorderRight(CellStyle.BORDER_THIN);
+        style.setBorderRight(BorderStyle.THIN);
         style.setRightBorderColor(IndexedColors.BLACK.getIndex());
         switch (isSummary) {
-            case 0: style.setBorderTop(CellStyle.BORDER_THIN); break;
+            case 0: style.setBorderTop(BorderStyle.THIN); break;
             case 1: 
-            case 2: style.setBorderTop(CellStyle.BORDER_MEDIUM); break;
+            case 2: style.setBorderTop(BorderStyle.MEDIUM); break;
         }
         style.setTopBorderColor(IndexedColors.BLACK.getIndex());
         style.setAlignment(align);

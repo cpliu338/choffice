@@ -7,12 +7,12 @@
         <param-value>Production</param-value>
     </context-param>
     <context-param>
-        <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+        <param-name>old.javax.faces.STATE_SAVING_METHOD</param-name>
         <param-value>server</param-value>
     </context-param>
     <context-param>
         <description>Check out http://stackoverflow.com/questions/18789547/viewexpiredexception-when-i-use-viewscoped</description>
-        <param-name>org.apache.myfaces.SERIALIZE_STATE_IN_SESSION</param-name>
+        <param-name>old.org.apache.myfaces.SERIALIZE_STATE_IN_SESSION</param-name>
         <param-value>false</param-value>
     </context-param>
     <filter>

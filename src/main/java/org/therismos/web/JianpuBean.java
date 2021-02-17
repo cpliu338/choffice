@@ -1,13 +1,11 @@
 package org.therismos.web;
 
-import javax.faces.bean.ManagedBean;
-
 /**
  *
  * @author cp_liu
  */
-@ManagedBean
-@javax.faces.bean.ViewScoped
+@javax.inject.Named
+@javax.faces.view.ViewScoped
 public class JianpuBean implements java.io.Serializable {
     private String measure;
     private String melody;

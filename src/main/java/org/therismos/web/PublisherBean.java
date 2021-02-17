@@ -1,16 +1,14 @@
 package org.therismos.web;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
 import java.util.*;
 
 /**
  * Dummy to be deleted
  * @author Administrator
  */
-@ManagedBean
-@ViewScoped
-public class PublisherBean {
+@javax.inject.Named
+@javax.faces.view.ViewScoped
+public class PublisherBean implements java.io.Serializable {
     private ArrayList<String> foundPublishers;
     private String crit;
     

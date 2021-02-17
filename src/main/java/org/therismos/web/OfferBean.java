@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
 import javax.persistence.EntityManager;
 import javax.persistence.TemporalType;
@@ -18,8 +17,8 @@ import org.therismos.entity.Offer;
  *
  * @author cpliu
  */
-@ManagedBean
-@javax.faces.bean.ViewScoped
+@javax.inject.Named
+@javax.faces.view.ViewScoped
 public class OfferBean implements java.io.Serializable {
     
     private int batch;
