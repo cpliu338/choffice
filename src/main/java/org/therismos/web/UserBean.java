@@ -34,7 +34,7 @@ public class UserBean implements java.io.Serializable {
     
     @javax.annotation.PostConstruct
     public void init() {
-        logger.log(Level.INFO, "Naspath is {0}, datapath is {1}", new Object[]{
+        logger.log(Level.FINE, "Naspath is {0}, datapath is {1}", new Object[]{
             naspath, datapath});        
     }
 

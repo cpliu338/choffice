@@ -27,7 +27,7 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 import org.apache.commons.codec.binary.Hex;
 import org.therismos.authen.BlindTrustSSLFactory;
-import org.therismos.authen.LoginBean;
+//import org.therismos.authen.LoginBean;
 
 /**
  *

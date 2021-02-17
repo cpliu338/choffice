@@ -17,7 +17,7 @@ import javax.naming.NamingException;
 import javax.naming.directory.*;
 import javax.naming.ldap.InitialLdapContext;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang.CharSet;
+//import org.apache.commons.lang.CharSet;
 
 /**
  *

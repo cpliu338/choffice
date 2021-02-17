@@ -23,15 +23,17 @@ public class StreamedBean implements java.io.Serializable {
     private File photospath;
     @javax.inject.Inject
     UserBean userBean;
+    @javax.annotation.Resource(name="datapath")// type="java.lang.String")
+    String datapath;
 
     @javax.annotation.PostConstruct
     public void init() {
-        basePath = userBean.getBasePath();
+        basePath = new File(datapath);
         photospath = new File(basePath, "photos");
     }
 
     public DefaultStreamedContent getWheat() {
-        File bkg = new File(this.basePath, "photos/wheat.jpg");
+        File bkg = new File(photospath, "wheat.jpg");
         try {
             return new DefaultStreamedContent(new FileInputStream(bkg), "image/jpeg");
         } catch (FileNotFoundException ex) {
@@ -70,7 +72,7 @@ public class StreamedBean implements java.io.Serializable {
      */
     public DefaultStreamedContent getBarcode() {
         barcode = null;
-        File barcodepath = new File(this.basePath, "codes");
+        File barcodepath = new File(basePath, "codes");
         GenBarcode barcodebean = new GenBarcode();
         barcodebean.setBasePath(barcodepath.getAbsolutePath());
         try {
