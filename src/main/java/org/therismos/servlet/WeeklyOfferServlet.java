@@ -67,7 +67,7 @@ public class WeeklyOfferServlet extends HttpServlet {
             offerlist.setDate1(d);
             this.task(d);
         } catch (RuntimeException | ParseException ex) {
-Logger.getLogger(WeeklyOfferServlet.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WeeklyOfferServlet.class.getName()).log(Level.SEVERE, null, ex);
             response.sendError(404);
             return;
         }
@@ -242,12 +242,10 @@ Logger.getLogger(WeeklyOfferServlet.class.getName()).log(Level.SEVERE, null, ex)
      */
     protected void doGetExcel(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        //PrintWriter out = response.getWriter();
-        
         response.setContentType("application/vnd.ms-excel");
         java.text.SimpleDateFormat fmt = new java.text.SimpleDateFormat("yyyy-MM-dd");
         String datestr = request.getParameter("datestr");
-Logger.getLogger(WeeklyOfferServlet.class.getName()).log(Level.INFO, "datestr {0}", datestr);
+Logger.getLogger(WeeklyOfferServlet.class.getName()).log(Level.FINE, "datestr {0}", datestr);
         try {
             Date d = fmt.parse(datestr);
             this.task(d);
@@ -255,7 +253,7 @@ Logger.getLogger(WeeklyOfferServlet.class.getName()).log(Level.INFO, "datestr {0
             XSSFWorkbook workbook = generateExcelReport();
             workbook.write(response.getOutputStream());
         } catch (RuntimeException | ParseException ex) {
-Logger.getLogger(WeeklyOfferServlet.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WeeklyOfferServlet.class.getName()).log(Level.SEVERE, null, ex);
             response.sendError(404);
         }
     }
@@ -278,6 +276,10 @@ Logger.getLogger(WeeklyOfferServlet.class.getName()).log(Level.SEVERE, null, ex)
             offers.clear();
         }
         String type = request.getParameter("type");
+        if (request.getProtocol().endsWith("1.0"))
+            response.setHeader("Pragma", "no-cache");
+        else
+            response.setHeader("Cache-Control", "private, no-store, no-cache, must-revalidate");
         if (type.contains("xls")) {
             doGetExcel(request, response);
         }
