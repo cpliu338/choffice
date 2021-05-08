@@ -72,7 +72,7 @@ public class AuditExportTask extends AbstractXlsxTask implements Runnable {
             Cell cell = row.createCell(0);
             cell.setCellValue(o.getString("extra1"));
             cell = row.createCell(1);
-            cell.setCellValue(o.getString("amount"));
+            cell.setCellValue(o.get("amount", Number.class).toString());
         }
         
     }
