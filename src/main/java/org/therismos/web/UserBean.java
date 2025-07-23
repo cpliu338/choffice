@@ -11,7 +11,9 @@ import java.util.logging.*;
 import org.therismos.jaas.UserPrincipal;
 
 /**
- *
+ * Updated for Jakarta EE 10
+ * TODO to be tested
+ * The Session Bean for a user
  * @author cpliu
  */
 @Named

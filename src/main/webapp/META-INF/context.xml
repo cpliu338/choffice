@@ -1,2 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Context path="/choffice"/>
+<Context path="/choffice" mapperContextRootRedirectEnabled="true">
+    <!-- LdapLogin in facts works on MariaDB with md5 hashed password -->
+    <Realm appName="LdapLogin" className="org.apache.catalina.realm.JAASRealm" roleClassNames="org.therismos.jaas.RolePrincipal" userClassNames="org.therismos.jaas.UserPrincipal"/>
+</Context>

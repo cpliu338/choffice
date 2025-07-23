@@ -87,6 +87,7 @@
     </security-constraint>
     <login-config>
         <auth-method>FORM</auth-method>
+        <realm-name>LdapLogin</realm-name>
         <form-login-config>
             <form-login-page>/login.jsf</form-login-page>
             <form-error-page>/login-failed.jsf</form-error-page>
