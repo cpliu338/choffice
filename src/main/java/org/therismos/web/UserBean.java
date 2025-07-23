@@ -1,21 +1,20 @@
 package org.therismos.web;
 
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.faces.context.*;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import java.io.*;
 import java.util.*;
 import java.util.logging.*;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import org.therismos.jaas.UserPrincipal;
 
 /**
  *
  * @author cpliu
  */
-@ManagedBean
+@Named
 @SessionScoped
 public class UserBean implements java.io.Serializable {
     private UserPrincipal user;
@@ -48,7 +47,7 @@ public class UserBean implements java.io.Serializable {
             base1 = envCtx.lookup("naspath").toString();
             return new File(base1);
         } catch (javax.naming.NamingException ex) {
-            Logger.getLogger(PublisherBean.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(UserBean.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
     }
@@ -62,7 +61,7 @@ public class UserBean implements java.io.Serializable {
             base1 = envCtx.lookup("naspath2").toString();
             return new File(base1);
         } catch (javax.naming.NamingException ex) {
-            Logger.getLogger(PublisherBean.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(UserBean.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
     }
@@ -75,8 +74,10 @@ public class UserBean implements java.io.Serializable {
         return Locale.TRADITIONAL_CHINESE;
     }
     
-    public static final String[] groups = {"deacons","librarians","staff"};
-   
+    static final String[] groups = {"deacons","librarians","staff"};
+
+    static public String[] getGroups() {return groups;}
+    
     public String logout() {
         user = null;
         userMap = Collections.EMPTY_MAP;
