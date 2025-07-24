@@ -11,13 +11,20 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 import javax.sql.*;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.dbutils.QueryRunner;
 /**
  * Updated for Jakarta EE 10
- * TODO to be tested
  * JAAS module using MariaDB and md5 hashed password
  * @author cp_liu
  */
 public class DummyModule implements LoginModule {
+
+    /**
+     * @return the subject
+     */
+    public Subject getSubject() {
+        return subject;
+    }
 
     /**
      * @return the ds
@@ -33,11 +40,11 @@ public class DummyModule implements LoginModule {
   private String login;
   private List<String> userGroups;
   private HashMap<String,String> map;
-  //private Properties props;
   private DataSource ds;
   private String ds_properties;
 
     /**
+     * This is for testing using a SimpleDatasource
      * @param ds the ds to set
      */
     public void setDs_properties(String ds) {
@@ -70,49 +77,33 @@ public class DummyModule implements LoginModule {
         }
   }
   
-@Override
+  @Override
   public boolean login() throws LoginException {
 
     Callback[] callbacks = new Callback[2];
     callbacks[0] = new NameCallback("login");
     callbacks[1] = new PasswordCallback("password", true);
-
-    try (Connection conn = getDs().getConnection()) {
-      handler.handle(callbacks);
-      String name = ((NameCallback) callbacks[0]).getName();
-      String password = String.valueOf(((PasswordCallback) callbacks[1])
-          .getPassword());
-      if (conn==null) 
-          throw new RuntimeException("Connection is null");
-      else {
-          PreparedStatement stmt=conn.prepareStatement("SELECT name FROM members WHERE nickname=? AND pwd=?");
-          stmt.setString(1, name);
-          stmt.setString(2, DigestUtils.md5Hex(password));
-          ResultSet rs = stmt.executeQuery();
-          if (rs.next()) {
-            map.put("givenName", rs.getString(1));
-            map.put("nickname", name);
-              rs.close();
-              stmt.close();
-              stmt=conn.prepareStatement("SELECT role FROM groups WHERE user=?");
-              stmt.setString(1, name);
-              rs = stmt.executeQuery();
-              while (rs.next()) {
-                userGroups.add(rs.getString(1));
-              }
-          }
-          else {
-              throw new RuntimeException("Wrong pwd");
-          }
-          rs.close();
-          stmt.close();
-          conn.close();
-      }
+    String sql = "SELECT m.name, m.nickname, g.role from members m LEFT JOIN groups g on m.nickname=g.user "
+            + "WHERE m.nickname=? and m.pwd=?";
+    QueryRunner runner = new QueryRunner(ds);
+    try {
+        handler.handle(callbacks);
+        String name = ((NameCallback) callbacks[0]).getName();
+        String password = String.valueOf(((PasswordCallback) callbacks[1]).getPassword());
+        List<Map<String, Object>> results = runner.query(sql, new org.apache.commons.dbutils.handlers.MapListHandler(), name, DigestUtils.md5Hex(password));
+        if (results.isEmpty()) throw new RuntimeException("Wrong pwd");
+        if (results.size() != 3) throw new RuntimeException("Wrong roles");
+        for (Map<String, Object> result : results) {
+            map.put("givenName", result.get("name").toString());
+            map.put("nickname", result.get("nickname").toString());
+            userGroups.add(result.get("role").toString());
+        }
         login = name;
         return true;
-     } catch (RuntimeException | SQLException | IOException | UnsupportedCallbackException e) {
-          throw new LoginException(e.getMessage());
-     }
+    }
+    catch (RuntimeException | SQLException | IOException | UnsupportedCallbackException e) {
+        throw new LoginException(e.getMessage());
+    }
 
   }
   
@@ -121,12 +112,12 @@ public class DummyModule implements LoginModule {
 
     userPrincipal = new UserPrincipal(login);
     userPrincipal.setMap(map);
-    subject.getPrincipals().add(userPrincipal);
+        getSubject().getPrincipals().add(userPrincipal);
 
-    if (userGroups != null && userGroups.size() > 0) {
+    if (userGroups != null && !userGroups.isEmpty()) {
       for (String groupName : userGroups) {
         rolePrincipal = new RolePrincipal(groupName);
-        subject.getPrincipals().add(rolePrincipal);
+                getSubject().getPrincipals().add(rolePrincipal);
       }
     }
 
@@ -140,8 +131,8 @@ public class DummyModule implements LoginModule {
 
   @Override
   public boolean logout() throws LoginException {
-    subject.getPrincipals().remove(userPrincipal);
-    subject.getPrincipals().remove(rolePrincipal);
+        getSubject().getPrincipals().remove(userPrincipal);
+        getSubject().getPrincipals().remove(rolePrincipal);
     return true;
   }
     

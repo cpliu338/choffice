@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 import org.mariadb.jdbc.MariaDbDataSource;
 
 /**
- *
+ * Use this datasource for testing
  * @author cp_liu
  */
 public class SimpleDatasource {

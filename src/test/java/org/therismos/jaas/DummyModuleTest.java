@@ -1,6 +1,7 @@
 package org.therismos.jaas;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Map;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.*;
@@ -10,9 +11,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.therismos.bean.ApplicationBean;
 
 /**
- *
+ * TODO: remove sensitive password
  * @author cp_liu
  */
 public class DummyModuleTest {
@@ -32,7 +34,7 @@ public class DummyModuleTest {
     
     @Before
     public void setUp() {
-        Subject subject = null;
+        Subject subject = new Subject();
         CallbackHandler callbackHandler = new Handler();
         Map sharedState = null;
         Map options = null;
@@ -63,15 +65,6 @@ public class DummyModuleTest {
      */
     public void testInitialize() throws Exception {
         System.out.println("initialize");
-        Subject subject = null;
-        CallbackHandler callbackHandler = null;
-        Map sharedState = null;
-        Map options = null;
-        //instance = new DummyModule();
-        instance.setDs_properties("/home/cp_liu/Documents/java_dir/config/choffice_test.properties");
-        instance.initialize(subject, callbackHandler, sharedState, options);
-        // TODO review the generated test code and remove the default call to fail.
-        System.out.println("ds OK");
     }
 
     /**
@@ -80,10 +73,23 @@ public class DummyModuleTest {
     @Test
     public void testLogin() throws Exception {
         System.out.println("login");
-        assert(instance.getDs() != null);
+        assert(instance.getSubject().getPrincipals().isEmpty());
         boolean result = instance.login();
         assert(result);
-        // TODO review the generated test code and remove the default call to fail.
+        assert(instance.commit());
+        Subject subject = instance.getSubject();
+        for (Principal p : subject.getPrincipals()) {
+            if (p instanceof UserPrincipal) {
+                UserPrincipal up = (UserPrincipal)p;
+                System.out.println("Given Name:" + up.getMap().get("givenName").toString());
+                System.out.println("Name:" + up.getName());
+            }
+            if (p instanceof RolePrincipal) {
+                RolePrincipal rp = (RolePrincipal)p;
+                System.out.println("Role:" + rp.getName());
+            }
+        }
+        assert(!subject.getPrincipals().isEmpty());
     }
 
     /**
@@ -129,6 +135,9 @@ public class DummyModuleTest {
 
         @Override
         public void handle(Callback[] clbcks) throws IOException, UnsupportedCallbackException {
+            ApplicationBean ab = new ApplicationBean();
+            ab.init();
+            String pwd = ab.getProperties().get("jaas.password").toString();
             for (Callback cb : clbcks) {
                 if (cb instanceof NameCallback) {
                     NameCallback ncb = (NameCallback) cb;
@@ -136,7 +145,7 @@ public class DummyModuleTest {
                 }
                 else if (cb instanceof PasswordCallback) {
                     PasswordCallback pcb = (PasswordCallback) cb;
-                    pcb.setPassword("hk97KL522".toCharArray());
+                    pcb.setPassword(pwd.toCharArray());
                 }
             }
         }

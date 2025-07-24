@@ -22,6 +22,9 @@ public class UserBean implements java.io.Serializable {
     private UserPrincipal user;
     private Map userMap;
     
+    @jakarta.annotation.Resource
+    private String datapath;
+    
     public UserBean() {
         userMap = Collections.EMPTY_MAP;
     }
@@ -122,6 +125,13 @@ public class UserBean implements java.io.Serializable {
      */
     public String getName() {
         return user == null ? "" : user.getName();
+    }
+
+    /**
+     * @return the datapath
+     */
+    public String getDatapath() {
+        return datapath;
     }
 
 }
