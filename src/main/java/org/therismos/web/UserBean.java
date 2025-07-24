@@ -21,57 +21,33 @@ import org.therismos.jaas.UserPrincipal;
 public class UserBean implements java.io.Serializable {
     private UserPrincipal user;
     private Map userMap;
+    static private Logger LOG = Logger.getLogger(UserBean.class.getName());
     
     @jakarta.annotation.Resource
     private String datapath;
+    @jakarta.annotation.Resource
+    private String naspath;
+    @jakarta.annotation.Resource
+    private String naspath2;
     
     public UserBean() {
-        userMap = Collections.EMPTY_MAP;
+        
     }
-
+    
     public File getBasePath() {
-        javax.naming.Context initCtx;
-        String base1;
-        try {
-            initCtx = new javax.naming.InitialContext();
-            javax.naming.Context envCtx = (javax.naming.Context) initCtx.lookup("java:comp/env");
-            base1 = envCtx.lookup("datapath").toString();
-            return new File(base1);
-        } catch (javax.naming.NamingException ex) {
-            Logger.getLogger(UserBean.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
+        return new File(datapath);
     }
 
     public File getNasPath() {
-        javax.naming.Context initCtx;
-        String base1;
-        try {
-            initCtx = new javax.naming.InitialContext();
-            javax.naming.Context envCtx = (javax.naming.Context) initCtx.lookup("java:comp/env");
-            base1 = envCtx.lookup("naspath").toString();
-            return new File(base1);
-        } catch (javax.naming.NamingException ex) {
-            Logger.getLogger(UserBean.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
+        return new File(naspath);
     }
     
     public File getNasPath2() {
-        javax.naming.Context initCtx;
-        String base1;
-        try {
-            initCtx = new javax.naming.InitialContext();
-            javax.naming.Context envCtx = (javax.naming.Context) initCtx.lookup("java:comp/env");
-            base1 = envCtx.lookup("naspath2").toString();
-            return new File(base1);
-        } catch (javax.naming.NamingException ex) {
-            Logger.getLogger(UserBean.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
+        return new File(naspath2);
     }
     
     public Map getUserMap() {
+        refreshUser();
         return userMap;
     }
     
@@ -79,9 +55,8 @@ public class UserBean implements java.io.Serializable {
         return Locale.TRADITIONAL_CHINESE;
     }
     
-    static final String[] groups = {"deacons","librarians","staff"};
-
-    static public String[] getGroups() {return groups;}
+//    static final String[] groups = {"deacons","librarians","staff"};
+//    static public String[] getGroups() {return groups;}
     
     public String logout() {
         user = null;
@@ -94,29 +69,23 @@ public class UserBean implements java.io.Serializable {
         return "/index?faces-redirect=true";
     }
     
-    public boolean isLibrarian() {
-        return isInRole("librarians");
-    }
-    
     public boolean isInRole(String r) {
         FacesContext fc = FacesContext.getCurrentInstance();
         HttpServletRequest req = (HttpServletRequest)fc.getExternalContext().getRequest();
         return req.isUserInRole(r);
     }
-    
-    public boolean isLoggedIn() {
+
+//    @jakarta.annotation.PostConstruct
+    private void refreshUser() {
         FacesContext fc = FacesContext.getCurrentInstance();
         HttpServletRequest req = (HttpServletRequest)fc.getExternalContext().getRequest();
-        if (req.getUserPrincipal() == null) {
-            user = null;
-            userMap = Collections.EMPTY_MAP;
-        Logger.getLogger(UserBean.class.getName()).log(Level.FINE, "Not logged in");
-            return false;
-        }
         // if just logged in via j_security check, set user
         user = (UserPrincipal) req.getUserPrincipal();
-        userMap = user.getMap();
-        Logger.getLogger(UserBean.class.getName()).log(Level.FINE, "User:"+user.getName());
+        userMap =  (user == null) ? Collections.EMPTY_MAP : user.getMap();
+    }
+    
+    public boolean isLoggedIn() {
+        refreshUser();
         return user!=null;
     }
 
@@ -124,14 +93,9 @@ public class UserBean implements java.io.Serializable {
      * @return the name
      */
     public String getName() {
-        return user == null ? "" : user.getName();
-    }
-
-    /**
-     * @return the datapath
-     */
-    public String getDatapath() {
-        return datapath;
+        refreshUser();
+        return user == null ? "" : 
+            (userMap.containsKey("givenName") ? userMap.get("givenName").toString() : user.getName());
     }
 
 }

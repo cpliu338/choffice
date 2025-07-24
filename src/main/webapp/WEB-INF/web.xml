@@ -11,6 +11,10 @@
         <param-value>server</param-value>
     </context-param>
     <context-param>
+        <param-name>choffice.version</param-name>
+        <param-value>6.0</param-value>
+    </context-param>
+    <context-param>
         <description>Check out http://stackoverflow.com/questions/18789547/viewexpiredexception-when-i-use-viewscoped</description>
         <param-name>jakarta.faces.SERIALIZE_STATE_IN_SESSION</param-name>
         <param-value>false</param-value>
@@ -31,7 +35,7 @@
         <session-timeout>3000</session-timeout>
     </session-config>
     <welcome-file-list>
-        <welcome-file>index.jsp</welcome-file>
+        <welcome-file>index.jsf</welcome-file>
     </welcome-file-list>
     <security-constraint>
         <display-name>Staff</display-name>

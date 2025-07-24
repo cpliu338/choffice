@@ -5,23 +5,19 @@
       xmlns:ui="jakarta.faces.facelets">
 
     <body>
-
         <ui:composition template="../WEB-INF/mainTemplate.xhtml">
             <ui:define name="left">
                 <h:form>
-                    <p>
-                    <h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">Log out</h:commandLink>
-                    </p><p>
-                    <h:commandLink rendered="#{userBean.loggedIn}" action="cards?faces-redirect=true">Print cards</h:commandLink>
-                    </p>
+                    <p:menu>
+                        <p:menuitem rendered="#{userBean.loggedIn}" action="#{userBean.logout()}" value="Log out" icon="pi pi-power-off" disabled="false"/> 
+                        <p:menuitem action="cards?faces-redirect=true" value="Print cards" disabled="false"/> 
+                    </p:menu>
                 </h:form>
             </ui:define>
             <ui:define name="content">
                 <h1>Hello <h:outputText value="#{userBean.userMap['givenName']}"/></h1>
-                <h2>Datapath is <h:outputText value="#{userBean.datapath}" /></h2>
+                <h2>Data path is <h:outputText value="#{applicationBean.datapath}" /></h2>
             </ui:define>
-
         </ui:composition>
-
     </body>
 </html>

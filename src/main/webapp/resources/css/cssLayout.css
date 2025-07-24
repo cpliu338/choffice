@@ -20,9 +20,9 @@
 
 #left {
     float: left;
-    background-color: #ece3a5;
+    /* background-color: #ece3a5; */
     padding: 5px;
-    width: 150px;
+    width: 180px;
 }
 
 #right {
@@ -41,7 +41,7 @@
 .left_content {
     background-color: #dddddd;
     padding: 5px;
-    margin-left: 170px;
+    margin-left: 210px;
 }
 
 .right_content {
@@ -62,4 +62,6 @@
   text-decoration : underline;
 }
 
-
+.footer-crumb {
+    margin-right: 5px; margin-left: 5px
+}

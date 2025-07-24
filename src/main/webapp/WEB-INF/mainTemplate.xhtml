@@ -1,9 +1,10 @@
 <?xml version='1.0' encoding='UTF-8' ?> 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:p="primefaces" 
       xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:f="http://java.sun.com/jsf/core"
       xmlns:h="http://java.sun.com/jsf/html">
-<f:view locale="#{userBean.locale}" contentType="text/html" >
+
+    <f:view locale="#{userBean.locale}" contentType="text/html" >
     <f:loadBundle var="msg" basename="messages" />
     <h:head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -30,7 +31,21 @@
             </div>
         </div>
         <div id="bottom">
-            <ui:insert name="bottom">Version 6.0</ui:insert>
+            <ui:insert name="bottom">
+                <p:panel rendered="#{userBean.loggedIn}">
+                <span style="margin-right: 4em">
+                Version <h:outputText value="#{initParam['choffice.version']}"/>
+                </span>
+                <span style="margin-right: 5px">
+                <h:outputText value="#{userBean.userMap['nickname']} " />
+                ( <h:outputText value="#{userBean.userMap['givenName']}" /> ) :
+                </span>
+                <!-- h:outputText value="#{userBean.name}"/ -->
+                <h:outputText rendered="#{userBean.isInRole('deacons')}" styleClass="footer-crumb" value="deacon"/>
+                <h:outputText rendered="#{userBean.isInRole('staff')}" styleClass="footer-crumb" value="staff"/>
+                <h:outputText rendered="#{userBean.isInRole('librarians')}" styleClass="footer-crumb" value="librarians"/> 
+                </p:panel>
+            </ui:insert>
         </div>
 
     </h:body>
