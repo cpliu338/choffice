@@ -3,7 +3,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="jakarta.faces.core"
       xmlns:p="primefaces" xmlns:h="jakarta.faces.html"
       xmlns:ui="jakarta.faces.facelets">
-
     <body>
         <ui:composition template="../WEB-INF/mainTemplate.xhtml">
             <ui:define name="left">
@@ -61,7 +60,7 @@
             <h:outputText value="Done" />
             </f:facet>
         </p:ajaxStatus>
-        <h:form style="margin: 20px">
+        <h:form style="margin: 20px" enctype="multipart/form-data">
             <p:selectOneMenu value="#{memberBean.group}">
                 <f:selectItem itemLabel="Select Group" itemValue="" />
                 <f:selectItems value="#{memberBean.selectItems}"/>
@@ -72,7 +71,11 @@
                 <f:selectItems value="#{memberBean.members}"/>
             </p:selectOneMenu>
             <p:commandButton update=":card" value="update"/>
-                <h:outputText id="debug" value="#{memberBean.debug}"/>
+            <p:fileUpload listener="#{streamedBean.handleFileUpload}" mode="advanced" multiple="false"
+                  update=":notify" label="Photo (&lt;100kB)">
+                <p:validateFile fileLimit="1" sizeLimit="100000" allowTypes="/(\.|\/)(jpe?g)$/" />
+            </p:fileUpload>
+            <!-- dragDropSupport="true" -->
         </h:form>
             </ui:define>
         </ui:composition>

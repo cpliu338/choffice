@@ -53,6 +53,7 @@ public class StreamedBean implements java.io.Serializable {
     }
 */
     public DefaultStreamedContent getPhoto() {
+        LOG.log(Level.INFO, "GetPhoto");
         DefaultStreamedContent photo = null;
         int id = 1;
         try {
@@ -91,6 +92,7 @@ public class StreamedBean implements java.io.Serializable {
      * @return the barcode
      */
     public DefaultStreamedContent getBarcode() {
+        LOG.log(Level.INFO, "GetBarcode");
         barcode = null;
         File barcodepath = new File(this.basePath, "codes");
         GenBarcode barcodebean = new GenBarcode();
@@ -136,7 +138,7 @@ public class StreamedBean implements java.io.Serializable {
     public void setBarcode(DefaultStreamedContent barcode) {
         this.barcode = barcode;
     }
-/*
+
     public void handleFileUpload(FileUploadEvent event) {
         FacesContext fc = FacesContext.getCurrentInstance();
         MemberBean memberBean = (MemberBean)fc.getApplication().evaluateExpressionGet(fc, "#{memberBean}", MemberBean.class);
@@ -145,7 +147,7 @@ public class StreamedBean implements java.io.Serializable {
             id = memberBean.getId();
         File file = new File(photospath, String.format("%d.jpg", id));
         try {
-        java.io.InputStream is = event.getFile().getInputstream();
+        java.io.InputStream is = event.getFile().getInputStream();
         java.io.OutputStream os = new java.io.FileOutputStream(file);
             int ch;
             while ((ch = is.read()) != -1) {
@@ -161,7 +163,7 @@ public class StreamedBean implements java.io.Serializable {
         FacesMessage msg = new FacesMessage("Succesful", event.getFile().getFileName() + " is uploaded.");
         FacesContext.getCurrentInstance().addMessage(null, msg);
     }
-*/
+
     public int getMemberId() {
         FacesContext fc = FacesContext.getCurrentInstance();
         MemberBean memberBean = (MemberBean)fc.getApplication().evaluateExpressionGet(fc, "#{memberBean}", MemberBean.class);
