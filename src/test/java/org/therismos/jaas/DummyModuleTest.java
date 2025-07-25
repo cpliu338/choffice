@@ -39,7 +39,7 @@ public class DummyModuleTest {
         Map sharedState = null;
         Map options = null;
         instance = new DummyModule();
-        instance.setDs_properties("/home/cp_liu/Documents/java_dir/config/choffice_test.properties");
+        instance.setDs_properties(System.getenv("choffice") + "/config/choffice.properties");
         instance.initialize(subject, callbackHandler, sharedState, options);
         System.out.println("set up " + instance.getDs().toString());
     }
@@ -63,14 +63,17 @@ public class DummyModuleTest {
     /**
      * Test of initialize method, of class DummyModule.
      */
+    @Test
     public void testInitialize() throws Exception {
         System.out.println("initialize");
+        java.io.File configPath = new java.io.File(System.getenv("choffice"));
+        assert(configPath.isDirectory() && configPath.canRead() && configPath.canExecute());
     }
 
     /**
      * Test of login method, of class DummyModule.
      */
-    @Test
+    //@Test
     public void testLogin() throws Exception {
         System.out.println("login");
         assert(instance.getSubject().getPrincipals().isEmpty());

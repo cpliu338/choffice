@@ -43,9 +43,11 @@ public class ApplicationBeanTest {
     public void testInit() {
         System.out.println("init");
         instance.init();
+        assert(!"dbUser".equals(instance.getProperty("db.user")));
+        /*
         for (Map.Entry<Object, Object> entry : instance.getProperties().entrySet()) {
             System.out.println(entry.getKey().toString() + ":" + entry.getValue().toString());
-        }
+        }*/
         // TODO review the generated test code and remove the default call to fail.
     }
     

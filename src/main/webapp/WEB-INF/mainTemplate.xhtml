@@ -45,6 +45,7 @@
                 <h:outputText rendered="#{userBean.isInRole('staff')}" styleClass="footer-crumb" value="staff"/>
                 <h:outputText rendered="#{userBean.isInRole('librarians')}" styleClass="footer-crumb" value="librarians"/> 
                 </p:panel>
+                <h:outputText value="Debug message: #{applicationBean.debug}"/>
             </ui:insert>
         </div>
 

@@ -10,13 +10,70 @@
                 <h:form>
                     <p:menu>
                         <p:menuitem rendered="#{userBean.loggedIn}" action="#{userBean.logout()}" value="Log out" icon="pi pi-power-off" disabled="false"/> 
-                        <p:menuitem action="cards?faces-redirect=true" value="Print cards" disabled="false"/> 
+                        <p:menuitem action="cards?faces-redirect=true" value="Print cards" icon="pi pi-print" disabled="false"/> 
                     </p:menu>
                 </h:form>
             </ui:define>
             <ui:define name="content">
-                <h1>Hello <h:outputText value="#{userBean.userMap['givenName']}"/></h1>
-                <h2>Data path is <h:outputText value="#{applicationBean.datapath}" /></h2>
+            <p:panel id="card">
+        <p:growl id="notify" showDetail="true"/>
+    <table width="330" height="200" border="1" cellpadding="0" cellspacing="0" ><tr><!--http://asdfjs:8080/-->
+            <td class="watermark2" style="background-image: url(https://therismos.org.hk/photos/wheat.jpg)" >
+    <table cellpadding="0" cellspacing="0">
+    <tr><td align="left" colspan="2" height="30"><img src="https://therismos.org.hk/photos/logo1.jpg" /></td></tr>
+    <tr><td width="160" align="center" height="115">
+            <p:graphicImage id="photo" value="#{streamedBean.photo}" width="101">
+                <f:param name="id" value="#{streamedBean.memberId}"/>
+            </p:graphicImage>
+    </td><td valign="top" width="170"><font size="2" style="line-height:35px"><b>姓 名 :</b></font><font size="3" style="line-height:35px">
+            <h:outputText value="#{memberBean.member.name}" style="font-weight:bold"/></font><br/>
+        <font size="2" style="line-height:35px"><b>稱 呼 :</b></font><font size="3" style="line-height:35px">
+            <h:outputText value="#{memberBean.member.nickname}" style="font-weight:bold"/>
+        </font><br/>
+        <font size="2" style="line-height:35px"><b>團 契 :</b></font><font size="3" style="line-height:35px"><b>
+                <h:outputText value="#{memberBean.member.groupname}"/>
+            </b></font></td></tr>
+        <tr><td height="46" colspan="2" align="center">
+                <p:graphicImage alt="barcode" value="#{streamedBean.barcode}">
+                    <f:param name="id" value="#{memberBean.id}"/>
+                </p:graphicImage>
+            </td></tr>
+    </table>
+    </td></tr></table>
+            </p:panel>
+        <p:ajaxStatus>
+            <f:facet name="prestart">
+            <h:outputText value="Loading..." />
+            </f:facet>
+            <f:facet name="error">
+            <h:outputText value="Error" />
+            </f:facet>
+            <f:facet name="success">
+            <h:outputText value="OK" />
+            </f:facet>
+            <f:facet name="default">
+            <h:outputText value="Ready" />
+            </f:facet>
+            <f:facet name="start">
+            <h:outputText value="Sending" />
+            </f:facet>
+            <f:facet name="complete">
+            <h:outputText value="Done" />
+            </f:facet>
+        </p:ajaxStatus>
+        <h:form style="margin: 20px">
+            <p:selectOneMenu value="#{memberBean.group}">
+                <f:selectItem itemLabel="Select Group" itemValue="" />
+                <f:selectItems value="#{memberBean.selectItems}"/>
+                <p:ajax update="member debug" listener="#{memberBean.handleGroupChange()}"/>
+            </p:selectOneMenu>
+            <p:selectOneMenu id="member" value="#{memberBean.id}">
+                <f:selectItem itemLabel="Select Member" itemValue="" />
+                <f:selectItems value="#{memberBean.members}"/>
+            </p:selectOneMenu>
+            <p:commandButton update=":card" value="update"/>
+                <h:outputText id="debug" value="#{memberBean.debug}"/>
+        </h:form>
             </ui:define>
         </ui:composition>
     </body>
