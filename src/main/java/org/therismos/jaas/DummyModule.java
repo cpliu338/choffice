@@ -40,8 +40,10 @@ public class DummyModule implements LoginModule {
   private String login;
   private List<String> userGroups;
   private HashMap<String,String> map;
+  private boolean debug;
   private DataSource ds;
   private String ds_properties;
+  private static final Logger LOG = Logger.getLogger(DummyModule.class.getName());
 
     /**
      * This is for testing using a SimpleDatasource
@@ -57,10 +59,18 @@ public class DummyModule implements LoginModule {
       Map<String, ?> sharedState,
       Map<String, ?> options) {
         userGroups = new ArrayList();
-        map = new HashMap<>();
+        map = new HashMap<>(); 
         handler = callbackHandler;
         this.subject = subject;
-      Context initContext;
+        Context initContext;
+        Object debug_o = options.get("debug");
+        if (debug_o != null && debug_o instanceof Boolean) {
+            debug = (boolean)debug_o;
+        }
+        else {
+            debug = true;
+        }
+        LOG.info(() -> "Debug mode:" + Boolean.toString(debug));
         try {
             if (ds_properties == null) {
                 initContext = new InitialContext();
@@ -73,7 +83,7 @@ public class DummyModule implements LoginModule {
                 throw new RuntimeException("Cannot make datasource");
             }
         } catch (NamingException | SQLException | IOException | RuntimeException ex) {
-            Logger.getLogger(DummyModule.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
   }
   
@@ -109,16 +119,26 @@ public class DummyModule implements LoginModule {
   
   @Override
   public boolean commit() throws LoginException {
-
+    if (debug) {
+        LOG.info("committing");
+    }
     userPrincipal = new UserPrincipal(login);
+    if (debug) {
+        LOG.info("committing 1");
+    }
     userPrincipal.setMap(map);
         getSubject().getPrincipals().add(userPrincipal);
-
+    if (debug) {
+        LOG.info("committing 2");
+    }
     if (userGroups != null && !userGroups.isEmpty()) {
       for (String groupName : userGroups) {
         rolePrincipal = new RolePrincipal(groupName);
                 getSubject().getPrincipals().add(rolePrincipal);
       }
+    }
+    if (debug) {
+        LOG.info("committing 3");
     }
 
     return true;

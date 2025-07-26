@@ -37,7 +37,7 @@ public class DummyModuleTest {
         Subject subject = new Subject();
         CallbackHandler callbackHandler = new Handler();
         Map sharedState = null;
-        Map options = null;
+        Map options = new java.util.HashMap<>();
         instance = new DummyModule();
         instance.setDs_properties(System.getenv("choffice") + "/config/choffice.properties");
         instance.initialize(subject, callbackHandler, sharedState, options);
