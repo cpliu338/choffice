@@ -69,16 +69,30 @@ public class MemberBean implements java.io.Serializable {
         return membersInCart;
     }
     
-    public void refreshCart() {
+    public void emptyCart() {
+        idsInCart.clear();
         membersInCart.clear();
-        String sql = "SELECT * FROM members m WHERE m.id IN (%s) ORDER m.id";
-        try {
-            membersInCart.addAll(
-                    appBean.queryWithInClause(sql, idsInCart, Member1.class)
-                    //getRunner().query(sql, getHandler(), idsInCart)
-            );
-        } catch (SQLException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+        LOG.log(Level.INFO, "Cart size: {0}", membersInCart.size());
+    }
+    
+    public void addToCart() {
+        LOG.log(Level.INFO, "Trying to add mem id: {0}", id);
+        if (!idsInCart.contains(id)) {
+            idsInCart.add(id);
+            String sql = "SELECT * FROM members m WHERE m.id IN (%s) ORDER BY m.id";
+            try {
+                membersInCart.clear();
+                membersInCart.addAll(
+                        appBean.queryWithInClause(sql, idsInCart, Member1.class)
+                        //getRunner().query(sql, getHandler(), idsInCart)
+                );
+            LOG.log(Level.INFO, "Cart size: {0}", membersInCart.size());
+            } catch (SQLException ex) {
+                LOG.log(Level.SEVERE, null, ex);
+            }
+        }
+        else {
+            LOG.log(Level.WARNING, "mem id already in cart: {0}", id);
         }
     }
     

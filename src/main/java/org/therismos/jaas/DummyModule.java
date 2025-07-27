@@ -63,14 +63,12 @@ public class DummyModule implements LoginModule {
         handler = callbackHandler;
         this.subject = subject;
         Context initContext;
-        Object debug_o = options.get("debug");
-        if (debug_o != null && debug_o instanceof Boolean) {
-            debug = (boolean)debug_o;
+        debug = false;
+        if (options != null) {
+            for (String key : options.keySet()) {
+                LOG.info(() -> key + ":" + options.get(key).toString());
+            }            
         }
-        else {
-            debug = true;
-        }
-        LOG.info(() -> "Debug mode:" + Boolean.toString(debug));
         try {
             if (ds_properties == null) {
                 initContext = new InitialContext();
@@ -119,28 +117,15 @@ public class DummyModule implements LoginModule {
   
   @Override
   public boolean commit() throws LoginException {
-    if (debug) {
-        LOG.info("committing");
-    }
     userPrincipal = new UserPrincipal(login);
-    if (debug) {
-        LOG.info("committing 1");
-    }
     userPrincipal.setMap(map);
-        getSubject().getPrincipals().add(userPrincipal);
-    if (debug) {
-        LOG.info("committing 2");
-    }
+    subject.getPrincipals().add(userPrincipal);
     if (userGroups != null && !userGroups.isEmpty()) {
       for (String groupName : userGroups) {
         rolePrincipal = new RolePrincipal(groupName);
-                getSubject().getPrincipals().add(rolePrincipal);
+        subject.getPrincipals().add(rolePrincipal);
       }
     }
-    if (debug) {
-        LOG.info("committing 3");
-    }
-
     return true;
   }
 

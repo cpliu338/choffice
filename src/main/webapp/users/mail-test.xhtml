@@ -1,39 +1,42 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="jakarta.faces.facelets"
       xmlns:h="jakarta.faces.html" xmlns:p="primefaces">
     <h:head>
         <title>Facelet Title</title>
     </h:head>
     <h:body>
-        <h:form>
-            <table>
-                <tr>
-                    <th>Config</th>
-                    <td><p:inputTextarea cols="80" rows="20" value="#{smtpTester.config_as_string}" ></p:inputTextarea></td>
-                </tr>
-                <tr>
-                    <th>Email Subject</th>
-                    <td><p:inputText value="#{smtpTester.email_subject}" ></p:inputText></td>
-                </tr>
-                <tr>
-                    <th>Email from</th>
-                    <td><p:inputText value="#{smtpTester.email_from}" ></p:inputText></td>
-                </tr>
-                <tr>
-                    <th>Email to</th>
-                    <td><p:inputText value="#{smtpTester.email_to}" ></p:inputText></td>
-                </tr>
-                <tr>
-                    <th>Email body</th>
-                    <td><p:inputTextarea cols="80" rows="20" value="#{smtpTester.email_body}" ></p:inputTextarea></td>
-                </tr>
-                <tr>
-                    <td><p:commandButton action="#{smtpTester.send}" value="Send" update="msg" /></td>
-                    <td><p:messages id="msg" globalOnly="true"/></td>
-                </tr>
-            </table>
-            
-        </h:form>
+        <ui:composition template="../WEB-INF/mainTemplate.xhtml">
+            <ui:define name="content">
+                <h:form>
+                    <table>
+                        <tr>
+                            <th>Config</th>
+                            <td><p:inputTextarea cols="80" rows="20" value="#{smtpTester.config_as_string}" ></p:inputTextarea></td>
+                        </tr>
+                        <tr>
+                            <th>Email Subject</th>
+                            <td><p:inputText value="#{smtpTester.email_subject}" ></p:inputText></td>
+                        </tr>
+                        <tr>
+                            <th>Email from</th>
+                            <td><p:inputText value="#{smtpTester.email_from}" ></p:inputText></td>
+                        </tr>
+                        <tr>
+                            <th>Email to</th>
+                            <td><p:inputText value="#{smtpTester.email_to}" ></p:inputText></td>
+                        </tr>
+                        <tr>
+                            <th>Email body</th>
+                            <td><p:inputTextarea cols="80" rows="20" value="#{smtpTester.email_body}" ></p:inputTextarea></td>
+                        </tr>
+                        <tr>
+                            <td><p:commandButton action="#{smtpTester.send}" value="Send" update="msg" /></td>
+                            <td><p:messages id="msg" globalOnly="true"/></td>
+                        </tr>
+                    </table>
+                </h:form>
+            </ui:define>
+        </ui:composition>
     </h:body>
 </html>
