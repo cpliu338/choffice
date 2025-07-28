@@ -67,6 +67,9 @@ public class DummyModule implements LoginModule {
         if (options != null) {
             for (String key : options.keySet()) {
                 LOG.info(() -> key + ":" + options.get(key).toString());
+                if ("debug".equals(key) && "true".equals(options.get(key).toString())) {
+                    debug = true;
+                }
             }            
         }
         try {
@@ -107,6 +110,9 @@ public class DummyModule implements LoginModule {
             userGroups.add(result.get("role").toString());
         }
         login = name;
+        if (debug) {
+            LOG.log(Level.INFO, "{0} logged in", login);
+        }
         return true;
     }
     catch (RuntimeException | SQLException | IOException | UnsupportedCallbackException e) {

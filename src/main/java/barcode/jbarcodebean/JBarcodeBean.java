@@ -358,7 +358,6 @@ public class JBarcodeBean extends JComponent implements java.io.Serializable, Ac
    * Returns the preferred size of the component.
    *
    * @deprecated Use {@link #getPreferredSize}.
-   */
   public Dimension preferredSize() {
     if (preferredSize != null) {
       return preferredSize;
@@ -366,6 +365,7 @@ public class JBarcodeBean extends JComponent implements java.io.Serializable, Ac
       return new Dimension(getWidth(), getHeight());
     }
   }
+   */
 
   /**
    * Accessor method for <tt><b>minimumSize</b></tt> property.
@@ -387,7 +387,6 @@ public class JBarcodeBean extends JComponent implements java.io.Serializable, Ac
    * Returns the minimum size of the component.
    *
    * @deprecated Use {@link #getMinimumSize}.
-   */
   public Dimension minimumSize() {
     if (minimumSize != null) {
       return minimumSize;
@@ -395,6 +394,7 @@ public class JBarcodeBean extends JComponent implements java.io.Serializable, Ac
       return new Dimension(getWidth(), getHeight());
     }
   }
+   */
 
   /**
    * Accessor method for the <tt><b>font</b></tt> property.

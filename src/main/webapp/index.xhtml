@@ -14,11 +14,14 @@
                 </h:form>
             </ui:define>
             <ui:define name="content">
+                <h:form>
+                    <p:menu>
+                        <p:menuitem outcome="/entries/cheques" value="#{msg['menu.accounting']}" icon="pi pi-home" disabled="false"/> 
+                        <p:menuitem outcome="/users/card" value="#{msg['legend.membercard']}" icon="pi pi-id-card" disabled="false"/> 
+                    </p:menu>
+                </h:form>
                 <p:panel>
                     <ul>
-                        <li><h:outputLink value="users/card.jsf">
-                            <h:outputText value="#{msg['legend.membercard']}"/>
-                        </h:outputLink></li>
                         <li><h:outputLink value="library/home.jsf">
                             <h:outputText value="#{msg['legend.library']}"/>
                         </h:outputLink></li>

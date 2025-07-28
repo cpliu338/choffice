@@ -1,5 +1,8 @@
 package org.therismos.bean;
 
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.concurrent.ManagedExecutorService;
 import java.io.*;
 import java.nio.file.*;
@@ -27,12 +30,16 @@ public class ApplicationBean implements java.io.Serializable {
     private String datapath;
     @jakarta.annotation.Resource
     DataSource dataSource;
+    
+    MongoClient mongoClient;
+    
     @jakarta.annotation.Resource
     private ManagedExecutorService managedExecutorService;
     static final Logger LOG = Logger.getLogger(ApplicationBean.class.getName());
 
     public String getDebug() {
-        return managedExecutorService == null ? "managedExecutorService not injected" : "managedExecutorService injected";
+        return mongoClient == null ? "MongoClient not injected" : "MongoClient injected";
+                //managedExecutorService == null ? "managedExecutorService not injected" : "managedExecutorService injected";
     }
     
     @jakarta.annotation.PostConstruct
@@ -57,6 +64,18 @@ public class ApplicationBean implements java.io.Serializable {
         }
         catch (IOException ex) {
             LOG.log(Level.SEVERE, null, ex);
+        }
+        mongoClient = MongoClients.create(properties.getProperty("mongodb.connectString"));
+    }
+
+    public MongoClient getMongoClient() {
+        return mongoClient;
+    }
+
+    @PreDestroy
+    public void cleanup() {
+        if (mongoClient != null) {
+            mongoClient.close();
         }
     }
     

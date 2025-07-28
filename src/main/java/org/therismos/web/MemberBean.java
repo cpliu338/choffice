@@ -72,11 +72,9 @@ public class MemberBean implements java.io.Serializable {
     public void emptyCart() {
         idsInCart.clear();
         membersInCart.clear();
-        LOG.log(Level.INFO, "Cart size: {0}", membersInCart.size());
     }
     
     public void addToCart() {
-        LOG.log(Level.INFO, "Trying to add mem id: {0}", id);
         if (!idsInCart.contains(id)) {
             idsInCart.add(id);
             String sql = "SELECT * FROM members m WHERE m.id IN (%s) ORDER BY m.id";
@@ -86,7 +84,6 @@ public class MemberBean implements java.io.Serializable {
                         appBean.queryWithInClause(sql, idsInCart, Member1.class)
                         //getRunner().query(sql, getHandler(), idsInCart)
                 );
-            LOG.log(Level.INFO, "Cart size: {0}", membersInCart.size());
             } catch (SQLException ex) {
                 LOG.log(Level.SEVERE, null, ex);
             }
@@ -134,7 +131,6 @@ public class MemberBean implements java.io.Serializable {
     }
     
     public void handleGroupChange() { 
-        LOG.log(Level.INFO, "group: {0}", group);
         try {
             members = getRunner().query("SELECT * FROM members m WHERE m.groupname = ?", getHandler(), group);
         } catch (SQLException ex) {

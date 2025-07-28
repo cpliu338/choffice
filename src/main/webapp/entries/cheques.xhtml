@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="jakarta.faces.core"
+      xmlns:p="primefaces" xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+    <body>
+        <ui:composition template="../WEB-INF/mainTemplate.xhtml">
+            <ui:define name="left">
+                <h:form>
+                    <p:menu>
+                        <p:menuitem outcome="/index" value="Home" icon="pi pi-home" disabled="false"/> 
+                        <p:menuitem rendered="#{userBean.loggedIn}" action="#{userBean.logout()}" value="Log out" icon="pi pi-power-off" disabled="false"/> 
+                    </p:menu>
+                </h:form>
+            </ui:define>
+            <ui:define name="content">
+                <br/><br/><br/><br/>
+                <h:outputText value="#{accountBean.debug}"/>
+                <br/>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>

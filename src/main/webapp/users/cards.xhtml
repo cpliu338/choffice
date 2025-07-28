@@ -7,6 +7,7 @@
     </h:head>
 <h:body>
     <div class="card">
+        <p:linkButton outcome="/users/card" icon="pi pi-id-card" value="Back to Member Card" />
         <h1>Choose member</h1>
         <p:ajaxStatus>
 <f:facet name="prestart">
@@ -41,7 +42,6 @@
             <p:commandButton update="@all" action="#{memberBean.addToCart}" icon="pi pi-plus" value="Add" />
             <p:commandButton update="card" action="#{memberBean.emptyCart}" icon="pi pi-trash" value="Empty" />
         </h:form>
-        <p:linkButton outcome="/users/card" icon="pi pi-id-card" value="Member Card" />
     </div>
     <div class="card">
         <h1>Cards</h1>

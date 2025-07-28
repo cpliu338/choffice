@@ -4,15 +4,17 @@
     <context-param>
         <description>Development or Production</description>
         <param-name>jakarta.faces.PROJECT_STAGE</param-name>
-        <param-value>Development</param-value>
+        <param-value>${my.stage}</param-value>
     </context-param>
     <context-param>
         <param-name>jakarta.faces.STATE_SAVING_METHOD</param-name>
         <param-value>server</param-value>
     </context-param>
     <context-param>
+        <description>the version in pom.xml
+</description>
         <param-name>choffice.version</param-name>
-        <param-value>6.0</param-value>
+        <param-value>${project.version}</param-value>
     </context-param>
     <context-param>
         <description>Check out http://stackoverflow.com/questions/18789547/viewexpiredexception-when-i-use-viewscoped</description>
@@ -20,8 +22,9 @@
         <param-value>false</param-value>
     </context-param>
     <context-param>
+        <description>cupertino or le-frog</description>
         <param-name>primefaces.THEME</param-name>
-        <param-value>cupertino</param-value>
+        <param-value>${my.theme}</param-value>
     </context-param>
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>

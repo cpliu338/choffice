@@ -18,7 +18,7 @@
         <div id="top">
             <ui:insert name="top">
                 <h:outputLink value="#{facesContext.externalContext.requestContextPath}/index.jsf">
-                    <h:outputText value="#{msg['app']}"/>
+                    <h:outputText value="#{msg['app']}"/> &emsp; ( <h:outputText value="#{initParam['jakarta.faces.PROJECT_STAGE']}"/> )
                 </h:outputLink>
             </ui:insert>
         </div>
