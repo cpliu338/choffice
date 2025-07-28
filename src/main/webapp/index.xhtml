@@ -1,49 +1,42 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:p="primefaces" 
-      xmlns:ui="http://java.sun.com/jsf/facelets" 
-      xmlns:h="http://java.sun.com/jsf/html">
-    <body>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:p="primefaces" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core">
+    <f:view locale="#{userBean.locale}" contentType="text/html" >
+    <f:loadBundle var="msg" basename="messages" />
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link href="#{facesContext.externalContext.requestContextPath}/resources/css/default.css" rel="stylesheet" type="text/css" />
+        <link href="#{facesContext.externalContext.requestContextPath}/resources/css/cssLayout.css" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" href="https://unpkg.com/primeflex@latest/primeflex.css" /> 
+        <title><h:outputText value="#{msg['app']}"/></title>
+<style>
+    .ui-panelgrid.showcase-text-align-center .ui-grid-responsive .ui-panelgrid-cell {
+        text-align: center;
+    }
 
-        <ui:composition template="WEB-INF/mainTemplate.xhtml">
-            <ui:define name="left">
-                <h:form>
-                    <h:commandLink rendered="#{userBean.loggedIn}" action="#{userBean.logout()}">
-                        <h:outputText value="#{msg['menu.logout']}"/>
-                    </h:commandLink>
-                </h:form>
-            </ui:define>
-            <ui:define name="content">
-                <h:form>
-                    <p:menu>
-                        <p:menuitem outcome="/entries/cheques" value="#{msg['menu.accounting']}" icon="pi pi-home" disabled="false"/> 
-                        <p:menuitem outcome="/users/card" value="#{msg['legend.membercard']}" icon="pi pi-id-card" disabled="false"/> 
-                    </p:menu>
-                </h:form>
-                <p:panel>
-                    <ul>
-                        <li><h:outputLink value="library/home.jsf">
-                            <h:outputText value="#{msg['legend.library']}"/>
-                        </h:outputLink></li>
-                        <li><h:outputLink value="offers/receipt.jsf">
-                            <h:outputText value="#{msg['offer']} #{msg['menu.receipt']}"/>
-                        </h:outputLink></li>
-                        <li><h:outputLink value="nas/list.jsf">
-                            <h:outputText value="NAS"/>
-                        </h:outputLink></li>
-                        <li><h:outputLink value="budget/list.jsf">
-                            <h:outputText value="#{msg['legend.budget']}"/>
-                        </h:outputLink></li>
-                        <li><h:outputLink value="entries/reconcile.jsf">
-                            <h:outputText value="#{msg['menu.accounting']}"/>
-                        </h:outputLink></li>
-                    </ul>
-                </p:panel>
-                <h:messages showDetail="true" />
-            </ui:define>
-
-        </ui:composition>
-
-    </body>
+    .customPanelGrid .ui-panelgrid-content {
+        align-items: center;
+    }
+</style>        
+    </h:head>
+    <h:body>
+        <h1 id="top">
+                <h:outputText value="#{msg['app']}"/> &emsp; ( <h:outputText value="#{initParam['jakarta.faces.PROJECT_STAGE']}"/> )
+        </h1>        
+        <div class="card m-3">
+        <h:form>
+            <p:panelGrid columns="4" layout="flex" styleClass="showcase-text-align-center"
+                 columnClasses="col-12 md:col-6 lg:col-3, col-12 md:col-6 lg:col-3, col-12 md:col-6 lg:col-3, col-12 md:col-6 lg:col-3">
+                    <p:linkButton outcome="/users/card" value="#{msg['legend.membercard']}" icon="pi pi-id-card" disabled="false"/> 
+                <p:menuButton value="#{msg['menu.accounting']}">
+                    <p:menuitem outcome="/entries/cheques" value="Cheques" icon="pi pi-money-bill" disabled="false"/> 
+                </p:menuButton>
+                <p:commandButton rendered="#{userBean.loggedIn}" action="#{userBean.logout()}" value="#{msg['legend.logout']}" icon="pi pi-power-off" disabled="false"/> 
+            </p:panelGrid>
+            <h:messages showDetail="true" />
+        </h:form>
+        </div>
+    </h:body>
+    </f:view>
 </html>
 

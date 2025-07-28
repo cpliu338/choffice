@@ -370,6 +370,7 @@ public class JBarcodeBean extends JComponent implements java.io.Serializable, Ac
   /**
    * Accessor method for <tt><b>minimumSize</b></tt> property.
    */
+  @Deprecated
   public Dimension getMinimumSize() {
     return minimumSize();
   }
@@ -399,6 +400,7 @@ public class JBarcodeBean extends JComponent implements java.io.Serializable, Ac
   /**
    * Accessor method for the <tt><b>font</b></tt> property.
    */
+  @Deprecated
   public Font getFont() {
     return super.getFont();
   }

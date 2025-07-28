@@ -126,6 +126,7 @@ public class DummyModule implements LoginModule {
     userPrincipal = new UserPrincipal(login);
     userPrincipal.setMap(map);
     subject.getPrincipals().add(userPrincipal);
+    subject.getPrincipals().add(new RolePrincipal("loggedin")); // for every user
     if (userGroups != null && !userGroups.isEmpty()) {
       for (String groupName : userGroups) {
         rolePrincipal = new RolePrincipal(groupName);
