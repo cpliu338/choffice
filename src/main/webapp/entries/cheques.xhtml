@@ -1,8 +1,7 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="jakarta.faces.core"
-      xmlns:p="primefaces" xmlns:h="jakarta.faces.html"
-      xmlns:ui="jakarta.faces.facelets">
+      xmlns:p="primefaces" xmlns:h="jakarta.faces.html" xmlns:ui="jakarta.faces.facelets">
     <body>
         <ui:composition template="../WEB-INF/mainTemplate.xhtml">
             <ui:define name="left">
@@ -14,9 +13,68 @@
                 </h:form>
             </ui:define>
             <ui:define name="content">
-                <br/><br/><br/><br/>
-                <h:outputText value="#{accountBean.debug}"/>
-                <br/>
+                <h:form>
+                    <p:outputLabel for="end-date">End Date</p:outputLabel>
+                    <p:selectOneMenu id="end-date"  onchange="#{accountBean.endDateChange()}" value="#{accountBean.selectedEndDate}">
+                        <p:ajax update="@form" process="@this" />
+                        <f:selectItems value="#{accountBean.endDates}"/>
+                    </p:selectOneMenu>
+<div class="card">
+    <p:panelGrid id="reconcile" columns="2">
+        <f:facet name="header">
+            Reconciliation on <h:outputText value="#{accountBean.selectedEndDate}"/>
+        </f:facet>
+
+        <h:outputText value="Book balance:"/>
+        <h:outputText value="#{0.0 - accountBean.reconcile.bookBalance}"/>
+
+        <h:outputText value="Sum of unpresented cheques:"/>
+        <h:outputText value="#{accountBean.reconcile.uncheq}"/>
+    </p:panelGrid>
+    <p:dataTable id="pending" value="#{accountBean.reconcile.pending}" var="cheq" scrollable="true" scrollHeight="250">
+        <f:facet name="header">
+            Pending Cheques 
+        </f:facet>
+        <p:column headerText="Entry Id">
+            <h:outputText value="#{cheq.entryId}"/>
+        </p:column>
+        <p:column headerText="Cheque No.">
+            <h:outputText value="#{cheq.extra1}"/>
+        </p:column>
+        <p:column headerText="Amount">
+            <h:outputText value="#{cheq.amount}"/>
+        </p:column>
+        <p:column style="width:3rem;text-align: center">
+            <p:commandButton update="@form" oncomplete="PF('reconcileDialog').show()"
+                             icon="pi pi-search" title="View">
+                <f:setPropertyActionListener value="#{cheq}" target="#{accountBean.selectedCheque}"/>
+            </p:commandButton>
+        </p:column>
+    </p:dataTable>
+</div>
+                    <p:dialog header="Cheque Info" widgetVar="reconcileDialog" modal="true" showEffect="fade"
+                        hideEffect="fade" resizable="false">
+                        <p:outputPanel id="entry" class="grid">
+                            <h:outputText value="Entry Id" styleClass="col-6"/>
+                            <h:outputText value="#{accountBean.selectedCheque.entryId}" styleClass="col-6"/>
+                            <h:outputText value="Entry Detail" rendered="#{not empty(accountBean.entry)}" styleClass="col-6"/>
+                            <h:outputText value="#{accountBean.entry.detail}" rendered="#{not empty(accountBean.entry)}" styleClass="col-6"/>
+                            <h:outputText value="Date" rendered="#{not empty(accountBean.entry)}" styleClass="col-6"/>
+                            <h:outputText value="#{accountBean.entry.date1}" rendered="#{not empty(accountBean.entry)}" styleClass="col-6"/>
+                            <h:outputText value="Amount" rendered="#{not empty(accountBean.entry)}" styleClass="col-6"/>
+                            <h:outputText value="#{accountBean.entry.amount}" rendered="#{not empty(accountBean.entry)}" styleClass="col-6"/>
+                            <h:outputText value="Cheque status" rendered="#{not empty(accountBean.entry)}" styleClass="col-6"/>
+                            <h:outputText value="#{accountBean.entry.extra1}" rendered="#{not empty(accountBean.entry)}" styleClass="col-6"/>
+                            <h:outputText value="Cheque found period" styleClass="col-6"/>
+                            <h:outputText value="#{accountBean.chequeDateRange}" styleClass="col-6"/>
+                            
+                            <p:message for="entry"/>
+                        </p:outputPanel>
+                        <div class="text-red-500">
+                            <h:outputText value="Entry has been deleted" rendered="#{empty(accountBean.entry)}"/></div>
+                    </p:dialog>
+                    <p:messages globalOnly="true" />
+                </h:form>
             </ui:define>
         </ui:composition>
     </body>

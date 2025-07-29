@@ -1,8 +1,14 @@
 package org.therismos.bean;
 
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import jakarta.annotation.PreDestroy;
+import com.mongodb.client.MongoCollection;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.configuration.CodecProvider;
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
+import jakarta.annotation.*;
 import jakarta.enterprise.concurrent.ManagedExecutorService;
 import java.io.*;
 import java.nio.file.*;
@@ -13,6 +19,7 @@ import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.bson.codecs.pojo.PojoCodecProvider;
 
 /**
  * Global config and functions
@@ -22,6 +29,20 @@ import org.apache.commons.dbutils.handlers.BeanListHandler;
 @jakarta.inject.Named
 @jakarta.inject.Singleton
 public class ApplicationBean implements java.io.Serializable {
+
+    /**
+     * @return the dataSource
+     */
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    /**
+     * @param dataSource the dataSource to set
+     */
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
     
     private static final long serialVersionUID = 1L;
     
@@ -29,9 +50,10 @@ public class ApplicationBean implements java.io.Serializable {
     @jakarta.annotation.Resource
     private String datapath;
     @jakarta.annotation.Resource
-    DataSource dataSource;
+    private DataSource dataSource;
     
     MongoClient mongoClient;
+    CodecRegistry pojoCodecRegistry;
     
     @jakarta.annotation.Resource
     private ManagedExecutorService managedExecutorService;
@@ -66,6 +88,13 @@ public class ApplicationBean implements java.io.Serializable {
             LOG.log(Level.SEVERE, null, ex);
         }
         mongoClient = MongoClients.create(properties.getProperty("mongodb.connectString"));
+        CodecProvider pojoCodecProvider = PojoCodecProvider.builder().automatic(true).build();
+        pojoCodecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), fromProviders(pojoCodecProvider));
+
+    }
+        
+    public <T> MongoCollection<T> getCollection(String name, Class<T> clazz) {
+        return mongoClient.getDatabase(properties.getProperty("mongodb.db")).getCollection(name, clazz).withCodecRegistry(pojoCodecRegistry);
     }
 
     public MongoClient getMongoClient() {
@@ -126,7 +155,7 @@ public class ApplicationBean implements java.io.Serializable {
         Object[] allParams = new Object[inClauseParams.size() + otherParams.length];
         System.arraycopy(inClauseParams.toArray(), 0, allParams, 0, inClauseParams.size());
         System.arraycopy(otherParams, 0, allParams, inClauseParams.size(), otherParams.length);
-        return new QueryRunner(dataSource).query(finalSql, new BeanListHandler<>(beanType), allParams);
+        return new QueryRunner(getDataSource()).query(finalSql, new BeanListHandler<>(beanType), allParams);
     }
     
 }

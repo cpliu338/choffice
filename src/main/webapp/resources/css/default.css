@@ -1,17 +1,8 @@
-@font-face {
-  font-family: Cipher;
-  src: 
-    local('Doulos SIL Cipher'),
-    url(DoulosSILCipher-R.woff) format('woff');
-}
-
-.jianpu {
-    margin-top: 1em; 
-  font-family: Cipher, Arial;
-    /* fall back to sans-serif so that it's really obvious if the fonts don't load */
-  font-size: 12pt;
-    /* Chinese style slur on the top */
-  -moz-font-feature-settings: "slur" 2;  
+/* Sage blue only supports Primeflex 2, but Primefaces 15 is using Primeflex 3 
+Define colors used.
+*/
+:root {
+  --p-red-500: var(--red-500);
 }
 
 body {
