@@ -85,6 +85,7 @@ public abstract class AbstractXlsxJob extends AbstractJob {
     @Override
     public Document call() throws Exception {
         File f = super.getDownloadPath();
+        config.append("download-path", f.getAbsolutePath());
         try (FileOutputStream fileOut = new FileOutputStream(f)) {
             buildExcel().write(fileOut);
         }
