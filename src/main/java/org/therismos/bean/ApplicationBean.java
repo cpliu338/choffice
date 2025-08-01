@@ -14,11 +14,14 @@ import java.io.*;
 import java.nio.file.*;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.bson.Document;
 import org.bson.codecs.pojo.PojoCodecProvider;
 
 /**
@@ -54,6 +57,7 @@ public class ApplicationBean implements java.io.Serializable {
     
     MongoClient mongoClient;
     CodecRegistry pojoCodecRegistry;
+    private List<JobFuture> jobList;
     
     @jakarta.annotation.Resource
     private ManagedExecutorService managedExecutorService;
@@ -90,7 +94,18 @@ public class ApplicationBean implements java.io.Serializable {
         mongoClient = MongoClients.create(properties.getProperty("mongodb.connectString"));
         CodecProvider pojoCodecProvider = PojoCodecProvider.builder().automatic(true).build();
         pojoCodecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), fromProviders(pojoCodecProvider));
-
+        if (dataSource == null) {
+            try {
+                // jdbc:mariadb://db-01:3306/emis?user=webapp&password=asd82KK
+                dataSource = new SingleConnectionDataSource(
+                        String.format("%s?user=%s&password=%s",
+                                properties.getProperty("db.url"), properties.getProperty("db.user"),
+                                properties.getProperty("db.password"))
+                );
+            } catch (SQLException ex) {
+                LOG.log(Level.SEVERE, (String) null, ex);
+            }
+        }
     }
         
     public <T> MongoCollection<T> getCollection(String name, Class<T> clazz) {
@@ -156,6 +171,70 @@ public class ApplicationBean implements java.io.Serializable {
         System.arraycopy(inClauseParams.toArray(), 0, allParams, 0, inClauseParams.size());
         System.arraycopy(otherParams, 0, allParams, inClauseParams.size(), otherParams.length);
         return new QueryRunner(getDataSource()).query(finalSql, new BeanListHandler<>(beanType), allParams);
+    }
+    
+    /**
+     * Get the job list, side effect: garbage collection
+     * Delete jobs expired
+     * @return the jobList
+     */
+    public List<JobFuture> getJobList() {
+        List<JobFuture> list1 = new ArrayList<>();
+        jobList.forEach(jobFuture -> {
+            if (jobFuture.expiryMsTimestamp > System.currentTimeMillis()) {
+                list1.add(jobFuture);
+            }
+            else {
+                Future<Document> future = jobFuture.future;
+                if (future.isDone()) {
+                    try {
+                        Document result = future.get();
+                        LOG.log(Level.INFO, result.toString());
+                    } catch (InterruptedException | ExecutionException ex) {
+                        LOG.log(Level.INFO, ex.getClass().getName());
+                    }
+                }
+                LOG.log(Level.INFO, "Expired {0,date,yyyy-MM-dd HH:mm}", new java.util.Date(jobFuture.expiryMsTimestamp));
+            }
+        });
+        jobList = list1;
+        return jobList;
+    }
+    
+    public void addFuture(String type, Future<Document> future, long msToExpire) {
+        JobFuture jobFuture = new JobFuture();
+        jobFuture.type = type;
+        jobFuture.future = future;
+        jobFuture.expiryMsTimestamp = System.currentTimeMillis() + msToExpire;
+        getJobList().add(jobFuture);
+        LOG.log(Level.INFO, "job list size is now {0}", jobList.size());
+    }
+    
+    public static class JobFuture {
+
+        /**
+         * @return the future
+         */
+        public Future<Document> getFuture() {
+            return future;
+        }
+
+        /**
+         * @return the expiryMsTimestamp
+         */
+        public long getExpiryMsTimestamp() {
+            return expiryMsTimestamp;
+        }
+
+        /**
+         * @return the type
+         */
+        public String getType() {
+            return type;
+        }
+        private Future<Document> future;
+        private long expiryMsTimestamp;
+        private String type;
     }
     
 }
