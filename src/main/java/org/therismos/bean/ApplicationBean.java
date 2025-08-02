@@ -10,6 +10,7 @@ import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 import jakarta.annotation.*;
 import jakarta.enterprise.concurrent.ManagedExecutorService;
+import jakarta.faces.context.FacesContext;
 import java.io.*;
 import java.nio.file.*;
 import java.sql.SQLException;
@@ -32,6 +33,13 @@ import org.bson.codecs.pojo.PojoCodecProvider;
 @jakarta.inject.Named
 @jakarta.inject.Singleton
 public class ApplicationBean implements java.io.Serializable {
+
+    /**
+     * @return the projectStage
+     */
+    public String getProjectStage() {
+        return projectStage;
+    }
 
     /**
      * @return the dataSource
@@ -58,6 +66,7 @@ public class ApplicationBean implements java.io.Serializable {
     MongoClient mongoClient;
     CodecRegistry pojoCodecRegistry;
     private List<JobFuture> jobList;
+    private String projectStage;
     
     @jakarta.annotation.Resource
     private ManagedExecutorService managedExecutorService;
@@ -70,6 +79,12 @@ public class ApplicationBean implements java.io.Serializable {
     
     @jakarta.annotation.PostConstruct
     public void init() {
+        try {
+            projectStage = FacesContext.getCurrentInstance().getExternalContext().getInitParameter("jakarta.faces.PROJECT_STAGE");
+        }
+        catch (NoClassDefFoundError r) {
+            projectStage = "Test";
+        }
         properties = new Properties();
         // This should be overwritten
         try (InputStream defaultI = this.getClass().getResourceAsStream("/choffice.properties")) {

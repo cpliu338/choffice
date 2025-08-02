@@ -79,7 +79,7 @@ public class WeeklyReport extends AbstractXlsxJob {
                     + "where date1=? order by o.account_id, m.name", 
                 new BeanListHandler<>(Offer.class),
                 java.sql.Date.valueOf(reportDate));
-            config.append("offers-count", offers.size());
+            getConfig().append("offers-count", offers.size());
         // Cell[0,0] is title
         Row row = cloneRow(0, 0);
         sheet.addMergedRegion(

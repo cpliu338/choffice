@@ -53,7 +53,7 @@ public class StreamedBean implements java.io.Serializable {
     }
 */
     public DefaultStreamedContent getPhoto() {
-        LOG.log(Level.INFO, "GetPhoto");
+        LOG.log(Level.FINE, "GetPhoto");
         DefaultStreamedContent photo = null;
         int id = 1;
         try {

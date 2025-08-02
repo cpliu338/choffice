@@ -14,9 +14,16 @@ import org.therismos.bean.ApplicationBean;
  * @author cp_liu
  */
 public abstract class AbstractJob implements Job {
+
+    /**
+     * @return the config
+     */
+    public Document getConfig() {
+        return config;
+    }
     protected String type;
     protected Date expiry;
-    protected final Document config;
+    private final Document config;
     protected final ApplicationBean applicationBean;
 
     protected AbstractJob(ApplicationBean srv, Document config) {
@@ -27,7 +34,7 @@ public abstract class AbstractJob implements Job {
     protected abstract String getFilePrefix();
     protected abstract String getFileExtension();
     
-    protected File getDownloadPath() {
+    public File getDownloadPath() {
         return new File( Paths.get(applicationBean.getDatapath(), "downloads", String.format("%s_%d.%s",
                 getFilePrefix(), System.currentTimeMillis(), getFileExtension())).toUri()
         );

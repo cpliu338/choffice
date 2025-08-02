@@ -85,17 +85,17 @@ public abstract class AbstractXlsxJob extends AbstractJob {
     @Override
     public Document call() throws Exception {
         File f = super.getDownloadPath();
-        config.append("download-path", f.getAbsolutePath());
+        getConfig().append("download-path", f.getAbsolutePath());
         try (FileOutputStream fileOut = new FileOutputStream(f)) {
             buildExcel().write(fileOut);
         }
         catch (Exception ex) {
-            config.append("exception-class", ex.getClass().getName());
-            config.append("exception-message", ex.getMessage());
+            getConfig().append("exception-class", ex.getClass().getName());
+            getConfig().append("exception-message", ex.getMessage());
             if (ex instanceof RuntimeException || ex instanceof IOException || ex instanceof SQLException) {} else
                 Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
         }
-        return config;
+        return getConfig();
     }
     
 }

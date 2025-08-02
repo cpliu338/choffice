@@ -15,9 +15,9 @@ import java.io.*;
  *
  * @author cp_liu
  */
-public class WeeklyReportTest {
+public class JobTest {
     
-    public WeeklyReportTest() {
+    public JobTest() {
     }
     
     @BeforeClass
@@ -42,15 +42,20 @@ public class WeeklyReportTest {
 
     /**
      * Test of getFilePattern method, of class WeeklyReport.
-    @Test
      */
-    public void testGetFilePattern() {
-        System.out.println("getFilePattern");
-        String expResult = "";
-        String result = WeeklyReport.getFilePattern();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+    @Test
+    public void testPrintReceipt() throws Exception {
+        System.out.println("test PrintReceipt");
+        ApplicationBean appBean = new ApplicationBean();
+        appBean.init();
+        /* 
+            endDate = LocalDate.parse(getConfig().getString("end"), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            batch = getConfig().getInteger("batch");        
+        */        
+        config.append("end", "2021-03-31");
+        config.append("batch", 1);
+        GenerateReceipts gr = new GenerateReceipts(appBean, config);
+        System.out.println(gr.call().toJson());
     }
 
     /**
@@ -61,9 +66,8 @@ public class WeeklyReportTest {
         System.out.println("test buildExcel");
         ApplicationBean appBean = new ApplicationBean();
         appBean.init();
-        // jdbc:mariadb://db-01:3306/emis?user=webapp&password=asd82KK
         config.append("reportDate", "2024-12-15");
-        WeeklyReport instance = new WeeklyReport(appBean, config);
+        instance = new WeeklyReport(appBean, config);
         File f = instance.getDownloadPath();
         try (FileOutputStream out = new FileOutputStream(f)) {
             XSSFWorkbook wb = instance.buildExcel();

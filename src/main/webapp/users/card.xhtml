@@ -6,12 +6,7 @@
     <body>
         <ui:composition template="../WEB-INF/mainTemplate.xhtml">
             <ui:define name="left">
-                <h:form>
-                    <p:menu>
-                        <p:menuitem rendered="#{userBean.loggedIn}" action="#{userBean.logout()}" value="Log out" icon="pi pi-power-off" disabled="false"/> 
                         <p:menuitem action="cards?faces-redirect=true" value="Print cards" icon="pi pi-print" disabled="false"/> 
-                    </p:menu>
-                </h:form>
             </ui:define>
             <ui:define name="content">
             <p:panel id="card">

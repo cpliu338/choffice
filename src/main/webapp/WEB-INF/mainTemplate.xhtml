@@ -14,27 +14,28 @@
     </h:head>
 
     <h:body>
-
-        <div id="top">
+        <div id="top" class="flex">
             <ui:insert name="top">
-                <h:outputLink value="#{facesContext.externalContext.requestContextPath}/index.jsf">
-                    <h:outputText value="#{msg['app']}"/> &emsp; ( <h:outputText value="#{initParam['jakarta.faces.PROJECT_STAGE']}"/> )
-                </h:outputLink>
+                <h2 id="top">
+                <h:outputText value="#{msg['app']}"/> &emsp; 
+                <h:outputText 
+                    rendered="#{initParam['jakarta.faces.PROJECT_STAGE'] != null and (initParam['jakarta.faces.PROJECT_STAGE'] eq 'Development')}"
+                    value="( #{initParam['jakarta.faces.PROJECT_STAGE']} )"/>
+                </h2>
+                <span class="ml-auto">
+                    <p:commandButton rendered="#{userBean.loggedIn}" action="#{userBean.logout()}" value="#{msg['menu.logout']}" icon="pi pi-power-off"/> 
+                </span>
             </ui:insert>
         </div>
-        <div>
-            <div id="left">
-                <ui:insert name="left">
-                <h:form>
+        <div class="grid">
+                <h:form id="side-menu" class="col-4" style="z-index: 1">
                     <p:menu>
-                        <p:menuitem outcome="/index" value="Home" icon="pi pi-home" disabled="false"/> 
-                        <p:menuitem rendered="#{userBean.loggedIn}" action="#{userBean.logout()}" value="Log out" icon="pi pi-power-off" disabled="false"/> 
+                        <p:menuitem outcome="/index" value="#{msg['home']}" icon="pi pi-home" disabled="false"/> 
+                        <ui:insert name="left"></ui:insert>
                     </p:menu>
-                </h:form>
-                </ui:insert>
-            </div>
-            <div id="content" class="left_content">
-                <ui:insert name="content">Left content</ui:insert>
+                </h:form>                
+            <div id="content" class="main_content col-8" style="z-index: 10">
+                <ui:insert name="content">Main content</ui:insert>
             </div>
         </div>
         <div id="bottom">

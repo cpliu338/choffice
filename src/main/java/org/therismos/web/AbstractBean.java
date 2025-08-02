@@ -13,4 +13,7 @@ public abstract class AbstractBean {
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(severity, content, content));        
     }
         
+    protected void addMessage(FacesMessage.Severity severity, String summary, String detail) {
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(severity, summary, detail));        
+    }
 }

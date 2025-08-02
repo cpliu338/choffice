@@ -4,14 +4,6 @@
       xmlns:p="primefaces" xmlns:h="jakarta.faces.html" xmlns:ui="jakarta.faces.facelets">
     <body>
         <ui:composition template="../WEB-INF/mainTemplate.xhtml">
-            <ui:define name="left">
-                <h:form>
-                    <p:menu>
-                        <p:menuitem outcome="/index" value="Home" icon="pi pi-home" disabled="false"/> 
-                        <p:menuitem rendered="#{userBean.loggedIn}" action="#{userBean.logout()}" value="Log out" icon="pi pi-power-off" disabled="false"/> 
-                    </p:menu>
-                </h:form>
-            </ui:define>
             <ui:define name="content">
                 <h:form>
                     <p:outputLabel for="end-date">End Date</p:outputLabel>
