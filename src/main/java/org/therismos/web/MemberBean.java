@@ -21,10 +21,9 @@ import org.therismos.entity.Member1;
  */
 @ViewScoped
 @Named
-public class MemberBean implements java.io.Serializable {
+public class MemberBean implements WebBean, java.io.Serializable {
     private static final long serialVersionUID = 1L;
     
-    static final Logger LOG = Logger.getLogger(MemberBean.class.getName());
     private int id;
     @jakarta.annotation.Resource
     DataSource dataSource;
@@ -52,7 +51,7 @@ public class MemberBean implements java.io.Serializable {
             members = em.createNamedQuery("Member1.findAll", Member1.class)
             .setMaxResults(3).getResultList();        */
         } catch (SQLException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            getLog().log(Level.SEVERE, null, ex);
             members = Collections.EMPTY_LIST;
         }
     }
@@ -85,11 +84,11 @@ public class MemberBean implements java.io.Serializable {
                         //getRunner().query(sql, getHandler(), idsInCart)
                 );
             } catch (SQLException ex) {
-                LOG.log(Level.SEVERE, null, ex);
+                getLog().log(Level.SEVERE, null, ex);
             }
         }
         else {
-            LOG.log(Level.WARNING, "mem id already in cart: {0}", id);
+            getLog().log(Level.WARNING, "mem id already in cart: {0}", id);
         }
     }
     
@@ -117,7 +116,7 @@ public class MemberBean implements java.io.Serializable {
             l =getRunner().query(
                     "SELECT DISTINCT m.groupname FROM members m", new ColumnListHandler <String>());
         } catch (SQLException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            getLog().log(Level.SEVERE, null, ex);
         }
         int size = l.size();
         items = new SelectItem[size];
@@ -134,7 +133,7 @@ public class MemberBean implements java.io.Serializable {
         try {
             members = getRunner().query("SELECT * FROM members m WHERE m.groupname = ?", getHandler(), group);
         } catch (SQLException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            getLog().log(Level.SEVERE, null, ex);
             members = Collections.EMPTY_LIST;
         }
     }
@@ -159,7 +158,7 @@ public class MemberBean implements java.io.Serializable {
             member = getRunner().query("SELECT * FROM members m WHERE m.id = ?", handler, this.id);
             //member = em.createNamedQuery("Member1.findById", Member1.class).setParameter("id", this.id).getSingleResult();
         } catch (SQLException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            getLog().log(Level.SEVERE, null, ex);
         }
     }
 

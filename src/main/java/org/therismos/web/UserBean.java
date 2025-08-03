@@ -18,11 +18,10 @@ import org.therismos.jaas.UserPrincipal;
  */
 @Named
 @SessionScoped
-public class UserBean implements java.io.Serializable {
+public class UserBean implements WebBean, java.io.Serializable {
     private static final long serialVersionUID = 1L;
     private UserPrincipal user;
     private Map userMap;
-    static private Logger LOG = Logger.getLogger(UserBean.class.getName());
     
     @jakarta.annotation.Resource
     private String datapath;

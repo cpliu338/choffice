@@ -15,7 +15,7 @@ import java.io.*;
  */
 @ViewScoped
 @jakarta.inject.Named
-public class SmtpTester implements Serializable {
+public class SmtpTester implements WebBean, Serializable {
     private static final long serialVersionUID = 1L;
     static final Logger LOG = Logger.getLogger(SmtpTester.class.getName());
 
@@ -80,7 +80,7 @@ public class SmtpTester implements Serializable {
             sendEmail(getSession());
             fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Mail sent", "Mail Sent"));
         } catch (IOException | MessagingException ex) {
-            LOG.log(Level.SEVERE, (String) null, ex);
+            getLog().log(Level.SEVERE, (String) null, ex);
             fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "Sent error", "Error"));
         }
         

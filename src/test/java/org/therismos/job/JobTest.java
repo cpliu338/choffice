@@ -48,10 +48,6 @@ public class JobTest {
         System.out.println("test PrintReceipt");
         ApplicationBean appBean = new ApplicationBean();
         appBean.init();
-        /* 
-            endDate = LocalDate.parse(getConfig().getString("end"), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            batch = getConfig().getInteger("batch");        
-        */        
         config.append("end", "2021-03-31");
         config.append("batch", 1);
         GenerateReceipts gr = new GenerateReceipts(appBean, config);

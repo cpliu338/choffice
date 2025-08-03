@@ -1,7 +1,6 @@
 package org.therismos.web;
 
 import jakarta.faces.application.FacesMessage;
-import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.*;
 import java.io.*;
@@ -19,7 +18,7 @@ import org.therismos.job.WeeklyReport;
  */
 @Named
 @ViewScoped
-public class OfferBean extends AbstractBean implements java.io.Serializable {
+public class OfferBean implements WebBean, java.io.Serializable {
 
     /**
      * @return the date
@@ -35,7 +34,6 @@ public class OfferBean extends AbstractBean implements java.io.Serializable {
         this.date = date;
     }
     
-    static final Logger LOG = Logger.getLogger(OfferBean.class.getName());
     @Inject
     ApplicationBean appBean;
     
@@ -51,7 +49,7 @@ public class OfferBean extends AbstractBean implements java.io.Serializable {
             wb.write(out);
             addMessage(FacesMessage.SEVERITY_INFO, f.getAbsolutePath(), config.toJson());
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, (String) null, ex);
+            getLog().log(Level.SEVERE, (String) null, ex);
             addMessage(FacesMessage.SEVERITY_ERROR, "IO Exception", ex.getMessage());
         }
         

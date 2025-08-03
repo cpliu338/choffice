@@ -22,10 +22,8 @@ import org.primefaces.util.Callbacks.SerializableSupplier;
  */
 @jakarta.inject.Named
 @RequestScoped
-public class StreamedBean implements java.io.Serializable {
+public class StreamedBean implements WebBean, java.io.Serializable {
 
-    static final Logger LOG = Logger.getLogger(StreamedBean.class.getName());
-    
     private DefaultStreamedContent barcode;
     private File basePath;
     private File photospath;
@@ -53,7 +51,7 @@ public class StreamedBean implements java.io.Serializable {
     }
 */
     public DefaultStreamedContent getPhoto() {
-        LOG.log(Level.FINE, "GetPhoto");
+        getLog().log(Level.FINE, "GetPhoto");
         DefaultStreamedContent photo = null;
         int id = 1;
         try {
@@ -62,11 +60,11 @@ public class StreamedBean implements java.io.Serializable {
             try {
                 if (map.containsKey("id")) {
                     id = Integer.parseInt(map.get("id"));
-                    LOG.log(Level.INFO, "getphoto Id:{0}", id);
+                    getLog().log(Level.INFO, "getphoto Id:{0}", id);
                 }
             }
             catch (NumberFormatException ex) {
-                LOG.log(Level.SEVERE,null, ex);
+                getLog().log(Level.SEVERE,null, ex);
             }
             File photoFile = new File(photospath, String.format("%d.jpg", id));
             if (!photoFile.canRead())
@@ -83,7 +81,7 @@ public class StreamedBean implements java.io.Serializable {
                 }
             }).build();
         } catch (Exception e) {
-            LOG.log(Level.SEVERE,null, e);
+            getLog().log(Level.SEVERE,null, e);
         }
         return photo;
     }
@@ -92,7 +90,7 @@ public class StreamedBean implements java.io.Serializable {
      * @return the barcode
      */
     public DefaultStreamedContent getBarcode() {
-        LOG.log(Level.INFO, "GetBarcode");
+        getLog().log(Level.INFO, "GetBarcode");
         barcode = null;
         File barcodepath = new File(this.basePath, "codes");
         GenBarcode barcodebean = new GenBarcode();
@@ -109,7 +107,7 @@ public class StreamedBean implements java.io.Serializable {
                     barcodebean.setCode(1);
             }
             catch (NumberFormatException ex) {
-                LOG.log(Level.SEVERE,null, ex);
+                getLog().log(Level.SEVERE,null, ex);
             }
             File barcodeFile = new File(barcodebean.getFileName());
             if (!barcodeFile.canRead()) {
@@ -127,7 +125,7 @@ public class StreamedBean implements java.io.Serializable {
                 }
             }).build();
         } catch (Exception e) {
-            LOG.log(Level.SEVERE,null, e);
+            getLog().log(Level.SEVERE,null, e);
         }
         return barcode;
     }
@@ -159,7 +157,7 @@ public class StreamedBean implements java.io.Serializable {
         catch (java.io.IOException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE,null, ex);
         }
-        LOG.fine(event.getFile().getContentType());
+        getLog().fine(event.getFile().getContentType());
         FacesMessage msg = new FacesMessage("Succesful", event.getFile().getFileName() + " is uploaded.");
         FacesContext.getCurrentInstance().addMessage(null, msg);
     }
@@ -169,7 +167,7 @@ public class StreamedBean implements java.io.Serializable {
         MemberBean memberBean = (MemberBean)fc.getApplication().evaluateExpressionGet(fc, "#{memberBean}", MemberBean.class);
         int id = memberBean.getId();
         File photoFile = new File(photospath, String.format("%d.jpg", id));
-        LOG.log(Level.INFO, "member Id:{0}", (photoFile.canRead()) ? id : 0);
+        getLog().log(Level.INFO, "member Id:{0}", (photoFile.canRead()) ? id : 0);
         return (photoFile.canRead()) ? id : 0;
     }
 

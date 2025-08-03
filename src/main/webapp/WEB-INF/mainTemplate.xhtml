@@ -23,7 +23,9 @@
                     value="( #{initParam['jakarta.faces.PROJECT_STAGE']} )"/>
                 </h2>
                 <span class="ml-auto">
+                    <h:form id="logout">
                     <p:commandButton rendered="#{userBean.loggedIn}" action="#{userBean.logout()}" value="#{msg['menu.logout']}" icon="pi pi-power-off"/> 
+                    </h:form>
                 </span>
             </ui:insert>
         </div>

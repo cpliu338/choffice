@@ -23,7 +23,7 @@ import org.therismos.entity.Uncheq;
  */
 @Named
 @ViewScoped
-public class AccountBean extends AbstractBean implements java.io.Serializable {
+public class AccountBean implements WebBean, java.io.Serializable {
 
     /**
      * @return the chequeDateRange
@@ -59,7 +59,6 @@ public class AccountBean extends AbstractBean implements java.io.Serializable {
     public void setSelectedEndDate(String selectedEndDate) {
         this.selectedEndDate = selectedEndDate;
     }
-    static final Logger LOG = Logger.getLogger(AccountBean.class.getName());
     
     @Inject
     ApplicationBean appBean;
@@ -85,7 +84,7 @@ public class AccountBean extends AbstractBean implements java.io.Serializable {
                     .projection(Projections.exclude("pending"))
                     .sort(Sorts.ascending("end")).cursor()) {
             while (cursor.hasNext()) {
-                LOG.log(Level.INFO, cursor.next().toJson());
+                getLog().log(Level.INFO, cursor.next().toJson());
                 i++;                
             }
         }

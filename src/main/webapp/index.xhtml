@@ -1,7 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:p="primefaces" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
-    >
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:p="primefaces" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core">
     <f:view locale="#{userBean.locale}" contentType="text/html" >
     <f:loadBundle var="msg" basename="messages" />
     <h:head>
@@ -28,7 +27,7 @@
         <h:form>
             <p:panelGrid columns="4" layout="flex" styleClass="showcase-text-align-center"
                  columnClasses="col-12 md:col-6 lg:col-3 xl:col-3, col-12 md:col-6 lg:col-3 xl:col-3, col-12 md:col-6 lg:col-3 xl:col-3, col-12 md:col-6 lg:col-3 xl:col-3">
-                    <p:linkButton outcome="/users/card" value="#{msg['legend.membercard']}" icon="pi pi-id-card" disabled="false"/> 
+                <p:linkButton outcome="/users/card" value="#{msg['legend.membercard']}" icon="pi pi-id-card" disabled="false"/> 
                 <p:menuButton value="#{msg['menu.accounting']}">
                     <p:menuitem outcome="/entries/cheques" value="Cheques" icon="pi pi-money-bill" disabled="false"/> 
                 </p:menuButton>
@@ -36,6 +35,7 @@
                     <p:menuitem outcome="/offers/weekly" value="Weekly Report"  icon="pi pi-print"/>
                     <p:menuitem outcome="/offers/weekly" value="Weekly Report"  icon="pi pi-receipt"/>
                 </p:menuButton>
+                <p:linkButton outcome="/nas/list" icon="pi pi-folder" value="NAS" />
                 <p:commandButton rendered="#{userBean.loggedIn}" action="#{userBean.logout()}" value="#{msg['legend.logout']}" icon="pi pi-power-off" disabled="false"/> 
             </p:panelGrid>
             <h:messages showDetail="true" />
