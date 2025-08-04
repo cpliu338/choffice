@@ -11,8 +11,10 @@ public class FileModel {
     private String name;
     private String strSize;
     private long size;
+    private File file;
 
     public FileModel(File file) {
+        this.file = file;
         name = file.getName();
         if (file.isDirectory()) {
             return;
@@ -49,6 +51,14 @@ public class FileModel {
      */
     public long getSize() {
         return size;
+    }
+    
+    public void unlink() throws SecurityException {
+        if (file != null && file.canWrite()) {
+            file.delete();
+            return;
+        }
+        throw new IllegalArgumentException("Cannot delete " + getName());
     }
     
     public String getTimeAgoInWords() {

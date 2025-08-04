@@ -8,8 +8,6 @@ import java.util.*;
 import java.util.logging.Level;
 import org.therismos.entity.FileModel;
 import org.therismos.entity.FolderModel;
-import org.primefaces.model.DefaultStreamedContent;
-import org.primefaces.model.StreamedContent;
 //import org.primefaces.util.Callbacks;
 
 /**
@@ -18,7 +16,7 @@ import org.primefaces.model.StreamedContent;
  */
 @Named
 @SessionScoped
-public class NasBean implements WebBean, Serializable {
+public class NasBean implements DownloadFile, Serializable {
 
     private File base;
     private File currentPath;
@@ -79,7 +77,12 @@ public class NasBean implements WebBean, Serializable {
     public void setCurrentPath(File currentPath) {
         this.currentPath = currentPath;
     }
-
+    
+    @Override
+    public File getFile2Download(String fileName) {
+        return new File(currentPath, fileName);
+    }
+/*
     public StreamedContent downloadFile(String fileName) {
         getLog().log(Level.FINE, "here 0: {0}", new File(currentPath,fileName).toString());
         File file = new File(currentPath,fileName);
@@ -100,7 +103,7 @@ public class NasBean implements WebBean, Serializable {
                 }
             }).build();
     }
-
+*/
     /**
      * @return the files
      */

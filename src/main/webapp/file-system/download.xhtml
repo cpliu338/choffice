@@ -12,7 +12,7 @@
             <p:messages id="growl"/>
             <div align="center">
                 <p:selectOneMenu style="width: 150px" value="#{downloadBean.selectedClassName}">
-                    <p:ajax listener="#{downloadBean.typeChange()}" update="@form" />
+                    <p:ajax process="@this time-stamp" listener="#{downloadBean.typeChange()}" update="@form" />
                     <f:selectItem rendered="#{empty downloadBean.selectedClassName}" itemLabel="Choose 1" itemValue="" />
                     <f:selectItems value="#{downloadBean.types}"/>
                 </p:selectOneMenu>
@@ -37,6 +37,7 @@
                     </p:commandButton>
                 </p:column>
             </p:dataTable>
+            <p:inputNumber id="time-stamp" value="#{downloadBean.oldestTimestamp}" minValue="1754058382323"/>
         </h:form>
             </ui:define>
 

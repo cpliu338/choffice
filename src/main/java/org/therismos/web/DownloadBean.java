@@ -1,6 +1,6 @@
 package org.therismos.web;
 import jakarta.annotation.PostConstruct;
-import jakarta.faces.application.FacesMessage;
+import java.util.regex.Pattern;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.model.SelectItem;
 import jakarta.faces.view.ViewScoped;
@@ -10,11 +10,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.logging.Level;
-import org.primefaces.model.DefaultStreamedContent;
 import java.nio.file.*;
 import java.util.stream.Collectors;
-import org.bson.Document;
-import org.primefaces.model.StreamedContent;
+import org.omnifaces.cdi.Param;
 import org.therismos.bean.ApplicationBean;
 import org.therismos.entity.FileModel;
 import org.therismos.job.AbstractJob;
@@ -43,11 +41,13 @@ public class DownloadBean implements DownloadFile, Serializable {
 
     final List<Class<? extends AbstractJob>> jobClasses;
     final List<SelectItem> types;
-    private final List<FileModel> files;
+    private List<FileModel> files;
     private File downloadDir;
     ResourceBundle bundle;
-
-    private String selectedClassName;
+    
+    @Param
+    String type;
+    String selectedClassName;
     private static final String JOBPATH = "org.therismos.job.";
     // can use choffice.properties
     private static final Set<String> BLACKLIST = Set.of(
@@ -115,6 +115,13 @@ public class DownloadBean implements DownloadFile, Serializable {
             }
             populateTypes();
         }
+        selectedClassName = "";
+        for (Class<? extends AbstractJob> clazz : jobClasses) {
+            if (clazz.getSimpleName().equals(type))
+                selectedClassName = clazz.getName();                
+        }
+        if (selectedClassName != null && selectedClassName.length()>1)
+            refreshFiles();
     }
     
     public boolean hasPublicStaticStringGetFilePattern(Class<?> clazz) {
@@ -148,6 +155,10 @@ public class DownloadBean implements DownloadFile, Serializable {
     
     public void typeChange() {
         populateTypes();
+        refreshFiles();
+    }
+
+    private void refreshFiles() {
         final StringBuilder pattern = new StringBuilder();
         try {
             Class<?> clazz = Class.forName(selectedClassName);
@@ -163,34 +174,60 @@ public class DownloadBean implements DownloadFile, Serializable {
         } catch (Exception ex) {
             getLog().log(Level.SEVERE, (String) null, ex);
         }
-        File[] fs = downloadDir.listFiles(new java.io.FileFilter() {
-            @Override
-            public boolean accept(File pathname) {
-                boolean matched = pathname.getName().matches(pattern.toString());
-                return matched;
-            }
-        });
-        files.clear();
-        for (File f : fs) {
-            files.add(new FileModel(f));
-        }
+        files = getModels(downloadDir, pattern.toString(), getOldestTimestamp());
     }
+    private long oldestTimestamp = 1754058382323L;
     
     public String getDebug() {
         if (selectedClassName == null || selectedClassName.length()==0)
             return "No selected type";
-        try {
-            Class<?> clazz = Class.forName(selectedClassName);
-            // Get the method (no parameters)
-            Method m = clazz.getDeclaredMethod("getFilePattern");
-            // Invoke the static method (null for instance)
-            Object result = m.invoke(null);
-            return (String) result;
-        } catch (Exception ex) {
-            getLog().log(Level.SEVERE, (String) null, ex);
+        return selectedClassName;        
+    }
+
+    public List<FileModel> getModels(File base, String regex, long timestamp) {
+        List<FileModel> models = new ArrayList<>();
+
+        // Ensure base is a directory
+        if (base == null || !base.isDirectory()) {
+            throw new IllegalArgumentException("Base must be an existing directory: " + base);
         }
-        return "Oh No";
-        
+
+        Pattern pattern = Pattern.compile(regex);
+
+        File[] files = base.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isFile() && pattern.matcher(file.getName()).matches()) {
+                    models.add(new FileModel(file));
+                }
+            }
+        }
+
+        // Remove outdated models and delete their files
+        Iterator<FileModel> iterator = models.iterator();
+        while (iterator.hasNext()) {
+            FileModel m = iterator.next();
+            if (m.getTimestamp() < timestamp) {
+                iterator.remove();
+                m.unlink();
+            }
+        }
+
+        return models;
+    }
+
+    /**
+     * @return the oldestTimestamp
+     */
+    public long getOldestTimestamp() {
+        return oldestTimestamp;
+    }
+
+    /**
+     * @param oldestTimestamp the oldestTimestamp to set
+     */
+    public void setOldestTimestamp(long oldestTimestamp) {
+        this.oldestTimestamp = oldestTimestamp;
     }
     
 }
