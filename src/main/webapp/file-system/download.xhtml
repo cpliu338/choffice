@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="jakarta.faces.facelets" xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"  xmlns:p="primefaces">
+    <h:head>
+        <title>Facelet Title</title>
+    </h:head>
+    <h:body>
+        <ui:composition template="../WEB-INF/mainTemplate.xhtml">
+            <ui:define name="content">
+        <h:form>
+            <p:messages id="growl"/>
+            <div align="center">
+                <p:selectOneMenu style="width: 150px" value="#{downloadBean.selectedClassName}">
+                    <p:ajax listener="#{downloadBean.typeChange()}" update="@form" />
+                    <f:selectItem rendered="#{empty downloadBean.selectedClassName}" itemLabel="Choose 1" itemValue="" />
+                    <f:selectItems value="#{downloadBean.types}"/>
+                </p:selectOneMenu>
+            </div>
+            <h:outputText rendered="#{initParam['jakarta.faces.PROJECT_STAGE'] eq 'Development'}" value="#{downloadBean.debug}"/>
+            
+            <p:dataTable id="files" value="#{downloadBean.files}" var="file" paginator="true" rows="15"
+                 paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} ">
+                <f:facet name="header">Files</f:facet>
+                <p:column>
+                    <h:outputText value="#{file.name}"/>
+                </p:column>
+                <p:column width="6em">
+                    <h:outputText value="#{file.strSize}"/>
+                </p:column>
+                <p:column width="8em">
+                    <h:outputText value="#{file.timeAgoInWords}"/>
+                </p:column>
+                <p:column width="9em">
+                    <p:commandButton value="download" ajax="false">
+                        <p:fileDownload value="#{downloadBean.downloadFile(file.name)}" />
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+            </ui:define>
+
+        </ui:composition>
+    </h:body>
+</html>

@@ -50,5 +50,35 @@ public class FileModel {
     public long getSize() {
         return size;
     }
+    
+    public String getTimeAgoInWords() {
+        long ts = getTimestamp();
+        if (ts > System.currentTimeMillis()) {
+            return "Future";
+        }
+        else if (ts > 1) {
+            long s = (System.currentTimeMillis() - ts)/1000L;
+            if (s < 60) {
+                return String.format("%d s ago", s);
+            }
+            if (s < 3600) {
+                return String.format("%.1f m ago", s/60.0);
+            }
+            if (s < 86400) {
+                return String.format("%.1f h ago", s/3600.0);
+            }
+            return String.format("%.1f d ago", s/86400.0);
+        }
+        else return "???";
+    }
+    
+    public long getTimestamp() {
+        try {
+            return Long.parseLong(name.substring(name.lastIndexOf('_')+1, name.lastIndexOf('.')));
+        }
+        catch (RuntimeException r) {
+            return -1L;
+        }
+    }
 
 }

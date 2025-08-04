@@ -4,15 +4,13 @@ import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.inject.*;
 import java.io.*;
-import java.io.InputStream;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.therismos.entity.FileModel;
 import org.therismos.entity.FolderModel;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
-import org.primefaces.util.Callbacks;
+//import org.primefaces.util.Callbacks;
 
 /**
  *
@@ -24,10 +22,8 @@ public class NasBean implements WebBean, Serializable {
 
     private File base;
     private File currentPath;
-    private String selectedFile;
     private List<FileModel> files;
     private List<FolderModel> subdirs;
-    private StreamedContent content;
     private String path;
     private String nasSelector;
     
@@ -39,7 +35,6 @@ public class NasBean implements WebBean, Serializable {
         path = ".";
         files = new ArrayList<>();
         subdirs = new ArrayList<>();
-        content = null;
         if ("NAS".equals(nasSelector)) {
             base = userBean.getNasPath();
         }
@@ -85,27 +80,17 @@ public class NasBean implements WebBean, Serializable {
         this.currentPath = currentPath;
     }
 
-    /**
-     * @return the selectedFile
-     */
-    public String getSelectedFile() {
-        Logger.getLogger(NasBean.class.getName()).info("Get selectedFile");
-        return selectedFile;
-    }
-    
     public StreamedContent downloadFile(String fileName) {
-        //try 
-        {
-            getLog().log(Level.FINE, "here 0: {0}", new File(currentPath,fileName).toString());
-            File file = new File(currentPath,fileName);
-            if (!file.exists()) {
-                addMessage(FacesMessage.SEVERITY_ERROR, "File not found", fileName);
-                return null;
-            }
-                return DefaultStreamedContent.builder()
-                        .name(fileName)
-                        .contentType("application/octet-stream")
-                        .stream(() -> {
+        getLog().log(Level.FINE, "here 0: {0}", new File(currentPath,fileName).toString());
+        File file = new File(currentPath,fileName);
+        if (!file.exists()) {
+            addMessage(FacesMessage.SEVERITY_ERROR, "File not found", fileName);
+            return null;
+        }
+        return DefaultStreamedContent.builder()
+            .name(fileName)
+            .contentType("application/octet-stream")
+            .stream(() -> {
                 try {
                     return new FileInputStream(file);
                 } catch (FileNotFoundException ex) {
@@ -113,25 +98,8 @@ public class NasBean implements WebBean, Serializable {
                     getLog().log(Level.SEVERE, null, ex);
                     return null;
                 }
-            })
-                        .build();
-        }
-                                //new File(currentPath,selectedFile)
-        /*catch (Exception ex) {
-            content = null;
-                this.addMessage(FacesMessage.SEVERITY_ERROR, ex.getClass().getName(), ex.getMessage());
-        }*/
-        
+            }).build();
     }
-
-    /**
-     * @param selectedFile the selectedFile to set
-     */
-    public void setSelectedFile(String selectedFile) {
-        this.selectedFile = selectedFile;
-    }
-/*  new File(currentPath, selectedFile);
-    */
 
     /**
      * @return the files
@@ -183,20 +151,6 @@ public class NasBean implements WebBean, Serializable {
      */
     public List<FolderModel> getSubdirs() {
         return subdirs;
-    }
-
-    /**
-     * @return the content
-     */
-    public StreamedContent getContent() {
-        if (content==null) {
-            getLog().log(Level.INFO, "content is {0} null", content==null ? "" : " not " );
-            addMessage(FacesMessage.SEVERITY_ERROR, "File not found", selectedFile);            
-        }
-        else {
-            getLog().log(Level.INFO, "content is {0} null", content==null ? "" : " not " );
-        }
-        return content;
     }
 
     /**

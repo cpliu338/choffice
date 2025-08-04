@@ -35,7 +35,10 @@
                     <p:menuitem outcome="/offers/weekly" value="Weekly Report"  icon="pi pi-print"/>
                     <p:menuitem outcome="/offers/weekly" value="Weekly Report"  icon="pi pi-receipt"/>
                 </p:menuButton>
-                <p:linkButton outcome="/nas/list" icon="pi pi-folder" value="NAS" />
+                <p:menuButton value="Files">
+                    <p:menuitem outcome="/file-system/list" icon="pi pi-folder" value="NAS" />
+                    <p:menuitem outcome="/file-system/download" icon="pi pi-download" value="Download" />
+                </p:menuButton>
                 <p:commandButton rendered="#{userBean.loggedIn}" action="#{userBean.logout()}" value="#{msg['legend.logout']}" icon="pi pi-power-off" disabled="false"/> 
             </p:panelGrid>
             <h:messages showDetail="true" />
