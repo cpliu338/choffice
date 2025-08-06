@@ -44,6 +44,8 @@ public class DownloadBean implements DownloadFile, Serializable {
     private List<FileModel> files;
     private File downloadDir;
     ResourceBundle bundle;
+    // download files older than 2 days long will be deleted
+    private final long ms2keep = 2 * 86400000L;
     
     @Param
     String type;
@@ -174,9 +176,8 @@ public class DownloadBean implements DownloadFile, Serializable {
         } catch (Exception ex) {
             getLog().log(Level.SEVERE, (String) null, ex);
         }
-        files = getModels(downloadDir, pattern.toString(), getOldestTimestamp());
+        files = getModels(downloadDir, pattern.toString(), System.currentTimeMillis()-ms2keep);
     }
-    private long oldestTimestamp = 1754058382323L;
     
     public String getDebug() {
         if (selectedClassName == null || selectedClassName.length()==0)
@@ -215,19 +216,4 @@ public class DownloadBean implements DownloadFile, Serializable {
 
         return models;
     }
-
-    /**
-     * @return the oldestTimestamp
-     */
-    public long getOldestTimestamp() {
-        return oldestTimestamp;
-    }
-
-    /**
-     * @param oldestTimestamp the oldestTimestamp to set
-     */
-    public void setOldestTimestamp(long oldestTimestamp) {
-        this.oldestTimestamp = oldestTimestamp;
-    }
-    
 }

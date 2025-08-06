@@ -30,10 +30,10 @@
                 <p:linkButton outcome="/users/card" value="#{msg['legend.membercard']}" icon="pi pi-id-card" disabled="false"/> 
                 <p:menuButton value="#{msg['menu.accounting']}">
                     <p:menuitem outcome="/entries/cheques" value="Cheques" icon="pi pi-money-bill" disabled="false"/> 
+                    <p:menuitem outcome="/entries/monthly" value="Monthly Report"  icon="pi pi-print"/>
                 </p:menuButton>
                 <p:menuButton value="#{msg['offer']}">
                     <p:menuitem outcome="/offers/weekly" value="Weekly Report"  icon="pi pi-print"/>
-                    <p:menuitem outcome="/offers/weekly" value="Weekly Report"  icon="pi pi-receipt"/>
                 </p:menuButton>
                 <p:menuButton value="Files">
                     <p:menuitem outcome="/file-system/list" icon="pi pi-folder" value="NAS" />

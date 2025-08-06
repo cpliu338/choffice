@@ -82,28 +82,7 @@ public class NasBean implements DownloadFile, Serializable {
     public File getFile2Download(String fileName) {
         return new File(currentPath, fileName);
     }
-/*
-    public StreamedContent downloadFile(String fileName) {
-        getLog().log(Level.FINE, "here 0: {0}", new File(currentPath,fileName).toString());
-        File file = new File(currentPath,fileName);
-        if (!file.exists()) {
-            addMessage(FacesMessage.SEVERITY_ERROR, "File not found", fileName);
-            return null;
-        }
-        return DefaultStreamedContent.builder()
-            .name(fileName)
-            .contentType("application/octet-stream")
-            .stream(() -> {
-                try {
-                    return new FileInputStream(file);
-                } catch (FileNotFoundException ex) {
-                    // not possible
-                    getLog().log(Level.SEVERE, null, ex);
-                    return null;
-                }
-            }).build();
-    }
-*/
+    
     /**
      * @return the files
      */

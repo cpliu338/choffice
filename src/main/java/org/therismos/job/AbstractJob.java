@@ -23,7 +23,7 @@ public abstract class AbstractJob implements Job {
     }
     protected String type;
     protected Date expiry;
-    private final Document config;
+    protected final Document config;
     protected final ApplicationBean applicationBean;
 
     protected AbstractJob(ApplicationBean srv, Document config) {

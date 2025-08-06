@@ -1,5 +1,6 @@
 package org.therismos.job;
 
+
 import java.io.*;
 import java.nio.file.Paths;
 import java.sql.SQLException;
@@ -22,6 +23,7 @@ public abstract class AbstractXlsxJob extends AbstractJob {
     protected XSSFWorkbook workbook;
     protected Sheet srcSheet /* template sheet */, sheet /* target sheet */;
     
+    
     protected AbstractXlsxJob(ApplicationBean srv, Document config) {
         super(srv, config);
         try {
@@ -30,13 +32,18 @@ public abstract class AbstractXlsxJob extends AbstractJob {
             templateXlsx = null;
         }
     }
+
+    protected abstract XSSFWorkbook buildExcel() throws Exception;
     
-    protected XSSFWorkbook buildExcel() throws Exception {
-        workbook = new XSSFWorkbook();
-        sheet = workbook.createSheet("Offers");
-        srcSheet = templateXlsx.getSheetAt(0);
+    protected XSSFWorkbook buildExcel(String sheetName) throws Exception {
+        if (workbook == null) // no need to create again for the second sheet
+            workbook = new XSSFWorkbook();
         if (templateXlsx == null)
             throw new IOException("template file not found: " + getTemplateFilePath().getAbsolutePath());
+        srcSheet = templateXlsx.getSheet(sheetName);
+        if (srcSheet == null)
+            throw new IOException(String.format("Sheet %s not found in %s ", sheetName, getTemplateFilePath().getAbsolutePath()));
+        sheet = workbook.createSheet(sheetName);
         return workbook;
     }
     

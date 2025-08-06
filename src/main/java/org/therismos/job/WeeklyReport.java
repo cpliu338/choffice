@@ -64,7 +64,12 @@ public class WeeklyReport extends AbstractXlsxJob {
 
     @Override
     public XSSFWorkbook buildExcel() throws Exception {
-        /*workbook =*/ super.buildExcel();
+        return buildExcel("Offer");
+    }
+    
+    @Override
+    public XSSFWorkbook buildExcel(String sheetName) throws Exception {
+        super.buildExcel(sheetName);
         accountNameStyle = workbook.createCellStyle();
         accountNameStyle.cloneStyleFrom(srcSheet.getRow(2).getCell(0).getCellStyle());
         subtotalStyle = workbook.createCellStyle();
@@ -147,7 +152,7 @@ public class WeeklyReport extends AbstractXlsxJob {
     }
 
     /**
-     * Get / create a detail row at row_no
+     * Get / create a detail row at row_no, assumed srcSheet.getRow(3) gives correct height
      * @param row_no
      * @return 
      */
