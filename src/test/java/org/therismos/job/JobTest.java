@@ -72,7 +72,7 @@ public class JobTest {
         System.out.println("test Monthly Report");
         ApplicationBean appBean = new ApplicationBean();
         appBean.init();
-        config.append("end", "2024-08-31");
+        config.append("end", "2024-12-31");
         instance = (MonthlyReport)new MonthlyReport(appBean, config);
         File f = instance.getDownloadPath();
         try (FileOutputStream out = new FileOutputStream(f)) {

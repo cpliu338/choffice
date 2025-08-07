@@ -9,8 +9,8 @@ import org.bson.codecs.configuration.CodecProvider;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 import jakarta.annotation.*;
+import jakarta.inject.*;
 import jakarta.enterprise.concurrent.ManagedExecutorService;
-import jakarta.faces.context.FacesContext;
 import java.io.*;
 import java.nio.file.*;
 import java.sql.SQLException;
@@ -30,8 +30,8 @@ import org.bson.codecs.pojo.PojoCodecProvider;
  * TODO: test it
  * @author cp_liu
  */
-@jakarta.inject.Named
-@jakarta.inject.Singleton
+@Named
+@Singleton
 public class ApplicationBean implements java.io.Serializable {
 
     /**
@@ -62,6 +62,8 @@ public class ApplicationBean implements java.io.Serializable {
     private String datapath;
     @jakarta.annotation.Resource
     private DataSource dataSource;
+    @Inject
+    private jakarta.servlet.ServletContext servletContext;
     
     MongoClient mongoClient;
     CodecRegistry pojoCodecRegistry;
@@ -79,10 +81,11 @@ public class ApplicationBean implements java.io.Serializable {
     
     @jakarta.annotation.PostConstruct
     public void init() {
+        jobList = new ArrayList<>();
         try {
-            projectStage = FacesContext.getCurrentInstance().getExternalContext().getInitParameter("jakarta.faces.PROJECT_STAGE");
+            projectStage = servletContext.getInitParameter("jakarta.faces.PROJECT_STAGE");
         }
-        catch (NoClassDefFoundError r) {
+        catch (RuntimeException r) {
             projectStage = "Test";
         }
         properties = new Properties();

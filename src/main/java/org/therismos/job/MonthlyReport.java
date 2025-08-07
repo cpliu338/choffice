@@ -11,6 +11,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
@@ -92,19 +93,13 @@ public class MonthlyReport extends AbstractXlsxJob {
     
     @Override
     protected XSSFWorkbook buildExcel() throws Exception {
-        super.buildExcel("P and L");
-        QueryRunner run = new QueryRunner(applicationBean.getDataSource());
-        buildPandL(run);
-        super.buildExcel("Balance Sheet");
-        buildBalanceSheet(run);
-        return workbook;
-    }
-    
-    public void buildPandL(QueryRunner run) {
         total = new HashMap<>();
         grandtotal = new HashMap<>();
-        int totalRowNo = 40;
-        try {
+        sumAccounts();
+        QueryRunner run = new QueryRunner(applicationBean.getDataSource());
+        super.buildExcel("P and L");
+        int totalRowNo = 40; // this value valid for Sheet P and L of the template
+        // following styles good for both sheets
             accountNameStyle = workbook.createCellStyle();
             accountNameStyle.cloneStyleFrom(srcSheet.getRow(6).getCell(0).getCellStyle());
             amountStyle = workbook.createCellStyle();
@@ -113,108 +108,140 @@ public class MonthlyReport extends AbstractXlsxJob {
             totalStyle.cloneStyleFrom(srcSheet.getRow(totalRowNo).getCell(1).getCellStyle());
             sur_def_Style = workbook.createCellStyle();
             sur_def_Style.cloneStyleFrom(srcSheet.getRow(totalRowNo-1).getCell(1).getCellStyle());                
-            Row row = cloneRow(0, 0);
-            sheet.addMergedRegion(
-                new CellRangeAddress(0, 0, 0, 2) // row1, row2, col1, col2
-            );
-            cloneCell(srcSheet.getRow(0).getCell(0), row, 0, true);
-            // row = cloneRow(1, 1);  row offset 1 is empty
-            row = cloneRow(2, 2);
-            Cell cell = cloneCell(srcSheet.getRow(2).getCell(0), row, 0, false);
-            String s = MessageFormat.format(bundle_zh.getString("format.cut-off-date"), java.sql.Date.valueOf(endDate));
-            LOG.log(Level.INFO, s);
-            cell.setCellValue(
-            s
-            );
-            sheet.addMergedRegion(
-                new CellRangeAddress(2, 2, 0, 2) // row1, row2, col1, col2
-            );
-            cloneCell(srcSheet.getRow(2).getCell(0), row, 0, true);
-            row = cloneRow(4, 4);
-            cloneCell(srcSheet.getRow(4).getCell(0), row, 0, true);
-            cloneCell(srcSheet.getRow(4).getCell(1), row, 1, true);
-            cloneCell(srcSheet.getRow(4).getCell(2), row, 2, true);
-            row = cloneRow(5, 5);
-            cloneCell(srcSheet.getRow(5).getCell(1), row, 1, true);
-            cloneCell(srcSheet.getRow(5).getCell(2), row, 2, true);
-//            endDate = LocalDate.parse(config.getString("end"), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            for (int i=1; i<=5; i++) {
-                String subtype = Integer.toString(i);
-                grandtotal.put(subtype, BigDecimal.ZERO);
-                for(String code: this.getAccountsBelow(i)) {
-                    total.put(code, reckon(code, endDate));
-                    if (incByCR(subtype)) 
-                        grandtotal.put(subtype, grandtotal.getOrDefault(subtype, BigDecimal.ZERO)
-                                .add(total.getOrDefault(code, BigDecimal.ZERO)));
-                    else
-                        grandtotal.put(subtype, grandtotal.getOrDefault(subtype, BigDecimal.ZERO)
-                                .subtract(total.getOrDefault(code, BigDecimal.ZERO)));
-                }
-            }
-            
+        buildPandL(run);
+        super.buildExcel("Balance Sheet");
+        buildBalanceSheet(run);
+        return workbook;
+    }
+    
+    public void buildPandL(QueryRunner run) {
+        try {
             List<String> account_codes;
             account_codes = new ArrayList<>();
             account_codes.addAll(getAccountsBelow(4));
             account_codes.addAll(getAccountsBelow(5));
-            double delta = 0.00001; // cater for imprecision
-            int first_detail_row = 6;
-            int row_no = first_detail_row;
-            for (String account_code : account_codes) {
-                BigDecimal t = total.get(account_code);
-                double amount = t.doubleValue();
-                if (Math.abs(amount) < delta)
-                    continue;
-                row = detailRow(row_no++);
-                Cell n = row.createCell(0);
-                n.setCellStyle(accountNameStyle);
-                List<String> list = findNameChi(run, account_code);
-                n.setCellValue(// account_code + 
-                        (list.isEmpty() ? "???" : list.get(0)));
-                if (amount >= delta) {
-                    Cell n1 = row.createCell(1);
-                    n1.setCellStyle(amountStyle);
-                    Cell n2 = row.createCell(2);
-                    n2.setCellValue(amount);                    
-                    n2.setCellStyle(amountStyle);
-                }
-                else {
-                    Cell n1 = row.createCell(1);
-                    n1.setCellValue(0-amount);                    
-                    n1.setCellStyle(amountStyle);
-                    Cell n2 = row.createCell(2);
-                    n2.setCellStyle(amountStyle);
-                }
-            }
-            row = cloneRow(totalRowNo-1, row_no++);
-            double surplus = (grandtotal.get("5").subtract(grandtotal.get("4"))).doubleValue();
-            if (surplus < delta) {
-                cell = cloneCell(srcSheet.getRow(totalRowNo-1).getCell(0), row, 0, false);
-                cell.setCellValue(bundle_zh.getString("legend.surplus"));
-                cell = cloneCell(srcSheet.getRow(totalRowNo-1).getCell(1), row, 1, false);
-                cell.setCellStyle(amountStyle);
-                cell.setCellValue(0 - surplus);
-                cell = cloneCell(srcSheet.getRow(totalRowNo-1).getCell(2), row, 2, false);
-                cell.setCellStyle(amountStyle);
-            }
-            else {
-                cell = cloneCell(srcSheet.getRow(totalRowNo-1).getCell(0), row, 0, false);
-                cell.setCellValue(bundle_zh.getString("legend.deficit"));
-                cell = cloneCell(srcSheet.getRow(totalRowNo-1).getCell(1), row, 1, false);
-                cell.setCellStyle(amountStyle);
-                cell = cloneCell(srcSheet.getRow(totalRowNo-1).getCell(2), row, 2, false);
-                cell.setCellStyle(amountStyle);
-                cell.setCellValue(surplus);
-            }
-            row = cloneRow(totalRowNo, row_no++);
-            cell = cloneCell(srcSheet.getRow(totalRowNo).getCell(1), row, 1, false);
-            cell.setCellStyle(totalStyle);
-            cell.setCellFormula(String.format("SUM(B%d:B%d)", first_detail_row+1, row_no-1));
-            cell = cloneCell(srcSheet.getRow(totalRowNo).getCell(2), row, 2, false);
-            cell.setCellStyle(totalStyle);
-            cell.setCellFormula(String.format("SUM(C%d:C%d)", first_detail_row+1, row_no-1));
+            fillDetailRows(account_codes, run, 1);
         }
         catch (SQLException ex) {
             LOG.log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     * 
+     * @param account_codes
+     * @param run
+     * @param page1 for P&L, 2 for Bal Sheet
+     * @throws FormulaParseException
+     * @throws IllegalStateException
+     * @throws SQLException 
+     */
+    private void fillDetailRows(List<String> account_codes, QueryRunner run, int page) throws FormulaParseException, IllegalStateException, SQLException {
+        cloneHeaderRows(bundle_zh.getString(page==1 ? "format.cut-off-date" : "format.cut-off-date2"));
+        double delta = 0.00001; // cater for imprecision
+        int totalRowNo = page==1 ? 40 : 21;
+        int first_detail_row = 6;
+        int row_no = first_detail_row;
+        Row row; Cell cell;
+        for (String account_code : account_codes) {
+            BigDecimal t = total.get(account_code);
+            double amount = t.doubleValue();
+            if (Math.abs(amount) < delta)
+                continue;
+            row = detailRow(row_no++);
+            Cell n = row.createCell(0);
+            n.setCellStyle(accountNameStyle);
+            List<String> list = findNameChi(run, account_code);
+            n.setCellValue(// account_code +
+                    (list.isEmpty() ? "???" : list.get(0)));
+            if (amount >= delta) {
+                Cell n1 = row.createCell(1);
+                n1.setCellStyle(amountStyle);
+                Cell n2 = row.createCell(2);
+                n2.setCellValue(amount);
+                n2.setCellStyle(amountStyle);
+            }
+            else {
+                Cell n1 = row.createCell(1);
+                n1.setCellValue(0-amount);
+                n1.setCellStyle(amountStyle);
+                Cell n2 = row.createCell(2);
+                n2.setCellStyle(amountStyle);
+            }
+        }
+        row = cloneRow(totalRowNo-1, row_no++);
+        double surplus = (grandtotal.get("5").subtract(grandtotal.get("4"))).doubleValue();
+        Cell cell0 = cloneCell(srcSheet.getRow(totalRowNo-1).getCell(0), row, 0, false);
+        cell0.setCellValue(bundle_zh.getString(surplus<delta ? "legend.surplus" : "legend.deficit"));
+        Cell cell1 = row.createCell(1);
+        Cell cell2 = cloneCell(srcSheet.getRow(totalRowNo-1).getCell(2), row, 2, false);
+        if (page == 1) {
+            if (surplus < delta) {
+                cell1.setCellValue(0 - surplus);
+                cell1.setCellStyle(amountStyle);
+            }
+            else {
+                cell2.setCellValue(surplus);
+                cell2.setCellStyle(amountStyle);
+            }
+        }
+        else {
+            if (surplus < delta) {
+                cell2.setCellValue(0 - surplus);
+                cell2.setCellStyle(amountStyle);
+            }
+            else {
+                cell1.setCellValue(surplus);
+                cell1.setCellStyle(amountStyle);
+            }
+        }
+        row = cloneRow(totalRowNo, row_no++);
+        cell = cloneCell(srcSheet.getRow(totalRowNo).getCell(1), row, 1, false);
+        cell.setCellStyle(totalStyle);
+        cell.setCellFormula(String.format("SUM(B%d:B%d)", first_detail_row+1, row_no-1));
+        cell = cloneCell(srcSheet.getRow(totalRowNo).getCell(2), row, 2, false);
+        cell.setCellStyle(totalStyle);
+        cell.setCellFormula(String.format("SUM(C%d:C%d)", first_detail_row+1, row_no-1));
+    }
+
+    private void cloneHeaderRows(String format) {
+        Row row = cloneRow(0, 0);
+        sheet.addMergedRegion(
+                new CellRangeAddress(0, 0, 0, 2) // row1, row2, col1, col2
+        );
+        cloneCell(srcSheet.getRow(0).getCell(0), row, 0, true);
+        // row = cloneRow(1, 1);  row offset 1 is empty
+        row = cloneRow(2, 2);
+        Cell cell = cloneCell(srcSheet.getRow(2).getCell(0), row, 0, false);        
+        cell.setCellValue(
+        MessageFormat.format(format, java.sql.Date.valueOf(endDate)) 
+        );
+        sheet.addMergedRegion(
+                new CellRangeAddress(2, 2, 0, 2) // row1, row2, col1, col2
+        );
+        
+        row = cloneRow(4, 4);
+        cloneCell(srcSheet.getRow(4).getCell(0), row, 0, true);
+        cloneCell(srcSheet.getRow(4).getCell(1), row, 1, true);
+        cloneCell(srcSheet.getRow(4).getCell(2), row, 2, true);
+        row = cloneRow(5, 5);
+        cloneCell(srcSheet.getRow(5).getCell(1), row, 1, true);
+        cloneCell(srcSheet.getRow(5).getCell(2), row, 2, true);
+    }
+
+    private void sumAccounts() throws SQLException {
+        for (int i=1; i<=5; i++) {
+            String subtype = Integer.toString(i);
+            grandtotal.put(subtype, BigDecimal.ZERO);
+            for(String code: this.getAccountsBelow(i)) {
+                total.put(code, reckon(code, endDate));
+                if (incByCR(subtype))
+                    grandtotal.put(subtype, grandtotal.getOrDefault(subtype, BigDecimal.ZERO)
+                            .add(total.getOrDefault(code, BigDecimal.ZERO)));
+                else
+                    grandtotal.put(subtype, grandtotal.getOrDefault(subtype, BigDecimal.ZERO)
+                            .subtract(total.getOrDefault(code, BigDecimal.ZERO)));
+            }
         }
     }
     
@@ -240,7 +267,17 @@ public class MonthlyReport extends AbstractXlsxJob {
     }
     
     private void buildBalanceSheet(QueryRunner run) {
-        
+        try {
+            List<String> account_codes;
+            account_codes = new ArrayList<>();
+            account_codes.addAll(getAccountsBelow(1));
+            account_codes.addAll(getAccountsBelow(2));
+            account_codes.addAll(getAccountsBelow(3));
+            fillDetailRows(account_codes, run, 2);
+        }
+        catch (SQLException ex) {
+            LOG.log(Level.SEVERE, null, ex);
+        }
     }
     
 }
