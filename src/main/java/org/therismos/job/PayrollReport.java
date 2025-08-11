@@ -134,7 +134,7 @@ public class PayrollReport extends AbstractXlsxJob {
             row_no = printSection(row_no, 7, non_key_personnel, staff_names, salaries) + 1;
         }
         if (row_no > row_no1+2) { // some rows written
-            row = sheet.createRow(row_no);
+            row = cloneRow(row_no_total, row_no);
             Cell cell = row.createCell(0);
             cell.setCellValue(total_in_chinese); 
             cell.setCellStyle(nameStyle);
@@ -149,6 +149,17 @@ public class PayrollReport extends AbstractXlsxJob {
             row_no++;
         }
         //LOG.log(Level.INFO, config.toJson(applicationBean.getPojoCodecRegistry().get(Document.class)));
+        row_no++;
+        row_no1 = row_no;
+        // MPF now
+        row = cloneRow(17, row_no++);  // Row for mpf row
+        this.cloneCell(srcSheet.getRow(17).getCell(0), row, 0, true);
+        if (!key_personnel.isEmpty()){
+            row_no = printSection(row_no, 3, key_personnel, staff_names, mpf) + 1; // +1 to skip one line
+        }
+        if (!non_key_personnel.isEmpty()){
+            row_no = printSection(row_no, 7, non_key_personnel, staff_names, mpf) + 1;
+        }
         return workbook;
     }
 
