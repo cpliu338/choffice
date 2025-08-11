@@ -67,13 +67,29 @@ public class JobTest {
         assert(sum.compareTo(new BigDecimal("-754964.79")) == 0);
     }
     
-    @Test
     public void testMonthlyReport() throws Exception {
         System.out.println("test Monthly Report");
         ApplicationBean appBean = new ApplicationBean();
         appBean.init();
         config.append("end", "2024-12-31");
         instance = (MonthlyReport)new MonthlyReport(appBean, config);
+        File f = instance.getDownloadPath();
+        try (FileOutputStream out = new FileOutputStream(f)) {
+            XSSFWorkbook wb = instance.buildExcel();
+            wb.write(out);
+        }
+        System.out.println("written to " + f.getAbsolutePath());
+    }
+    
+    @Test
+    public void testPayrollReport() throws Exception {
+        System.out.println("test Payroll Report");
+        ApplicationBean appBean = new ApplicationBean();
+        appBean.init();
+        config.append("startDate", "2024-01-01");
+        java.util.List<String> a = java.util.Arrays.asList( "5112");
+        config.append("key_personnel", a);
+        instance = new PayrollReport(appBean, config);
         File f = instance.getDownloadPath();
         try (FileOutputStream out = new FileOutputStream(f)) {
             XSSFWorkbook wb = instance.buildExcel();

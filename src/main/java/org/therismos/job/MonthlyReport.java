@@ -195,13 +195,16 @@ public class MonthlyReport extends AbstractXlsxJob {
                 cell1.setCellStyle(amountStyle);
             }
         }
+        FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();  
         row = cloneRow(totalRowNo, row_no++);
         cell = cloneCell(srcSheet.getRow(totalRowNo).getCell(1), row, 1, false);
         cell.setCellStyle(totalStyle);
         cell.setCellFormula(String.format("SUM(B%d:B%d)", first_detail_row+1, row_no-1));
+        evaluator.evaluateFormulaCell(cell);
         cell = cloneCell(srcSheet.getRow(totalRowNo).getCell(2), row, 2, false);
         cell.setCellStyle(totalStyle);
         cell.setCellFormula(String.format("SUM(C%d:C%d)", first_detail_row+1, row_no-1));
+        evaluator.evaluateFormulaCell(cell);
     }
 
     private void cloneHeaderRows(String format) {

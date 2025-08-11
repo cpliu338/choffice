@@ -23,7 +23,9 @@ import javax.sql.DataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.bson.Document;
+import static org.bson.codecs.configuration.CodecRegistries.fromCodecs;
 import org.bson.codecs.pojo.PojoCodecProvider;
+import org.therismos.codec.YearMonthCodec;
 
 /**
  * Global config and functions
@@ -33,6 +35,13 @@ import org.bson.codecs.pojo.PojoCodecProvider;
 @Named
 @Singleton
 public class ApplicationBean implements java.io.Serializable {
+
+    /**
+     * @return the pojoCodecRegistry
+     */
+    public CodecRegistry getPojoCodecRegistry() {
+        return pojoCodecRegistry;
+    }
 
     /**
      * @return the projectStage
@@ -66,7 +75,7 @@ public class ApplicationBean implements java.io.Serializable {
     private jakarta.servlet.ServletContext servletContext;
     
     MongoClient mongoClient;
-    CodecRegistry pojoCodecRegistry;
+    private CodecRegistry pojoCodecRegistry;
     private List<JobFuture> jobList;
     private String projectStage;
     
@@ -111,7 +120,11 @@ public class ApplicationBean implements java.io.Serializable {
         }
         mongoClient = MongoClients.create(properties.getProperty("mongodb.connectString"));
         CodecProvider pojoCodecProvider = PojoCodecProvider.builder().automatic(true).build();
-        pojoCodecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), fromProviders(pojoCodecProvider));
+        pojoCodecRegistry = fromRegistries(
+                fromCodecs(new YearMonthCodec()),
+                MongoClientSettings.getDefaultCodecRegistry(), 
+                fromProviders(pojoCodecProvider)
+        );
         if (dataSource == null) {
             try {
                 // jdbc:mariadb://db-01:3306/emis?user=webapp&password=asd82KK
@@ -127,7 +140,7 @@ public class ApplicationBean implements java.io.Serializable {
     }
         
     public <T> MongoCollection<T> getCollection(String name, Class<T> clazz) {
-        return mongoClient.getDatabase(properties.getProperty("mongodb.db")).getCollection(name, clazz).withCodecRegistry(pojoCodecRegistry);
+        return mongoClient.getDatabase(properties.getProperty("mongodb.db")).getCollection(name, clazz).withCodecRegistry(getPojoCodecRegistry());
     }
 
     public MongoClient getMongoClient() {
