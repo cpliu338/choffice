@@ -27,7 +27,9 @@ public class PayrollReport extends AbstractXlsxJob {
     LocalDate startDate;
     List<YearMonth> yearMonth;
     final List<String> remarks;
+    DateTimeFormatter yyyyMM;
     ResourceBundle bundle;
+    FormulaEvaluator evaluator;
     CellStyle nameStyle, accountStyle, amountStyle; // from template to get style from
         
     final String sqlSalary = "SELECT a.code,a.name_chi AS name,e.date1,e.detail,0-e.amount AS amt "
@@ -43,6 +45,7 @@ public class PayrollReport extends AbstractXlsxJob {
         startDate = LocalDate.parse(config.getString("startDate"), DateTimeFormatter.ISO_DATE);
         yearMonth = new ArrayList<>();
         remarks = new ArrayList<>();
+        yyyyMM = DateTimeFormatter.ofPattern("yyyy-MM");
     }
 
     /**
@@ -60,6 +63,7 @@ public class PayrollReport extends AbstractXlsxJob {
     @Override
     protected XSSFWorkbook buildExcel() throws Exception {
         super.buildExcel("Payroll Report");
+        evaluator = workbook.getCreationHelper().createFormulaEvaluator();
         LocalDate ld = startDate;
         LocalDate endDate = startDate.plusYears(1).minusDays(1);
         for (int i = 0; i < 12; i++) {
@@ -100,7 +104,6 @@ public class PayrollReport extends AbstractXlsxJob {
         config.append("mpf", mpf);
         config.append("mpf_total", mpf_total);
         config.append("remarks", remarks);
-        FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();  
         nameStyle = workbook.createCellStyle();
         nameStyle.cloneStyleFrom(srcSheet.getRow(4).getCell(2).getCellStyle()); // from cell C5
         accountStyle = workbook.createCellStyle();
@@ -118,31 +121,64 @@ public class PayrollReport extends AbstractXlsxJob {
         row = cloneRow(2, row_no++);  // Row for gross salaries row
         cloneCell(srcSheet.getRow(2).getCell(0), row, 0, true);// Cell A3 is section header
         List<String> key_personnel = config.getList("key_personnel", String.class);
+        List<String> non_key_personnel = config.getList("non_key_personnel", String.class);
         Map<String, String> staff_names = config.get("staff_names", Map.class);
-        DateTimeFormatter yyyyMM = DateTimeFormatter.ofPattern("yyyy-MM");
+        int row_no1 = row_no; // the first row of this section
+        int row_no_total = 15;
+        String total_in_chinese = srcSheet.getRow(row_no_total).getCell(0).getStringCellValue(); // the row with "Total" in the first column
+        Row totalRow = srcSheet.getRow(row_no_total);
         if (!key_personnel.isEmpty()){
-            row = cloneRow(3, row_no++);  // Row for key_personnel row
-            cloneCell(srcSheet.getRow(3).getCell(0), row, 0, true);// Cell A4 is key_personnel header#
-            for (String code : key_personnel) {
-                row = cloneRow(4, row_no++);  // template detail row for key_personnel salary
-                Cell c = row.createCell(2);
-                c.setCellValue(staff_names.getOrDefault(code, "???"));
-                c.setCellStyle(nameStyle);
-                c = row.createCell(3);
-                c.setCellValue(MessageFormat.format(bundle.getString("payroll.account_code"), code));
-                c.setCellStyle(accountStyle);
-                Map<String, Double> sal = salaries.get(code, Map.class);
-                for (int i = 0; i<12; i++) {
-                    Cell ce = row.createCell(5+i);
-                    String key = yearMonth.get(i).format(yyyyMM);
-                    Double s = sal.getOrDefault(key, 0.0);
-                    ce.setCellValue(s);
-                    ce.setCellStyle(amountStyle);
-                }
+            row_no = printSection(row_no, 3, key_personnel, staff_names, salaries) + 1; // +1 to skip one line
+        }
+        if (!non_key_personnel.isEmpty()){
+            row_no = printSection(row_no, 7, non_key_personnel, staff_names, salaries) + 1;
+        }
+        if (row_no > row_no1+2) { // some rows written
+            row = sheet.createRow(row_no);
+            Cell cell = row.createCell(0);
+            cell.setCellValue(total_in_chinese); 
+            cell.setCellStyle(nameStyle);
+            for (int i = 0; i<12; i++) {
+                Cell ce = this.cloneCell(totalRow.getCell(5), row, 5+i, false);
+                char[] ca = new char[1]; ca[0]=(char)('F' + i); String column = new String(ca);
+                ce.setCellFormula(String.format("SUM(%s%d:%s%d)", column, row_no1+2, column, row_no-1));
+                evaluator.evaluateFormulaCell(ce);
             }
+            Cell totalCell = this.cloneCell(totalRow.getCell(18), row, 18, false);
+            totalCell.setCellFormula(String.format("SUM(F%d:Q%d)", row_no+1, row_no+1));
+            row_no++;
         }
         //LOG.log(Level.INFO, config.toJson(applicationBean.getPojoCodecRegistry().get(Document.class)));
         return workbook;
+    }
+
+    private int printSection(int row_no, int row_no_section_head, List<String> personnel, Map<String, String> staff_names, Document salaries) {
+        Row row;
+        row = cloneRow(row_no_section_head, row_no++);  // Row for section head
+        cloneCell(srcSheet.getRow(row_no_section_head).getCell(0), row, 0, true);// clone cell for personnel header
+        for (String code : personnel) {
+            row = cloneRow(row_no_section_head+1, row_no);  // template detail row for personnel salary
+            Cell c = row.createCell(2);
+            c.setCellValue(staff_names.getOrDefault(code, "???"));
+            c.setCellStyle(nameStyle);
+            c = row.createCell(3);
+            c.setCellValue(MessageFormat.format(bundle.getString("payroll.account_code"), code));
+            c.setCellStyle(accountStyle);
+            Map<String, Double> sal = salaries.get(code, Map.class);
+            for (int i = 0; i<12; i++) {
+                Cell ce = row.createCell(5+i);
+                String key = yearMonth.get(i).format(yyyyMM);
+                Double s = sal.getOrDefault(key, 0.0);
+                ce.setCellValue(s);
+                ce.setCellStyle(amountStyle);
+            }
+            c = row.createCell(18); // row total
+            c.setCellFormula(String.format("SUM(F%d:Q%d)", row_no+1, row_no+1));
+            c.setCellStyle(amountStyle);
+            evaluator.evaluateFormulaCell(c);
+            row_no++;
+        }
+        return row_no;
     }
 
     /**
