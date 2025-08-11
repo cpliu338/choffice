@@ -7,6 +7,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
+import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
 import org.bson.Document;
@@ -133,34 +134,60 @@ public class PayrollReport extends AbstractXlsxJob {
         if (!non_key_personnel.isEmpty()){
             row_no = printSection(row_no, 7, non_key_personnel, staff_names, salaries) + 1;
         }
-        if (row_no > row_no1+2) { // some rows written
-            row = cloneRow(row_no_total, row_no);
-            Cell cell = row.createCell(0);
-            cell.setCellValue(total_in_chinese); 
-            cell.setCellStyle(nameStyle);
-            for (int i = 0; i<12; i++) {
-                Cell ce = this.cloneCell(totalRow.getCell(5), row, 5+i, false);
-                char[] ca = new char[1]; ca[0]=(char)('F' + i); String column = new String(ca);
-                ce.setCellFormula(String.format("SUM(%s%d:%s%d)", column, row_no1+2, column, row_no-1));
-                evaluator.evaluateFormulaCell(ce);
-            }
-            Cell totalCell = this.cloneCell(totalRow.getCell(18), row, 18, false);
-            totalCell.setCellFormula(String.format("SUM(F%d:Q%d)", row_no+1, row_no+1));
-            row_no++;
+        if (row_no > row_no1+2) {
+            row_no = printTotalRow(row_no_total, row_no, total_in_chinese, totalRow, row_no1);
         }
         //LOG.log(Level.INFO, config.toJson(applicationBean.getPojoCodecRegistry().get(Document.class)));
         row_no++;
         row_no1 = row_no;
         // MPF now
         row = cloneRow(17, row_no++);  // Row for mpf row
-        this.cloneCell(srcSheet.getRow(17).getCell(0), row, 0, true);
+        cloneCell(srcSheet.getRow(17).getCell(0), row, 0, true);
         if (!key_personnel.isEmpty()){
             row_no = printSection(row_no, 3, key_personnel, staff_names, mpf) + 1; // +1 to skip one line
         }
         if (!non_key_personnel.isEmpty()){
             row_no = printSection(row_no, 7, non_key_personnel, staff_names, mpf) + 1;
         }
+        if (row_no > row_no1+2) {
+            row_no = printTotalRow(row_no_total, row_no, total_in_chinese, totalRow, row_no1);
+        }
+        row = cloneRow(31, row_no++);  // Row for per_ledger row
+        Row srcRow = srcSheet.getRow(31);
+        cloneCell(srcRow.getCell(0), row, 0, true);
+           //Map<String, Double> sal = salaries.get(code, Map.class);
+            for (int i = 0; i<12; i++) {
+                Cell ce = cloneCell(srcRow.getCell(5), row, 5+i, false);
+                String key = yearMonth.get(i).format(yyyyMM);
+                Double s = mpf_queried.getOrDefault(key, 0.0);
+                ce.setCellValue(s);
+            }
+            Cell c = cloneCell(srcRow.getCell(18), row, 18, false); // row total
+            c.setCellFormula(String.format(
+            "IF(S%d=SUM(F$row:Q$row),\"Per ledger\",SUM(F$row:Q$row))".replaceAll("\\$row", String.valueOf(row_no)),
+                    row_no-1));
+            evaluator.evaluateFormulaCell(c);
+            row_no++;
         return workbook;
+    }
+
+    private int printTotalRow(int row_no_total, int row_no, String total_in_chinese, Row totalRow, int row_no1) throws FormulaParseException, IllegalStateException {
+        Row row;
+        // some rows written
+        row = cloneRow(row_no_total, row_no);
+        Cell cell = row.createCell(0);
+        cell.setCellValue(total_in_chinese);
+        cell.setCellStyle(nameStyle);
+        for (int i = 0; i<12; i++) {
+            Cell ce = this.cloneCell(totalRow.getCell(5), row, 5+i, false);
+            char[] ca = new char[1]; ca[0]=(char)('F' + i); String column = new String(ca);
+            ce.setCellFormula(String.format("SUM(%s%d:%s%d)", column, row_no1+2, column, row_no-1));
+            evaluator.evaluateFormulaCell(ce);
+        }
+        Cell totalCell = this.cloneCell(totalRow.getCell(18), row, 18, false);
+        totalCell.setCellFormula(String.format("SUM(F%d:Q%d)", row_no+1, row_no+1));
+        row_no++;
+        return row_no;
     }
 
     private int printSection(int row_no, int row_no_section_head, List<String> personnel, Map<String, String> staff_names, Document salaries) {
