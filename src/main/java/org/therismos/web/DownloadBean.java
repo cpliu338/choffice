@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.nio.file.*;
 import java.util.stream.Collectors;
 import org.omnifaces.cdi.Param;
+import org.omnifaces.util.Faces;
 import org.therismos.bean.ApplicationBean;
 import org.therismos.entity.FileModel;
 import org.therismos.job.AbstractJob;
@@ -24,6 +25,20 @@ import org.therismos.job.AbstractJob;
 @Named
 @ViewScoped
 public class DownloadBean implements DownloadFile, Serializable {
+
+    /**
+     * @return the ms2keep
+     */
+    public long getMs2keep() {
+        return ms2keep;
+    }
+
+    /**
+     * @param ms2keep the ms2keep to set
+     */
+    public void setMs2keep(long ms2keep) {
+        this.ms2keep = ms2keep;
+    }
 
     /**
      * @return the files
@@ -44,8 +59,8 @@ public class DownloadBean implements DownloadFile, Serializable {
     private List<FileModel> files;
     private File downloadDir;
     ResourceBundle bundle;
-    // download files older than 2 days long will be deleted
-    private final long ms2keep = 2 * 86400000L;
+    // download files older than 2 days long will be deleted for development set to 1 hour
+    private long ms2keep;
     
     @Param
     String type;
@@ -75,6 +90,7 @@ public class DownloadBean implements DownloadFile, Serializable {
     @PostConstruct
     public void init() throws IOException, ClassNotFoundException {
         downloadDir = new File(appBean.getDatapath(), "downloads");
+        ms2keep = ("Development".equalsIgnoreCase(appBean.getProjectStage())) ? 3600000L : 2*86400000L;
         FacesContext facesContext = FacesContext.getCurrentInstance();
         bundle = ResourceBundle.getBundle("messages", facesContext.getViewRoot().getLocale());
         String basePath = facesContext.getExternalContext()
@@ -137,6 +153,36 @@ public class DownloadBean implements DownloadFile, Serializable {
             return false;
         }
     }
+    
+    /**
+     * Delete files with older than now - ms2keep
+     */
+    private void housekeep() {
+        final long oldestTimestamp = System.currentTimeMillis() - ms2keep;
+        getLog().log(Level.INFO, "Oldest ts: {0} due to {1}", new Long[]{oldestTimestamp, ms2keep});
+        File[] f = downloadDir.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                String string = file.getName();
+                int last_ = string.lastIndexOf('_');
+                if (last_ < 1) return false;
+                int lastDot = string.lastIndexOf('.');
+                if (last_ > lastDot) return false;
+                try {
+                    return oldestTimestamp > Long.parseLong(string.substring(last_+1, lastDot));
+                }
+                catch (RuntimeException ex) {
+                    return false;
+                }
+            }
+
+        });
+        for (File fn : f) {
+            String path = fn.getAbsolutePath();
+            boolean deleted = fn.delete();
+            getLog().log(Level.FINE, "Delete {0} was {1}", new Object[]{path, deleted ? "successful" : "failed"});
+        }
+    }
 
     private void populateTypes() {
         types.clear();
@@ -158,6 +204,7 @@ public class DownloadBean implements DownloadFile, Serializable {
     public void typeChange() {
         populateTypes();
         refreshFiles();
+        housekeep();
     }
 
     private void refreshFiles() {
@@ -176,7 +223,7 @@ public class DownloadBean implements DownloadFile, Serializable {
         } catch (Exception ex) {
             getLog().log(Level.SEVERE, (String) null, ex);
         }
-        files = getModels(downloadDir, pattern.toString(), System.currentTimeMillis()-ms2keep);
+        files = getModels(downloadDir, pattern.toString(), System.currentTimeMillis()-getMs2keep());
     }
     
     public String getDebug() {

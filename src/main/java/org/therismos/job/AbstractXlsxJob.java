@@ -58,6 +58,19 @@ public abstract class AbstractXlsxJob extends AbstractJob {
         return "xlsx";
     }
     
+    /**
+     * Clone a style from srcSheet[row, column] in the template to a style in workbook
+     * @param row
+     * @param column
+     * @return 
+     */
+    protected CellStyle cloneStyle(int row, int column) {
+        CellStyle s1 = srcSheet.getRow(row).getCell(column).getCellStyle();
+        CellStyle s = workbook.createCellStyle();
+        s.cloneStyleFrom(s1);
+        return s;
+    }
+    
     protected Cell cloneCell(Cell toCopy, Row row, int columnOffset, boolean cloneValue) {
         Cell cell = row.createCell(columnOffset);
         CellStyle srcStyle = toCopy.getCellStyle();
@@ -85,6 +98,8 @@ public abstract class AbstractXlsxJob extends AbstractJob {
         for (Cell cell : srcRow1) {
             int index = cell.getColumnIndex();
             sheet.setColumnWidth(index, srcSheet.getColumnWidth(index));
+            Logger.getLogger("AbstractXlsxJob").log(Level.FINE, "Set column {0} to {1}", 
+                    new Object[]{index, srcSheet.getColumnWidth(index)});
         }
         return row;
     }

@@ -12,8 +12,8 @@
             <p:messages id="growl"/>
             <div align="center">
                 <p:selectOneMenu style="width: 150px" value="#{downloadBean.selectedClassName}">
-                    <p:ajax process="@this time-stamp" listener="#{downloadBean.typeChange()}" update="@form" />
-                    <f:selectItem rendered="#{empty downloadBean.selectedClassName}" itemLabel="Choose 1" itemValue="" />
+                    <p:ajax process="@this ms2keep" listener="#{downloadBean.typeChange()}" update="@form" />
+                    <f:selectItem itemLabel="Choose 1" itemValue="" />
                     <f:selectItems value="#{downloadBean.types}"/>
                 </p:selectOneMenu>
             </div>
@@ -37,7 +37,7 @@
                     </p:commandButton>
                 </p:column>
             </p:dataTable>
-            <p:inputNumber id="time-stamp" value="#{downloadBean.oldestTimestamp}" minValue="1754058382323"/>
+            <p:inputNumber rendered="#{initParam['jakarta.faces.PROJECT_STAGE'] eq 'Development'}" id="ms2keep" value="#{downloadBean.ms2keep}" />
         </h:form>
             </ui:define>
 

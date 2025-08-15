@@ -81,7 +81,35 @@ public class JobTest {
         System.out.println("written to " + f.getAbsolutePath());
     }
     
-    @Test
+    public void testAuditedAccounts() throws Exception{
+        System.out.println("test Audited Accounts");
+        ApplicationBean appBean = new ApplicationBean();
+        appBean.init();
+        config.append("year", 2024);
+        instance = new AuditedAccounts(appBean, config);
+        File f = instance.getDownloadPath();
+        try (FileOutputStream out = new FileOutputStream(f)) {
+            XSSFWorkbook wb = instance.buildExcel();
+            wb.write(out);
+        }
+        System.out.println("written to " + f.getAbsolutePath());
+    }
+    
+    public void testAuditExport() throws Exception {
+        System.out.println("test Audit Export");
+        ApplicationBean appBean = new ApplicationBean();
+        appBean.init();
+        config.append("start", "2024-01-01");
+        config.append("end", "2024-12-31");
+        instance = new AuditExport(appBean, config);
+        File f = instance.getDownloadPath();
+        try (FileOutputStream out = new FileOutputStream(f)) {
+            XSSFWorkbook wb = instance.buildExcel();
+            wb.write(out);
+        }
+        System.out.println("written to " + f.getAbsolutePath());
+    }
+    
     public void testPayrollReport() throws Exception {
         System.out.println("test Payroll Report");
         ApplicationBean appBean = new ApplicationBean();

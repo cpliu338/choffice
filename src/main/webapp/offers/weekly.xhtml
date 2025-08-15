@@ -12,9 +12,9 @@
                 <h1>Weekly Offer Report</h1>
                 <h:form>
                     <p:outputLabel for="date" value="Offers on" accesskey="O" styleClass="m-2"/>
-                    <p:datePicker value="#{offerBean.date}" id="date" />
+                    <p:datePicker value="#{dateReportBean.date}" id="date" />
                     <br/>
-                    <p:commandButton value="Report" action="#{offerBean.report}" icon="pi pi-print" update="msg"/>
+                    <p:commandButton value="Report" action="#{dateReportBean.weeklyReport}" icon="pi pi-print" update="msg"/>
                 <p:messages globalOnly="true" showDetail="true" showSummary="true" showIcon="true" id="msg"/>
                 </h:form>
             </ui:define>

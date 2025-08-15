@@ -11,7 +11,11 @@
             <ui:define name="content">
                 <h1>Monthly Financial Report</h1>
                 <h:form>
-                    <p:messages globalOnly="true" showDetail="true" showSummary="true" showIcon="true" id="msg"/>
+                    <p:outputLabel for="date" value="Report end date" accesskey="O" styleClass="m-2"/>
+                    <p:datePicker value="#{dateReportBean.date}" id="date" />
+                    <br/>
+                    <p:commandButton value="Report" action="#{dateReportBean.monthlyReport}" icon="pi pi-print" update="msg"/>
+                <p:messages globalOnly="true" showDetail="true" showSummary="true" showIcon="true" id="msg"/>
                 </h:form>
             </ui:define>
         </ui:composition>

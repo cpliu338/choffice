@@ -20,6 +20,7 @@ import org.therismos.bean.ApplicationBean;
 
 /**
  * Monthly P&L and Balance Sheet report. Based on a template file MonthlyReportTemplate.xlsx
+ * POST body expected: {end: '2024-03-31'}
  * @since Ver 7.0
  * @author cp_liu
  */
@@ -92,7 +93,7 @@ public class MonthlyReport extends AbstractXlsxJob {
     }
     
     @Override
-    protected XSSFWorkbook buildExcel() throws Exception {
+    public XSSFWorkbook buildExcel() throws Exception {
         total = new HashMap<>();
         grandtotal = new HashMap<>();
         sumAccounts();

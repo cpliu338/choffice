@@ -31,7 +31,7 @@ public class PayrollReport extends AbstractXlsxJob {
     DateTimeFormatter yyyyMM;
     ResourceBundle bundle;
     FormulaEvaluator evaluator;
-    CellStyle nameStyle, accountStyle, amountStyle; // from template to get style from
+    CellStyle nameStyle, accountStyle, amountStyle, diffAmountStyle; // from template to get style from
         
     final String sqlSalary = "SELECT a.code,a.name_chi AS name,e.date1,e.detail,0-e.amount AS amt "
             + "FROM entries e INNER JOIN accounts a ON e.account_id=a.id "
@@ -72,23 +72,28 @@ public class PayrollReport extends AbstractXlsxJob {
             ld = ld.plusMonths(1);
         }
         bundle = ResourceBundle.getBundle("payrollReport", Locale.CHINESE);
+        if (startDate.getDayOfMonth() != 1) {
+            remarks.add(MessageFormat.format(bundle.getString("payroll.odd_startDate"), 
+                    startDate.format(DateTimeFormatter.ISO_DATE))
+            );
+        }
         config.append("year_months", this.yearMonth);
         QueryRunner run = new QueryRunner(applicationBean.getDataSource());
         Document salaries = this.processResults(run.query(sqlSalary, new ArrayListHandler(),
                 java.sql.Date.valueOf(startDate), java.sql.Date.valueOf(endDate)),
                 bundle); 
-        Document mpf = new Document();
+        Document mpf = new Document();/*
         Map<String, Double> mpf_total = new HashMap<>();
         for (YearMonth ym: this.yearMonth) {
             mpf_total.put(ym.toString(), 0.0);
-        }
+        }*/
         for (Map.Entry<String, Object> e:salaries.entrySet()) {
             Map<String,Double> map = (Map)e.getValue();
             Map<String, Double> calc = new HashMap<>();
             for (Map.Entry<String, Double> e2: map.entrySet()) {
                 Double calced = calcEmployerContrib(e2.getValue());
                 calc.put(e2.getKey(), calced);
-                mpf_total.put(e2.getKey(), calced + mpf_total.get(e2.getKey()));
+            //    mpf_total.put(e2.getKey(), calced + mpf_total.get(e2.getKey()));
             }
             mpf.put(e.getKey(), calc);
         }
@@ -103,7 +108,7 @@ public class PayrollReport extends AbstractXlsxJob {
         }
         config.append("mpf_queried", mpf_queried);
         config.append("mpf", mpf);
-        config.append("mpf_total", mpf_total);
+        //config.append("mpf_total", mpf_total);
         config.append("remarks", remarks);
         nameStyle = workbook.createCellStyle();
         nameStyle.cloneStyleFrom(srcSheet.getRow(4).getCell(2).getCellStyle()); // from cell C5
@@ -111,6 +116,8 @@ public class PayrollReport extends AbstractXlsxJob {
         accountStyle.cloneStyleFrom(srcSheet.getRow(4).getCell(3).getCellStyle()); // from cell D5
         amountStyle = workbook.createCellStyle();
         amountStyle.cloneStyleFrom(srcSheet.getRow(4).getCell(5).getCellStyle()); // from cell F5
+        diffAmountStyle = workbook.createCellStyle();
+        diffAmountStyle.cloneStyleFrom(srcSheet.getRow(31).getCell(5).getCellStyle());
         int row_no = 1;
         Row row = cloneRow(1, row_no++);  // Row for months
         Cell cellYM = srcSheet.getRow(1).getCell(5); // Jan-24
@@ -119,14 +126,15 @@ public class PayrollReport extends AbstractXlsxJob {
             cell.setCellValue(LocalDate.of (yearMonth.get(i).getYear(), yearMonth.get(i).getMonth(), 1));
         } 
         cloneCell(srcSheet.getRow(1).getCell(18), row, 18, true); // for label Total for employee
-        row = cloneRow(2, row_no++);  // Row for gross salaries row
-        cloneCell(srcSheet.getRow(2).getCell(0), row, 0, true);// Cell A3 is section header
+        //row = cloneRow(2, row_no++);  // Row for gross salaries row
+        //cloneCell(srcSheet.getRow(2).getCell(0), row, 0, true);// Cell A3 is section header
+        this.cloneColumn1(2, row_no, 0, false);
         List<String> key_personnel = config.getList("key_personnel", String.class);
         List<String> non_key_personnel = config.getList("non_key_personnel", String.class);
         Map<String, String> staff_names = config.get("staff_names", Map.class);
         int row_no1 = row_no; // the first row of this section
         int row_no_total = 15;
-        String total_in_chinese = srcSheet.getRow(row_no_total).getCell(0).getStringCellValue(); // the row with "Total" in the first column
+        //String total_in_chinese = srcSheet.getRow(row_no_total).getCell(0).getStringCellValue(); // the row with "Total" in the first column
         Row totalRow = srcSheet.getRow(row_no_total);
         if (!key_personnel.isEmpty()){
             row_no = printSection(row_no, 3, key_personnel, staff_names, salaries) + 1; // +1 to skip one line
@@ -135,13 +143,14 @@ public class PayrollReport extends AbstractXlsxJob {
             row_no = printSection(row_no, 7, non_key_personnel, staff_names, salaries) + 1;
         }
         if (row_no > row_no1+2) {
-            row_no = printTotalRow(row_no_total, row_no, total_in_chinese, totalRow, row_no1);
+            row_no = printTotalRow(row_no_total, row_no, totalRow, row_no1);
         }
         //LOG.log(Level.INFO, config.toJson(applicationBean.getPojoCodecRegistry().get(Document.class)));
         row_no++;
         row_no1 = row_no;
         // MPF now
-        row = cloneRow(17, row_no++);  // Row for mpf row
+        //row = cloneRow(17, row_no++);  
+        row = this.cloneColumn1(17, row_no++, 0, false);// Row for mpf row
         cloneCell(srcSheet.getRow(17).getCell(0), row, 0, true);
         if (!key_personnel.isEmpty()){
             row_no = printSection(row_no, 3, key_personnel, staff_names, mpf) + 1; // +1 to skip one line
@@ -150,34 +159,69 @@ public class PayrollReport extends AbstractXlsxJob {
             row_no = printSection(row_no, 7, non_key_personnel, staff_names, mpf) + 1;
         }
         if (row_no > row_no1+2) {
-            row_no = printTotalRow(row_no_total, row_no, total_in_chinese, totalRow, row_no1);
+            row_no = printTotalRow(row_no_total, row_no, totalRow, row_no1);
         }
-        row = cloneRow(31, row_no++);  // Row for per_ledger row
-        Row srcRow = srcSheet.getRow(31);
-        cloneCell(srcRow.getCell(0), row, 0, true);
-           //Map<String, Double> sal = salaries.get(code, Map.class);
-            for (int i = 0; i<12; i++) {
-                Cell ce = cloneCell(srcRow.getCell(5), row, 5+i, false);
-                String key = yearMonth.get(i).format(yyyyMM);
-                Double s = mpf_queried.getOrDefault(key, 0.0);
-                ce.setCellValue(s);
+        Row srcRow = this.cloneColumn1(31, row_no, 0, true);
+        Row prevRow = sheet.getRow(row_no - 1);
+        row = sheet.getRow(row_no++);
+        //row_no++;
+        for (int i = 0; i<12; i++) {
+            Cell ce = row.createCell(5+i);//cloneCell(srcRow.getCell(5), row, 5+i, false);
+            String key = yearMonth.get(i).format(yyyyMM);
+            Double s = mpf_queried.getOrDefault(key, 0.0);
+            double to_check = prevRow.getCell(5+i).getNumericCellValue();
+            LOG.log(Level.INFO, "column {0}, {1} vs {2}", new Object[] {5+i, s, to_check});
+            ce.setCellValue(s);
+            ce.setCellStyle(Math.abs(s-to_check) < 0.01 ? amountStyle : diffAmountStyle) ;
+        }
+        Cell c = cloneCell(srcRow.getCell(18), row, 18, false); // row total
+        c.setCellFormula(String.format(
+        "IF(S%d=SUM(F$row:Q$row),\"Per ledger\",SUM(F$row:Q$row))".replaceAll("\\$row", String.valueOf(row_no)),
+                row_no-1));
+        evaluator.evaluateFormulaCell(c);
+        row_no++;
+        List<Object[]> trainings = run.query(sqlByCode, new ArrayListHandler(),
+                    "5122",
+                    java.sql.Date.valueOf(startDate), java.sql.Date.valueOf(endDate));
+        if (!trainings.isEmpty()) {
+            this.cloneColumn1(33, row_no++, 0, false);
+            for (Object[] training : trainings) {
+                Row r = sheet.createRow(row_no++);
+                Cell ce = r.createCell(2);
+                ce.setCellValue(training[1].toString());
+                ce.setCellStyle(nameStyle);
+                for (int i=0; i<12; i++) {
+                    ce = r.createCell(5+i);
+                    ce.setCellValue(0.0);
+                    ce.setCellStyle(amountStyle);
+                }
+                java.sql.Date date1 = (java.sql.Date)training[0];
+                int delta_month = Period.between(startDate,date1.toLocalDate()).getMonths();
+                Number amount = (Number)training[2];
+                r.getCell(5 + delta_month).setCellValue(amount.doubleValue());
             }
-            Cell c = cloneCell(srcRow.getCell(18), row, 18, false); // row total
-            c.setCellFormula(String.format(
-            "IF(S%d=SUM(F$row:Q$row),\"Per ledger\",SUM(F$row:Q$row))".replaceAll("\\$row", String.valueOf(row_no)),
-                    row_no-1));
-            evaluator.evaluateFormulaCell(c);
-            row_no++;
+        }
+        row_no++;
+        if (!remarks.isEmpty()) {
+            this.cloneColumn1(38, row_no++, 0, true);
+            for (String rem : remarks) {
+                Row r = sheet.createRow(row_no++);
+                Cell ce = r.createCell(1);
+                ce.setCellStyle(nameStyle);
+                ce.setCellValue(rem);
+            }
+        }
         return workbook;
     }
 
-    private int printTotalRow(int row_no_total, int row_no, String total_in_chinese, Row totalRow, int row_no1) throws FormulaParseException, IllegalStateException {
-        Row row;
-        // some rows written
+    private int printTotalRow(int row_no_total, int row_no, Row totalRow, int row_no1) throws FormulaParseException, IllegalStateException {
+        //Row row;
+        /* some rows written
         row = cloneRow(row_no_total, row_no);
         Cell cell = row.createCell(0);
         cell.setCellValue(total_in_chinese);
-        cell.setCellStyle(nameStyle);
+        cell.setCellStyle(nameStyle);*/
+        Row row = cloneColumn1(row_no_total, row_no, 0, false);
         for (int i = 0; i<12; i++) {
             Cell ce = this.cloneCell(totalRow.getCell(5), row, 5+i, false);
             char[] ca = new char[1]; ca[0]=(char)('F' + i); String column = new String(ca);
@@ -189,11 +233,28 @@ public class PayrollReport extends AbstractXlsxJob {
         row_no++;
         return row_no;
     }
+    
+    /**
+     * Clone srcRowNo from srcSheet and the row header
+     * @param srcRowNo the target row offset in srcSheet
+     * @param row_no the target row offset in sheet
+     * @param col_header_offset the column offset of the row header
+     * @param want_src_row what row in srcSheet or sheet?
+     * @return the row depending on want_src_row
+     */
+    private Row cloneColumn1(int srcRowNo, int row_no, int col_header_offset, boolean want_src_row) {
+        Row row = cloneRow(srcRowNo, row_no);  // Row for per_ledger row
+        Row srcRow = srcSheet.getRow(srcRowNo);
+        cloneCell(srcRow.getCell(col_header_offset), row, col_header_offset, true);
+        return want_src_row ? srcRow : row;
+    }
 
     private int printSection(int row_no, int row_no_section_head, List<String> personnel, Map<String, String> staff_names, Document salaries) {
-        Row row;
-        row = cloneRow(row_no_section_head, row_no++);  // Row for section head
+        cloneColumn1(row_no_section_head, row_no++, 0, false);
+/*        row = cloneRow(row_no_section_head, row_no++);  // Row for section head
         cloneCell(srcSheet.getRow(row_no_section_head).getCell(0), row, 0, true);// clone cell for personnel header
+*/
+        Row row;
         for (String code : personnel) {
             row = cloneRow(row_no_section_head+1, row_no);  // template detail row for personnel salary
             Cell c = row.createCell(2);
