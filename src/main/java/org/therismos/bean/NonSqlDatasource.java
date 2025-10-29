@@ -26,7 +26,9 @@ public class NonSqlDatasource {
     HttpServletRequest req;    
     @Context
     UriInfo uriInfo;
-    
+    @jakarta.annotation.Resource
+    private String datapath;
+        
     @GET
     @Produces("application/json")
     public Response getData() {
@@ -42,7 +44,7 @@ public class NonSqlDatasource {
                 pageSize = Integer.parseInt(uriInfo.getQueryParameters().getFirst("pageSize"));
             } catch (RuntimeException ignored){}
             result.append("data", resolver.getData(new Document(
-                    "baseFolder", "/home/cp_liu/Documents")
+                    "baseFolder", datapath)
                 .append("path", uriInfo.getQueryParameters().getFirst("path")==null ? "" : uriInfo.getQueryParameters().getFirst("path"))
                 .append("page", page)
                 .append("pageSize", pageSize)
