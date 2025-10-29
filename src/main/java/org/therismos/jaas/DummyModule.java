@@ -103,7 +103,7 @@ public class DummyModule implements LoginModule {
         String password = String.valueOf(((PasswordCallback) callbacks[1]).getPassword());
         List<Map<String, Object>> results = runner.query(sql, new org.apache.commons.dbutils.handlers.MapListHandler(), name, DigestUtils.md5Hex(password));
         if (results.isEmpty()) throw new RuntimeException("Wrong pwd");
-        if (results.size() != 3) throw new RuntimeException("Wrong roles");
+        //if (results.size() != 3) throw new RuntimeException("Wrong roles");
         for (Map<String, Object> result : results) {
             map.put("givenName", result.get("name").toString());
             map.put("nickname", result.get("nickname").toString());
