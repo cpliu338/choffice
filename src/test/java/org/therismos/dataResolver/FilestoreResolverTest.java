@@ -80,7 +80,7 @@ public class FilestoreResolverTest {
     public void testMongoDbResolver() throws Exception {
         System.out.println("test MongoDbResolver");
         ApplicationBean appBean = new ApplicationBean();
-        appBean.setDatapath("/home/cp_liu/Documents/java_dir");
+        appBean.setDatapath(System.getenv("choffice"));
         appBean.init();
         assert(appBean.getMongoClient() != null);
         assert(appBean.getCollection("reconcile", Document.class) != null);
