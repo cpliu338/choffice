@@ -1,12 +1,12 @@
 package org.therismos.dataResolver;
 
+import com.mongodb.client.model.Filters;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Comparator;
-import java.util.Map;
+import java.util.*;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -14,6 +14,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.therismos.bean.ApplicationBean;
+import org.therismos.bean.NonSqlDatasource;
 import static org.therismos.dataResolver.FilestoreResolver.DATE;
 import static org.therismos.dataResolver.FilestoreResolver.NAME;
 import static org.therismos.dataResolver.FilestoreResolver.SIZE;
@@ -46,7 +48,6 @@ public class FilestoreResolverTest {
     /**
      * Test of getData method, of class FilestoreResolver.
      */
-    @Test 
     public void testGetData() throws Exception {
         System.out.println("getData");
         Document param = new Document("baseFolder", "/home/cp_liu/Documents")
@@ -60,37 +61,36 @@ public class FilestoreResolverTest {
         result.putAll(r.getData(param));
         System.out.println(result.toJson());
     }
+    
+    @Test 
+    public void testQueryToDocument() throws Exception {
+        System.out.println("queryToDocument");
+        NonSqlDatasource ds = new NonSqlDatasource();
+        MultivaluedMap<String,String> uri_info = new MultivaluedHashMap();
+        uri_info.addAll("page", "3", "4");
+        uri_info.add("pageSize", "10");
+        uri_info.add("sortKey", "size");
+        uri_info.add("baseFolder", "root");
+        Document defaults = new Document("page", 1).append("sortKey", "date").append("pageSize", 20);
+        defaults = ds.queryToDocument(uri_info, defaults);
+        System.out.println(defaults.toJson());
+    }
 
-    public void testX(String sortKey) throws Exception {
-        System.out.println("test x");
-            Comparator<Path> secondaryComparator;
-            final LinkOption[] followLinks = new LinkOption[]{}; // Follow symbolic links
-            secondaryComparator = switch (sortKey) {
-                case NAME -> Comparator.comparing(Path::getFileName);
-                case DATE -> (path1, path2) -> {
-                    try {
-                        // Read attributes, following the link
-                        BasicFileAttributes attr1 = Files.readAttributes(path1, BasicFileAttributes.class, followLinks);
-                        BasicFileAttributes attr2 = Files.readAttributes(path2, BasicFileAttributes.class, followLinks);
-                        // Newest first: path2 (newest) compared to path1 (oldest)
-                        return attr2.lastModifiedTime().compareTo(attr1.lastModifiedTime());
-                    } catch (IOException e) {
-                        return 0; // Treat as equal on error
-                    }
-                };
-                case SIZE -> (path1, path2) -> {
-                    try {
-                        // Files.size() automatically follows links by default, but let's be explicit
-                        long size1 = Files.size(path1);
-                        long size2 = Files.size(path2);
-                        return Long.compare(size1, size2);
-                    } catch (IOException e) {
-                        return 0; // Treat as equal on error
-                    }
-                };
-                default -> Comparator.comparing(Path::getFileName);
-            }; // Compares file names alphabetically
-        
+    @Test 
+    public void testMongoDbResolver() throws Exception {
+        System.out.println("test MongoDbResolver");
+        ApplicationBean appBean = new ApplicationBean();
+        appBean.setDatapath("/home/cp_liu/Documents/java_dir");
+        appBean.init();
+        assert(appBean.getMongoClient() != null);
+        assert(appBean.getCollection("reconcile", Document.class) != null);
+        MongoDbResolver resolver = new MongoDbResolver();
+        resolver.setAppBean(appBean);
+        Document param = new Document("filter", Filters.eq("accountId", "11201"))
+                .append("collection", "reconcile");
+        Document result = new Document();
+        result.putAll(resolver.getData(param));
+        System.out.println(result.toJson());
     }
     
     /**

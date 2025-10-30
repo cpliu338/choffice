@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.*;
 import org.bson.Document;
+import org.therismos.bean.ApplicationBean;
 
 /**
  * Retrieves the contents of a specified folder and returns a list of maps,
@@ -18,11 +19,17 @@ public class FilestoreResolver implements Resolver {
 
     protected int total_count = 0;
     Map<String, Object> result;
+    ApplicationBean appBean;
     
     public FilestoreResolver() {
         result = new HashMap<>();
         result.put("total_count", 0);
-        result.put("data", java.util.Collections.EMPTY_LIST);
+        result.put("entries", java.util.Collections.EMPTY_LIST);
+    }
+    @Override
+    
+    public void setAppBean(ApplicationBean appBean) {
+        this.appBean = appBean;
     }
     
     /**
@@ -35,7 +42,8 @@ public class FilestoreResolver implements Resolver {
     @Override
     public Map<String, Object> getData(Document param)  {
         // 1. Convert the input string to a Path object.
-        Path folderPath = Paths.get(param.getString("baseFolder"), param.get("path", ""));
+        Path folderPath = Paths.get(param.get("baseFolder", appBean.getDatapath()), 
+                param.get("path", ""));
 
         // Check if the path exists and is a directory.
         if (!Files.exists(folderPath) || !Files.isDirectory(folderPath)) {
@@ -54,6 +62,11 @@ public class FilestoreResolver implements Resolver {
         return result;
     }
 
+    @Override
+    public Document getDefaults() {
+        return new Document("page", 1).append("sortKey", "name").append("pageSize", 20);        
+    }
+    
     /**
      * Defines the available keys for sorting directory contents.
      */
@@ -210,7 +223,7 @@ public class FilestoreResolver implements Resolver {
                     return attributes;
                             })
                 .collect(Collectors.toList());
-            result.put("data", list);
+            result.put("entries", list);
 
         }
     }

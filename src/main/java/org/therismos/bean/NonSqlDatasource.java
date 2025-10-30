@@ -26,15 +26,54 @@ public class NonSqlDatasource {
     HttpServletRequest req;    
     @Context
     UriInfo uriInfo;
-    @jakarta.annotation.Resource
-    private String datapath;
-        
+    @jakarta.inject.Inject
+    ApplicationBean appBean;
+    
+    /**
+     * GET document with attributes of parameter names and values the FIRST value for that name, i.e. ?ar=a&ar=b&ar2=c 
+     * @param defaults the default value for each parameter, with the specified type, if there is no default value, make it a String
+     * @return the document 
+     */
+    public Document queryToDocument(MultivaluedMap<String,String> uri_info, Document defaults) {
+        uri_info.forEach((String key, List<String> values)-> {
+            String givenValue = values.get(0);
+            // TODO type cast exception will default
+            if (defaults.containsKey(key)) {
+                Object def_value = defaults.get(key);
+                if (def_value instanceof Integer) {
+                    defaults.put(key, Integer.valueOf(givenValue));
+                }
+                else if (def_value instanceof Long) {
+                    defaults.put(key, Long.valueOf(givenValue));
+                }
+                else if (def_value instanceof String) {
+                    defaults.put(key, givenValue);
+                }
+            }
+            else {
+                defaults.put(key, givenValue);
+            }
+        });
+        return defaults;
+    }
+    
     @GET
     @Produces("application/json")
     public Response getData() {
-        Document result = new Document();
-        Resolver resolver = new FilestoreResolver();
+        Map<String, Object> result = new HashMap<>();
+        
+        Resolver resolver;
         try {
+            String fqcn = "org.therismos.dataResolver." + uriInfo.getQueryParameters().getFirst("type") + "Resolver"; // fully qualified class name
+System.getLogger(NonSqlDatasource.class.getName()).log(System.Logger.Level.DEBUG, "class name: {0}", fqcn);
+            Class<?> clazz = Class.forName(fqcn);   // Load the class
+            Object obj = clazz.getDeclaredConstructor().newInstance(); // Call default constructor
+            // Safe cast (if you’re sure the class implements Resolver)
+            resolver = (Resolver) obj;
+            resolver.setAppBean(appBean);
+            result = resolver.getData(this.queryToDocument(uriInfo.getPathParameters(), resolver.getDefaults()));
+/*            
+
             int page = 1;
             try {
                 page = Integer.parseInt(uriInfo.getQueryParameters().getFirst("page"));
@@ -42,17 +81,21 @@ public class NonSqlDatasource {
             int pageSize = 20;
             try {
                 pageSize = Integer.parseInt(uriInfo.getQueryParameters().getFirst("pageSize"));
-            } catch (RuntimeException ignored){}
-            result.append("data", resolver.getData(new Document(
+            } catch (RuntimeException ignored){
+            }
+            Document params = new Document(
                     "baseFolder", datapath)
                 .append("path", uriInfo.getQueryParameters().getFirst("path")==null ? "" : uriInfo.getQueryParameters().getFirst("path"))
                 .append("page", page)
                 .append("pageSize", pageSize)
-                .append("sortKey", uriInfo.getQueryParameters().getFirst("sort")==null ? NAME : uriInfo.getQueryParameters().getFirst("sort"))
-            ));
-        } catch (RuntimeException ex) {
-            result.append("exception_class", ex.getClass().getName());
-            result.append("exception_message", ex.getMessage());
+                .append("sortKey", uriInfo.getQueryParameters().getFirst("sort")==null ? NAME : uriInfo.getQueryParameters().getFirst("sort"));
+            result.putAll(resolver.getData(params));
+            result.put("type", "Filestore");
+*/
+        } catch (RuntimeException | ReflectiveOperationException ex) {
+            result.put("type", "Error");
+            result.put("exception_class", ex.getClass().getName());
+            result.put("exception_message", ex.getMessage());
             System.getLogger(NonSqlDatasource.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
         return Response.ok(result, MediaType.APPLICATION_JSON).build();
