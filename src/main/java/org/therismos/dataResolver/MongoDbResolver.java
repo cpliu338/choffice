@@ -34,7 +34,7 @@ public class MongoDbResolver implements Resolver {
     
     @Override
     public Document getDefaults() {
-        return new Document("collection", "reconcile");
+        return Resolver.super.getDefaults().append("collection", "reconcile");
     }    
 
     /**
@@ -44,14 +44,28 @@ public class MongoDbResolver implements Resolver {
      */
     @Override
     public Map<String, Object> getData(Document param) {
-        Bson filter = param.get("filter", Bson.class);
-        if (filter == null) {
-            filter = Filters.eq("accountId", "11201");
+        Bson filter;
+        try {
+            filter = Document.parse(param.getString("filter"));
+        }
+        catch (Exception ex) {
+            filter = new Document("accountId", "11200");
+        }
+System.getLogger(MongoDbResolver.class.getName()).log(System.Logger.Level.INFO, "param: {0}", param.toJson());
+        Bson sort;
+        try {
+            sort = Document.parse(param.getString(SORTKEY));
+        }
+        catch (Exception ex) {
+            sort = new Document("_id", 1);
         }
         String collection = param.getString("collection");
-        Spliterator<Document> it = appBean.getCollection(collection, Document.class).find(filter).spliterator();
-        long total_count = it.estimateSize(); // getExactSizeIfKnown()
+        long total_count = appBean.getCollection(collection, Document.class).countDocuments(filter);
+        Spliterator<Document> it = appBean.getCollection(collection, Document.class).find(filter).sort(sort).spliterator();
+        
         List<Map<String,Object>> list = StreamSupport.stream(it, false)
+                .skip(param.getInteger(PAGE)-1)
+                .limit(param.getInteger(PAGESIZE))
                 .map((doc)->{
                     Map<String,Object> m = new HashMap<>();
                     m.putAll(doc);
@@ -59,8 +73,8 @@ public class MongoDbResolver implements Resolver {
                 })
                 .collect(Collectors.toList());
         Map<String,Object> m = new HashMap<>();
-        m.put("total_count", total_count);
-        m.put("entries", list);
+        m.put(TOTALCOUNT, total_count);
+        m.put(ENTRIES, list);
         return m;
     }
     

@@ -31,11 +31,13 @@ public class NonSqlDatasource {
     
     /**
      * GET document with attributes of parameter names and values the FIRST value for that name, i.e. ?ar=a&ar=b&ar2=c 
+     * @param uri_info
      * @param defaults the default value for each parameter, with the specified type, if there is no default value, make it a String
      * @return the document 
      */
     public Document queryToDocument(MultivaluedMap<String,String> uri_info, Document defaults) {
         uri_info.forEach((String key, List<String> values)-> {
+System.getLogger(NonSqlDatasource.class.getName()).log(System.Logger.Level.INFO, "key: {0}", key);
             String givenValue = values.get(0);
             // TODO type cast exception will default
             if (defaults.containsKey(key)) {
@@ -46,7 +48,7 @@ public class NonSqlDatasource {
                 else if (def_value instanceof Long) {
                     defaults.put(key, Long.valueOf(givenValue));
                 }
-                else if (def_value instanceof String) {
+                else {// if (def_value instanceof String) {
                     defaults.put(key, givenValue);
                 }
             }
@@ -54,6 +56,7 @@ public class NonSqlDatasource {
                 defaults.put(key, givenValue);
             }
         });
+System.getLogger(NonSqlDatasource.class.getName()).log(System.Logger.Level.INFO, "params from url with default: {0}", defaults.toJson());
         return defaults;
     }
     
@@ -65,13 +68,12 @@ public class NonSqlDatasource {
         Resolver resolver;
         try {
             String fqcn = "org.therismos.dataResolver." + uriInfo.getQueryParameters().getFirst("type") + "Resolver"; // fully qualified class name
-System.getLogger(NonSqlDatasource.class.getName()).log(System.Logger.Level.DEBUG, "class name: {0}", fqcn);
             Class<?> clazz = Class.forName(fqcn);   // Load the class
             Object obj = clazz.getDeclaredConstructor().newInstance(); // Call default constructor
             // Safe cast (if you’re sure the class implements Resolver)
             resolver = (Resolver) obj;
             resolver.setAppBean(appBean);
-            result = resolver.getData(this.queryToDocument(uriInfo.getPathParameters(), resolver.getDefaults()));
+            result = resolver.getData(this.queryToDocument(uriInfo.getQueryParameters(), resolver.getDefaults()));
 /*            
 
             int page = 1;

@@ -86,8 +86,8 @@ public class FilestoreResolverTest {
         assert(appBean.getCollection("reconcile", Document.class) != null);
         MongoDbResolver resolver = new MongoDbResolver();
         resolver.setAppBean(appBean);
-        Document param = new Document("filter", Filters.eq("accountId", "11201"))
-                .append("collection", "reconcile");
+        Document param = new Document("filter", "{\"accountId\": \"11201\", \"end\": {\"$gt\": \"2024-01-01\"}}");
+        param.putAll(resolver.getDefaults());
         Document result = new Document();
         result.putAll(resolver.getData(param));
         System.out.println(result.toJson());
@@ -96,16 +96,19 @@ public class FilestoreResolverTest {
     /**
      * Test of getPagedAndSortedDirectoryStream method, of class FilestoreResolver.
      */
+    @Test 
     public void testGetPagedAndSortedDirectoryStream() throws Exception {
         System.out.println("getPagedAndSortedDirectoryStream");
-        Path folderPath = null;
-        int pageSize = 0;
-        int pageOffset = 0;
-        String sortKey = "";
-        FilestoreResolver instance = new FilestoreResolver();
-        instance.getPagedAndSortedDirectoryStream(folderPath, pageSize, pageOffset, sortKey);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        ApplicationBean appBean = new ApplicationBean();
+        appBean.setDatapath(System.getenv("choffice"));
+        appBean.init();
+        FilestoreResolver resolver = new FilestoreResolver();
+        resolver.setAppBean(appBean);
+        Document param = resolver.getDefaults();
+        param.put("path", "");
+        Document result = new Document();
+        result.putAll(resolver.getData(param));
+        System.out.println(result.toJson());
     }
     
 }

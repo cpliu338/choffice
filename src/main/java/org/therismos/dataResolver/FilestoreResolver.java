@@ -23,8 +23,8 @@ public class FilestoreResolver implements Resolver {
     
     public FilestoreResolver() {
         result = new HashMap<>();
-        result.put("total_count", 0);
-        result.put("entries", java.util.Collections.EMPTY_LIST);
+        result.put(TOTALCOUNT, 0);
+        result.put(ENTRIES, java.util.Collections.EMPTY_LIST);
     }
     @Override
     
@@ -47,15 +47,16 @@ public class FilestoreResolver implements Resolver {
 
         // Check if the path exists and is a directory.
         if (!Files.exists(folderPath) || !Files.isDirectory(folderPath)) {
-            result.put("total_count", this.total_count);
+            result.put(TOTALCOUNT, this.total_count);
             // Throw a specific exception for better error handling than java.io.File
             result.put("exception_class", "IOException");
             result.put("exception_message", "Path is not a valid directory: " + folderPath);
             return result;
         }        
-        result.put("total_count", this.total_count);
+        result.put(TOTALCOUNT, this.total_count);
         try {
-            this.getPagedAndSortedDirectoryStream(folderPath, param.getInteger("pageSize"), param.getInteger("page"), param.getString("sortKey"));
+            getPagedAndSortedDirectoryStream(folderPath, param.getInteger(PAGESIZE), param.getInteger(PAGE), 
+                    param.getString(SORTKEY), param.getInteger(DIRECTION));
         } catch (IOException ex) {
             System.getLogger(FilestoreResolver.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
@@ -64,16 +65,10 @@ public class FilestoreResolver implements Resolver {
 
     @Override
     public Document getDefaults() {
-        return new Document("page", 1).append("sortKey", "name").append("pageSize", 20);        
+        return new Document(PAGE, 1).append(SORTKEY, NAME).append(PAGESIZE, 20).append(DIRECTION, 1)
+        .append("baseFolder", appBean.getDatapath());
     }
     
-    /**
-     * Defines the available keys for sorting directory contents.
-     */
-    public static final String NAME = "name";
-    public static final String DATE = "date";
-    public static final String SIZE = "size";
-
     /**
      * Creates a paged and sorted sub-list of Path objects from a directory.
      * Directories always come before regular files. Symbolic links are resolved.
@@ -82,15 +77,17 @@ public class FilestoreResolver implements Resolver {
      * @param pageSize The maximum number of entries per page.
      * @param pageOffset The 1-based page number (e.g., 1, 2, 3...).
      * @param sortKey The criteria for secondary sorting (NAME, DATE, or SIZE).
+     * @param dir 1 (asc) -1 (desc)
      * @ return A List of Path objects representing the requested page.
      * @throws IOException If an I/O error occurs during directory streaming.
      */
     public void getPagedAndSortedDirectoryStream(
-            Path folderPath, int pageSize, int pageOffset, String sortKey)
+            Path folderPath, int pageSize, int pageOffset, String sortKey, int dir)
             throws IOException {
         if (sortKey == null) {
             sortKey = NAME;
         }
+        final int direction = (dir != -1) ? 1 : -1;
         // --- 1. Convert DirectoryStream to Stream and collect to a List ---
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(folderPath)) {
             List<Path> allPaths = StreamSupport.stream(stream.spliterator(), false)
@@ -107,7 +104,7 @@ public class FilestoreResolver implements Resolver {
                         BasicFileAttributes attr1 = Files.readAttributes(path1, BasicFileAttributes.class, followLinks);
                         BasicFileAttributes attr2 = Files.readAttributes(path2, BasicFileAttributes.class, followLinks);
                         // Newest first: path2 (newest) compared to path1 (oldest)
-                        return attr2.lastModifiedTime().compareTo(attr1.lastModifiedTime());
+                        return attr2.lastModifiedTime().compareTo(attr1.lastModifiedTime()) * direction;
                     } catch (IOException e) {
                         return 0; // Treat as equal on error
                     }
@@ -117,14 +114,15 @@ public class FilestoreResolver implements Resolver {
                         // Files.size() automatically follows links by default, but let's be explicit
                         long size1 = Files.size(path1);
                         long size2 = Files.size(path2);
-                        return Long.compare(size1, size2);
+                        return Long.compare(size1, size2) * direction;
                     } catch (IOException e) {
                         return 0; // Treat as equal on error
                     }
                 };
-                case NAME -> Comparator.comparing(Path::getFileName);
-                default -> Comparator.comparing(Path::getFileName);
-            }; // Compares file names alphabetically
+                case NAME -> direction == 1 ? Comparator.comparing(Path::getFileName) : Comparator.comparing(Path::getFileName).reversed();
+                default -> direction == 1 ? Comparator.comparing(Path::getFileName) : Comparator.comparing(Path::getFileName).reversed();
+            }; 
+// Compares file names alphabetically
             // Compares the last modified time (Newest first)
             // Compares the size in bytes (Smallest first)
 
@@ -223,7 +221,7 @@ public class FilestoreResolver implements Resolver {
                     return attributes;
                             })
                 .collect(Collectors.toList());
-            result.put("entries", list);
+            result.put(ENTRIES, list);
 
         }
     }
