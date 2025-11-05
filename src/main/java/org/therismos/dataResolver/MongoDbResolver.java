@@ -44,14 +44,14 @@ public class MongoDbResolver implements Resolver {
      */
     @Override
     public Map<String, Object> getData(Document param) {
-        Bson filter;
+        Document filter;
         try {
             filter = Document.parse(param.getString("filter"));
         }
         catch (Exception ex) {
-            filter = new Document("accountId", "11200");
+            filter = new Document();
         }
-System.getLogger(MongoDbResolver.class.getName()).log(System.Logger.Level.INFO, "param: {0}", param.toJson());
+System.getLogger(MongoDbResolver.class.getName()).log(System.Logger.Level.INFO, "param: {0}", filter.toJson());
         Bson sort;
         try {
             sort = Document.parse(param.getString(SORTKEY));
