@@ -37,6 +37,20 @@ import org.therismos.codec.YearMonthCodec;
 public class ApplicationBean implements java.io.Serializable {
 
     /**
+     * @return the naspath
+     */
+    public String getNaspath() {
+        return naspath;
+    }
+
+    /**
+     * @param naspath the naspath to set
+     */
+    public void setNaspath(String naspath) {
+        this.naspath = naspath;
+    }
+
+    /**
      * @return the pojoCodecRegistry
      */
     public CodecRegistry getPojoCodecRegistry() {
@@ -69,6 +83,8 @@ public class ApplicationBean implements java.io.Serializable {
     private Properties properties;
     @jakarta.annotation.Resource
     private String datapath;
+    @jakarta.annotation.Resource
+    private String naspath;
     @jakarta.annotation.Resource
     private DataSource dataSource;
     @Inject

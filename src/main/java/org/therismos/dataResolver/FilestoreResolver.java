@@ -41,10 +41,15 @@ public class FilestoreResolver implements Resolver {
      */
     @Override
     public Map<String, Object> getData(Document param)  {
+        final String defaultFolder = appBean.getNaspath() != null ? appBean.getNaspath() : appBean.getDatapath();
         // 1. Convert the input string to a Path object.
-        Path folderPath = Paths.get(param.get("baseFolder", appBean.getDatapath()), 
-                param.get("path", ""));
-
+        final String baseFolder = param.get("root", defaultFolder);
+        Path folderPath = Paths.get(
+            (Arrays.stream(
+            appBean.getProperties().getProperty("nas.paths", defaultFolder).split(":") // String[] of nas paths
+            ).anyMatch(nas_path -> nas_path.equalsIgnoreCase(baseFolder))) ? baseFolder : defaultFolder // acceptable base folder
+                , param.get("path", ""));
+System.getLogger(FilestoreResolver.class.getName()).log(System.Logger.Level.DEBUG, "Using nas base path: {0}", folderPath.toString());
         // Check if the path exists and is a directory.
         if (!Files.exists(folderPath) || !Files.isDirectory(folderPath)) {
             result.put(TOTALCOUNT, this.total_count);
@@ -52,11 +57,11 @@ public class FilestoreResolver implements Resolver {
             result.put("exception_class", "IOException");
             result.put("exception_message", "Path is not a valid directory: " + folderPath);
             return result;
-        }        
-        result.put(TOTALCOUNT, this.total_count);
+        }
         try {
             getPagedAndSortedDirectoryStream(folderPath, param.getInteger(PAGESIZE), param.getInteger(PAGE), 
                     param.getString(SORTKEY), param.getInteger(DIRECTION));
+            result.put(TOTALCOUNT, this.total_count);
         } catch (IOException ex) {
             System.getLogger(FilestoreResolver.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
@@ -66,7 +71,7 @@ public class FilestoreResolver implements Resolver {
     @Override
     public Document getDefaults() {
         return new Document(PAGE, 1).append(SORTKEY, NAME).append(PAGESIZE, 20).append(DIRECTION, 1)
-        .append("baseFolder", appBean.getDatapath());
+        .append("root", appBean.getNaspath());
     }
     
     /**

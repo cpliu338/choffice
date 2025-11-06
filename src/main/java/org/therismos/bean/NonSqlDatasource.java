@@ -37,7 +37,6 @@ public class NonSqlDatasource {
      */
     public Document queryToDocument(MultivaluedMap<String,String> uri_info, Document defaults) {
         uri_info.forEach((String key, List<String> values)-> {
-System.getLogger(NonSqlDatasource.class.getName()).log(System.Logger.Level.INFO, "key: {0}", key);
             String givenValue = values.get(0);
             // TODO type cast exception will default
             if (defaults.containsKey(key)) {
