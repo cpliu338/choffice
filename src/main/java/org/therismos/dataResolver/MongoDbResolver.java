@@ -18,6 +18,8 @@ import org.therismos.bean.ApplicationBean;
  * @author cp_liu
  */
 public class MongoDbResolver implements Resolver {
+    
+    Document param;
 
     /**
      * @param appBean the appBean to set
@@ -30,6 +32,7 @@ public class MongoDbResolver implements Resolver {
     private ApplicationBean appBean;
     
     public MongoDbResolver() {
+        param = new Document();
     }
     
     @Override
@@ -44,6 +47,7 @@ public class MongoDbResolver implements Resolver {
      */
     @Override
     public Map<String, Object> getData(Document param) {
+        this.param.putAll(param);
         Document filter;
         try {
             filter = Document.parse(param.getString("filter"));

@@ -20,14 +20,16 @@ public class FilestoreResolver implements Resolver {
     protected int total_count = 0;
     Map<String, Object> result;
     ApplicationBean appBean;
+    Document param;
     
     public FilestoreResolver() {
         result = new HashMap<>();
         result.put(TOTALCOUNT, 0);
         result.put(ENTRIES, java.util.Collections.EMPTY_LIST);
+        param = new Document();
     }
-    @Override
-    
+
+    @Override    
     public void setAppBean(ApplicationBean appBean) {
         this.appBean = appBean;
     }
@@ -59,8 +61,10 @@ System.getLogger(FilestoreResolver.class.getName()).log(System.Logger.Level.DEBU
             return result;
         }
         try {
+            List<String> sorts = this.getSortFields(param);
+            List<Integer> dirs = this.getSortDirections(param);
             getPagedAndSortedDirectoryStream(folderPath, param.getInteger(PAGESIZE), param.getInteger(PAGE), 
-                    param.getString(SORTKEY), param.getInteger(DIRECTION));
+                    sorts.isEmpty() ? NAME : sorts.get(0), dirs.isEmpty() ? 1 : dirs.get(0));
             result.put(TOTALCOUNT, this.total_count);
         } catch (IOException ex) {
             System.getLogger(FilestoreResolver.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
@@ -70,7 +74,7 @@ System.getLogger(FilestoreResolver.class.getName()).log(System.Logger.Level.DEBU
 
     @Override
     public Document getDefaults() {
-        return new Document(PAGE, 1).append(SORTKEY, NAME).append(PAGESIZE, 20).append(DIRECTION, 1)
+        return new Document(PAGE, 1).append(SORTKEY, NAME).append(PAGESIZE, 20).append(DIRECTION, "asc")
         .append("root", appBean.getNaspath());
     }
     

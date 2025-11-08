@@ -48,18 +48,28 @@ public class FilestoreResolverTest {
     /**
      * Test of getData method, of class FilestoreResolver.
      */
-    public void testGetData() throws Exception {
-        System.out.println("getData");
-        Document param = new Document("baseFolder", "/home/cp_liu/Documents")
-                    .append("path", "")
-                    .append("page", 1)
-                    .append("pageSize", 3)
-                    .append("sortKey", null)
-            ;
+    @Test
+    public void testGetSort() throws Exception {
+        System.out.println("get sort");
+        Document param = new Document();
         FilestoreResolver r = new FilestoreResolver();
-        Document result = new Document();
-        result.putAll(r.getData(param));
-        System.out.println(result.toJson());
+        List<String> sorts = r.getSortFields(param);
+        assert(sorts.isEmpty());
+        param.put("sort", "size");
+        sorts = r.getSortFields(param);
+        assert(sorts.size()==1 && sorts.get(0).equals("size"));
+        param.put("sort", "size, name");
+        sorts = r.getSortFields(param);
+        assert(sorts.size()==2 && sorts.get(1).equals("name"));
+        param.put("direction", "ascending");
+        List<Integer> dirs = r.getSortDirections(param);
+        assert(sorts.size()==2 && dirs.size()==1 && dirs.get(0)==1);
+        param.put("direction", "1,desc");
+        dirs = r.getSortDirections(param);
+        for (Integer s: dirs) {System.out.println(s);}
+        assert(sorts.size()==2);
+        assert(dirs.size()==2);
+        assert(dirs.get(0)==1 && dirs.get(1)==-1);
     }
     
     @Test 
@@ -100,7 +110,7 @@ public class FilestoreResolverTest {
     public void testGetPagedAndSortedDirectoryStream() throws Exception {
         System.out.println("getPagedAndSortedDirectoryStream");
         ApplicationBean appBean = new ApplicationBean();
-        appBean.setDatapath(System.getenv("choffice"));
+        appBean.setDatapath("/home/cp_liu/Documents/java_dir");//System.getenv("choffice"));
         appBean.init();
         FilestoreResolver resolver = new FilestoreResolver();
         resolver.setAppBean(appBean);
