@@ -51,7 +51,6 @@ public class FilestoreResolver implements Resolver {
             appBean.getProperties().getProperty("nas.paths", defaultFolder).split(":") // String[] of nas paths
             ).anyMatch(nas_path -> nas_path.equalsIgnoreCase(baseFolder))) ? baseFolder : defaultFolder // acceptable base folder
                 , param.get("path", ""));
-System.getLogger(FilestoreResolver.class.getName()).log(System.Logger.Level.DEBUG, "Using nas base path: {0}", folderPath.toString());
         // Check if the path exists and is a directory.
         if (!Files.exists(folderPath) || !Files.isDirectory(folderPath)) {
             result.put(TOTALCOUNT, this.total_count);
@@ -113,6 +112,9 @@ System.getLogger(FilestoreResolver.class.getName()).log(System.Logger.Level.DEBU
                         BasicFileAttributes attr1 = Files.readAttributes(path1, BasicFileAttributes.class, followLinks);
                         BasicFileAttributes attr2 = Files.readAttributes(path2, BasicFileAttributes.class, followLinks);
                         // Newest first: path2 (newest) compared to path1 (oldest)
+System.getLogger(FilestoreResolver.class.getName()).log(System.Logger.Level.INFO, "{0} {1} {2} {3}", 
+        path1, path2, attr1.lastModifiedTime(), direction
+        );
                         return attr2.lastModifiedTime().compareTo(attr1.lastModifiedTime()) * direction;
                     } catch (IOException e) {
                         return 0; // Treat as equal on error
