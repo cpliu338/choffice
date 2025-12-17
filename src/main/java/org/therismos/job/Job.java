@@ -11,7 +11,6 @@ import org.bson.Document;
 public interface Job extends Callable<Document> {
     public String getType();
     public void setType(String type);
-    public Date getExpiry();
-    public void setExpiry(Date expiry);
-    
+    public long getCreate_ts();
+    public void setCreate_ts(long ts);
 }

@@ -1,5 +1,7 @@
 package org.therismos.job;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import org.bson.Document;
 
@@ -20,23 +22,23 @@ public class JobInfo {
     private volatile Document result;
     private volatile Throwable error;
 
-    JobInfo(UUID id, String type, long expiresAt) {
+    public JobInfo(UUID id, String type, long expiresAt) {
         this.id = id;
         this.type = type;
         this.expiresAt = expiresAt;
     }
 
-    void markSuccess(Document result) {
+    public void markSuccess(Document result) {
         this.result = result;
         this.status = Status.SUCCESS;
     }
 
-    void markFailure(Throwable error) {
+    public void markFailure(Throwable error) {
         this.error = error;
         this.status = Status.FAILED;
     }
 
-    void markExpired() {
+    public void markExpired() {
         this.status = Status.EXPIRED;
     }
 
@@ -47,4 +49,15 @@ public class JobInfo {
     public Status getStatus() { return status; }
     public Document getResult() { return result; }
     public Throwable getError() { return error; }
+    
+    public String toJson() {
+        Document d = new Document("id", id.toString());
+        d.append("type", type);
+        d.append("status", status.toString());
+        d.append("error", error == null ? "null" : error.getMessage());
+        d.append("result", result);
+        d.append("expires", java.time.Instant.ofEpochMilli(expiresAt).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
+        return d.toJson();
+    }
+    
 }

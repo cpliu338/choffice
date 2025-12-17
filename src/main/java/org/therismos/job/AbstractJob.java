@@ -22,7 +22,7 @@ public abstract class AbstractJob implements Job {
         return config;
     }
     protected String type;
-    protected Date expiry;
+    protected long create_ts;
     protected final Document config;
     protected final ApplicationBean applicationBean;
 
@@ -35,9 +35,24 @@ public abstract class AbstractJob implements Job {
     protected abstract String getFileExtension();
     
     public File getDownloadPath() {
+        create_ts = System.currentTimeMillis();
         return new File( Paths.get(applicationBean.getDatapath(), "downloads", String.format("%s_%d.%s",
-                getFilePrefix(), System.currentTimeMillis(), getFileExtension())).toUri()
+                getFilePrefix(), create_ts, getFileExtension())).toUri()
         );
+    }
+    
+    public static long getCreateTs(String name) {
+        int lastUnderscore = name.lastIndexOf("_");
+        int lastDot =  name.lastIndexOf(".");
+        if (lastDot > lastUnderscore + 1 && lastUnderscore > 1) {
+            try {
+                return Long.parseLong(name.substring(lastUnderscore + 1, lastDot));
+            }
+            catch (RuntimeException ex) {
+                return 0L;
+            }
+        }
+        return 0L;
     }
     
     @Override
@@ -51,13 +66,13 @@ public abstract class AbstractJob implements Job {
     }
 
     @Override
-    public Date getExpiry() {
-        return expiry;
+    public long getCreate_ts() {
+        return create_ts;
     }
 
     @Override
-    public void setExpiry(Date expiry) {
-        this.expiry = expiry;
+    public void setCreate_ts(long create_ts) {
+        this.create_ts = create_ts;
     }
     
 }

@@ -11,10 +11,15 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 import jakarta.annotation.*;
 import jakarta.inject.*;
 import jakarta.enterprise.concurrent.ManagedExecutorService;
+import jakarta.servlet.ServletContext;
 import java.io.*;
 import java.nio.file.*;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.*;
@@ -26,6 +31,7 @@ import org.bson.Document;
 import static org.bson.codecs.configuration.CodecRegistries.fromCodecs;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.therismos.codec.YearMonthCodec;
+import org.therismos.job.JobInfo;
 
 /**
  * Global config and functions
@@ -36,6 +42,57 @@ import org.therismos.codec.YearMonthCodec;
 @Singleton
 public class ApplicationBean implements java.io.Serializable {
 
+    private final Map<UUID, JobInfo> jobs = new ConcurrentHashMap<>();
+
+    public UUID submit(
+            String type,
+            Callable<Document> task,
+            long ttlMillis
+    ) {
+        UUID id = UUID.randomUUID();
+        long expiresAt = System.currentTimeMillis() + ttlMillis;
+
+        JobInfo job = new JobInfo(id, type, expiresAt);
+        jobs.put(id, job);
+
+        CompletableFuture
+            .supplyAsync(() -> {
+                try {
+                    return task.call();
+                } catch (Exception e) {
+                    throw new CompletionException(e);
+                }
+            }, managedExecutorService)
+            .whenComplete((result, throwable) -> {
+                if (throwable == null) {
+                    job.markSuccess(result);
+                } else {
+                    job.markFailure(throwable.getCause());
+                }
+            });
+        return id;
+    }
+    
+    /**
+     * This method is lock-free, non-blocking, container-safe, extremely cheap
+     * No background threads required.
+     * @return 
+     */
+    public List<JobInfo> getJobs() {
+        long now = System.currentTimeMillis();
+
+        jobs.entrySet().removeIf(entry -> {
+            JobInfo job = entry.getValue();
+            if (job.getExpiresAt() < now) {
+                job.markExpired();
+                return true;
+            }
+            return false;
+        });
+
+        return List.copyOf(jobs.values());
+    }
+        
     /**
      * @return the naspath
      */
@@ -85,15 +142,14 @@ public class ApplicationBean implements java.io.Serializable {
     private String datapath;
     @jakarta.annotation.Resource
     private String naspath;
-    @jakarta.annotation.Resource
+    @jakarta.annotation.Resource(name="churchDB")
     private DataSource dataSource;
-    @Inject
-    private jakarta.servlet.ServletContext servletContext;
     
     MongoClient mongoClient;
     private CodecRegistry pojoCodecRegistry;
-    private List<JobFuture> jobList;
     private String projectStage;
+    @Inject
+    private ServletContext servletContext;
     
     @jakarta.annotation.Resource
     private ManagedExecutorService managedExecutorService;
@@ -106,7 +162,6 @@ public class ApplicationBean implements java.io.Serializable {
     
     @jakarta.annotation.PostConstruct
     public void init() {
-        jobList = new ArrayList<>();
         try {
             projectStage = servletContext.getInitParameter("jakarta.faces.PROJECT_STAGE");
         }
@@ -220,68 +275,5 @@ public class ApplicationBean implements java.io.Serializable {
         return new QueryRunner(getDataSource()).query(finalSql, new BeanListHandler<>(beanType), allParams);
     }
     
-    /**
-     * Get the job list, side effect: garbage collection
-     * Delete jobs expired
-     * @return the jobList
-     */
-    public List<JobFuture> getJobList() {
-        List<JobFuture> list1 = new ArrayList<>();
-        jobList.forEach(jobFuture -> {
-            if (jobFuture.expiryMsTimestamp > System.currentTimeMillis()) {
-                list1.add(jobFuture);
-            }
-            else {
-                Future<Document> future = jobFuture.future;
-                if (future.isDone()) {
-                    try {
-                        Document result = future.get();
-                        LOG.log(Level.INFO, result.toString());
-                    } catch (InterruptedException | ExecutionException ex) {
-                        LOG.log(Level.INFO, ex.getClass().getName());
-                    }
-                }
-                LOG.log(Level.INFO, "Expired {0,date,yyyy-MM-dd HH:mm}", new java.util.Date(jobFuture.expiryMsTimestamp));
-            }
-        });
-        jobList = list1;
-        return jobList;
-    }
-    
-    public void addFuture(String type, Future<Document> future, long msToExpire) {
-        JobFuture jobFuture = new JobFuture();
-        jobFuture.type = type;
-        jobFuture.future = future;
-        jobFuture.expiryMsTimestamp = System.currentTimeMillis() + msToExpire;
-        getJobList().add(jobFuture);
-        LOG.log(Level.INFO, "job list size is now {0}", jobList.size());
-    }
-    
-    public static class JobFuture {
-
-        /**
-         * @return the future
-         */
-        public Future<Document> getFuture() {
-            return future;
-        }
-
-        /**
-         * @return the expiryMsTimestamp
-         */
-        public long getExpiryMsTimestamp() {
-            return expiryMsTimestamp;
-        }
-
-        /**
-         * @return the type
-         */
-        public String getType() {
-            return type;
-        }
-        private Future<Document> future;
-        private long expiryMsTimestamp;
-        private String type;
-    }
     
 }

@@ -12,6 +12,8 @@ import org.therismos.bean.ApplicationBean;
 import java.io.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
+import org.therismos.bean.FilesResource;
 
 /**
  *
@@ -143,4 +145,10 @@ public class JobTest {
         System.out.println("written to " + f.getAbsolutePath());
     }
     
+    @Test
+    public void testJobInfo() throws Exception {
+        System.out.println("test JobInfo");
+        JobInfo info = new JobInfo(UUID.randomUUID(), "WeeklyReport", System.currentTimeMillis()+60_000L);
+        System.out.print(info.toJson());
+    }    
 }

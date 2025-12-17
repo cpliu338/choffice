@@ -23,6 +23,7 @@ public class ApplicationConfig extends jakarta.ws.rs.core.Application {
      * If required, comment out calling this method in getClasses().
      */
     private void addRestResourceClasses(Set<Class<?>> resources) {
+        resources.add(org.therismos.bean.FilesResource.class);
         resources.add(org.therismos.bean.Jobs.class);
         resources.add(org.therismos.bean.NonSqlDatasource.class);
     }
