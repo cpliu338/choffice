@@ -27,7 +27,7 @@ public class PayrollReport extends AbstractXlsxJob {
     static final Logger LOG = Logger.getLogger(PayrollReport.class.getName());
     LocalDate startDate;
     List<YearMonth> yearMonth;
-    final List<String> remarks;
+    List<String> remarks;
     DateTimeFormatter yyyyMM;
     ResourceBundle bundle;
     FormulaEvaluator evaluator;
@@ -41,8 +41,9 @@ public class PayrollReport extends AbstractXlsxJob {
             + "FROM entries e INNER JOIN accounts a ON e.account_id=a.id "
             + "WHERE a.code=? and e.date1 BETWEEN ? AND ? ORDER BY e.date1";
 
-    public PayrollReport(ApplicationBean srv, Document config) {
-        super(srv, config);
+    @Override
+    public void init() {
+        super.init();
         startDate = LocalDate.parse(config.getString("startDate"), DateTimeFormatter.ISO_DATE);
         yearMonth = new ArrayList<>();
         remarks = new ArrayList<>();
@@ -54,10 +55,10 @@ public class PayrollReport extends AbstractXlsxJob {
      * for jobs producing downloadables
      * @return regex string, one single matcher group representing the timestamp in ms
      */
-    public static String getFilePattern() {return "PayrollReport_[^_]+_([0-9]+)\\.xlsx";}
+    public String getFilePattern() {return "PayrollReport_[^_]+_([0-9]+)\\.xlsx";}
 
     @Override
-    protected String getFilePrefix() {
+    public String getFilePrefix() {
         return String.format("PayrollReport_%s", DateTimeFormatter.ofPattern("yyyyMM").format(startDate));
     }
 
@@ -370,5 +371,5 @@ public class PayrollReport extends AbstractXlsxJob {
         double x = salary * 0.05;
         return x >= 1500.00 ? 1500.00 : x;
     }
-    
+
 }

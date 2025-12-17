@@ -22,29 +22,14 @@ import org.therismos.bean.ApplicationBean;
 public class GenerateReceipts extends AbstractJob {
 
     final Logger LOG = Logger.getLogger(GenerateReceipts.class.getName());
-    /**
-     * Main constructor to be used
-     * @param srv the applicationScoped bean
-     * @param config 
-     */
-    public GenerateReceipts(ApplicationBean srv, org.bson.Document config) {
-        super(srv, config);
-    }
+
     /**
      * File pattern to identify this type of downloadable file, must be present
      * for jobs producing downloadables
      * @return regex string, one single matcher group representing the timestamp in ms
      */
-    public static String getFilePattern() {return "Receipts_[^_]+_([0-9]+)\\.pdf";}
+    public String getFilePattern() {return "Receipts_[^_]+_([0-9]+)\\.pdf";}
 
-    /**
-     * File description to be used for display in Rest client
-     * @param name appearing in the file system
-     * @return File description to be used for display
-     */
-    public static String getFileDesc(String name) {
-        return name.substring(9, 15);
-    }
     /*
      * GenerateReceipts job: based on end date, get offers for offers for the past year
      * print receipts as a PDF file using iText and put in download path
@@ -239,12 +224,12 @@ public class GenerateReceipts extends AbstractJob {
     }
 
     @Override
-    protected String getFilePrefix() {
+    public String getFilePrefix() {
         return String.format("Receipts_%d%02d", endDate.getYear(), batch);
     }
 
     @Override
-    protected String getFileExtension() {
+    public String getFileExtension() {
         return "pdf";
     }
     

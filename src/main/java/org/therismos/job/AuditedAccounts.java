@@ -17,6 +17,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.xssf.usermodel.*;
 import org.bson.Document;
 import org.therismos.bean.ApplicationBean;
@@ -45,7 +46,6 @@ public class AuditedAccounts extends AbstractXlsxJob {
     LocalDate endDate;
     LocalDate startDate;
     int year;
-    final List<Cell> cellsToEval = new ArrayList<>();
     final List<String> fundsCodes = new ArrayList<>();
     final List<String> fundsNames = new ArrayList<>();
     final List<Integer> fundsIds = new ArrayList<>();
@@ -58,8 +58,9 @@ public class AuditedAccounts extends AbstractXlsxJob {
             styleSubtotal, // amount with single underline at top and bottom 
             styleTotal; // amount with double underline at bottom
 
-    public AuditedAccounts(ApplicationBean srv, Document config) {
-        super(srv, config);
+    @Override
+    public void init() {
+        super.init();
         bundle = ResourceBundle.getBundle("auditedAccounts", Locale.CHINESE);
         coll = applicationBean.getCollection("auditUseAccounts", Document.class);
         Object o = config.get(YEAR);
@@ -94,7 +95,10 @@ public class AuditedAccounts extends AbstractXlsxJob {
         buildPandL();
         buildPageTop("auditedAccounts.fundsPage");
         buildFundsPage();
-        evalFormulae();
+        workbook.getCreationHelper().createFormulaEvaluator().evaluateAll();
+        workbook.setForceFormulaRecalculation(true); 
+        /* this may functionally do what evaluateAll() above 
+        but just for safety's sake, never mind negligible overhead */
         return workbook;
     }
     
@@ -128,7 +132,6 @@ public class AuditedAccounts extends AbstractXlsxJob {
             Cell c = r.createCell(col);
             c.setCellFormula(fmla.replaceAll("A", COLUMNINDEX.substring(col, col+1)));
             c.setCellStyle(styleSubtotal);
-            this.cellsToEval.add(c);
         }
         fmla = String.format("A%d-A%d", row_profit, row_no);
         r = sheet.createRow(row_no + 1);
@@ -139,7 +142,6 @@ public class AuditedAccounts extends AbstractXlsxJob {
             Cell c = r.createCell(col);
             c.setCellFormula(fmla.replaceAll("A", COLUMNINDEX.substring(col, col+1)));
             c.setCellStyle(styleTotal);
-            this.cellsToEval.add(c);
         }        
     }
     
@@ -269,7 +271,6 @@ public class AuditedAccounts extends AbstractXlsxJob {
             cell = row.createCell(6);
             cell.setCellFormula(String.format("SUM(E%d:F%d)", rowno+1, rowno+1));
             cell.setCellStyle(style);
-            this.cellsToEval.add(cell);
             rowno++;
         }
         if (totalStyle == null) return rowno;
@@ -281,18 +282,10 @@ public class AuditedAccounts extends AbstractXlsxJob {
                 cell.setCellFormula(String.format("SUM(%s%d:%s%d)", 
                         COLUMNINDEX.substring(col, col+1), row_no+1, COLUMNINDEX.substring(col, col+1), rowno));
                 cell.setCellStyle(totalStyle);
-                cellsToEval.add(cell);
             }            
             rowno++;
         }
         return rowno;
-    }
-    
-    private void evalFormulae() {
-        FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();  
-        for (Cell cell : this.cellsToEval) {
-            evaluator.evaluateFormulaCell(cell);
-        }
     }
     
     private List<Object[]> mockSectionRows(String audit_code, LocalDate start, LocalDate end) throws SQLException {
@@ -440,7 +433,6 @@ public class AuditedAccounts extends AbstractXlsxJob {
             cell.setCellStyle(style);
             String fmla = cellFormula.replaceAll("A", COLUMNINDEX.substring(i, i+1));
             cell.setCellFormula(fmla);
-            cellsToEval.add(cell);
         }
         eval1.clearAllCachedResultValues();
         return rowno+1;
@@ -460,7 +452,7 @@ public class AuditedAccounts extends AbstractXlsxJob {
      * for jobs producing downloadables
      * @return regex string, one single matcher group representing the timestamp in ms
      */
-    public static String getFilePattern() {return "AuditedAccounts_[^_]+_([0-9]+)\\.xlsx";}
+    public String getFilePattern() {return "AuditedAccounts_[^_]+_([0-9]+)\\.xlsx";}
 
     @Override
     public String getFilePrefix() {

@@ -127,7 +127,6 @@ public class DownloadBean implements DownloadFile, Serializable {
             if (jobBase.isAssignableFrom(clazz)
                     && !clazz.isInterface()
                     && !java.lang.reflect.Modifier.isAbstract(clazz.getModifiers())
-                    && hasPublicStaticStringGetFilePattern(clazz)
                     ) {
                 jobClasses.add((Class<? extends AbstractJob>)clazz);
             }
@@ -141,19 +140,7 @@ public class DownloadBean implements DownloadFile, Serializable {
         if (selectedClassName != null && selectedClassName.length()>1)
             refreshFiles();
     }
-    
-    public boolean hasPublicStaticStringGetFilePattern(Class<?> clazz) {
-        try {
-            Method m = clazz.getDeclaredMethod("getFilePattern");
-            return Modifier.isStatic(m.getModifiers())
-                    && Modifier.isPublic(m.getModifiers())
-                    && m.getReturnType() == String.class
-                    && m.getParameterCount() == 0;
-        } catch (NoSuchMethodException e) {
-            return false;
-        }
-    }
-    
+        
     /**
      * Delete files with older than now - ms2keep
      */

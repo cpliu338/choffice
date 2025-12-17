@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bson.Document;
+import org.therismos.job.*;
 
 /**
  * Files in {datapath}/downloads folder
@@ -99,16 +100,18 @@ public class FilesResource {
         String fqcn = "org.therismos.job." + className;
         
         try (Stream<java.nio.file.Path> pathStream = Files.walk(Paths.get(applicationBean.getDatapath(), "downloads"))) {            
+            AbstractJob job = AbstractJob.createJob(className, applicationBean, new Document(), AbstractJob.class);
             // 2. Load the Class Object using Reflection
             Class<?> filterClass = Class.forName(fqcn);
 
             // 3. Find the static method getFilePattern(String)
-            Method getPatternMethod = filterClass.getMethod("getFilePattern");
-            Method getFileDescMethod = filterClass.getMethod("getFileDesc", String.class);
+            //Method getPatternMethod = filterClass.getMethod("getFilePattern");
+            //Method getFileDescMethod = filterClass.getMethod("getFileDesc", String.class);
 
             // 4. Invoke the static method to get the dynamic regex pattern
             // The first argument for static method invocation is null.
-            String regexPattern = (String) getPatternMethod.invoke(null);
+            String regexPattern = job.getFilePattern();
+                    //(String) getPatternMethod.invoke(null);
 
             // 5. Compile the dynamic regex into a Pattern object for efficient matching
             final Pattern pattern = Pattern.compile(regexPattern);
@@ -125,12 +128,8 @@ public class FilesResource {
                 })
                 .map((Path path) -> {
                     String desc;
-                    try {
-                        desc = (String)getFileDescMethod.invoke(null, path.toFile().getName());
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                        System.getLogger(FilesResource.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-                        desc = ex.getClass().getName();
-                    }
+                        desc = job.getFileDesc();
+                                //(String)getFileDescMethod.invoke(null, path.toFile().getName());
                     return new Document("name", path.toFile().getAbsolutePath())
                         .append("desc", desc)
                         .append("created", org.therismos.job.AbstractJob.getCreateTs(path.toFile().getName()));
@@ -141,7 +140,7 @@ public class FilesResource {
             return Response.ok(this.deleteOldFiles(filteredFiles, 8)
             ).build();
         }
-        catch (java.io.IOException | ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+        catch (Exception ex) {
             System.getLogger(FilesResource.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
             return Response.serverError().build();
         }

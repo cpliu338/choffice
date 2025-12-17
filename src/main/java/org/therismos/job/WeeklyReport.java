@@ -1,6 +1,5 @@
 package org.therismos.job;
 
-import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -10,8 +9,6 @@ import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
-import org.bson.Document;
-import org.therismos.bean.ApplicationBean;
 
 
 /**
@@ -23,9 +20,9 @@ public class WeeklyReport extends AbstractXlsxJob {
     
     static final Logger LOG = Logger.getLogger(WeeklyReport.class.getName());
 
-    
-    public WeeklyReport(ApplicationBean srv, Document config) {
-        super(srv, config);
+    @Override
+    public void init() {
+        super.init();
         reportDate = LocalDate.parse(config.getString("reportDate"), 
                 DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
@@ -35,18 +32,7 @@ public class WeeklyReport extends AbstractXlsxJob {
      * for jobs producing downloadables
      * @return regex string, one single matcher group representing the timestamp in ms
      */
-    public static String getFilePattern() {return "Offer_[^_]+_([0-9]+)\\.xlsx";}
-
-    /**
-     * This is not used?
-     * File description to be used for display in Rest client
-     * @param name appearing in the file system
-     * @return File description to be used for display
-     */
-    @Deprecated
-    public static String getFileDesc(String name) {
-        throw new UnsupportedOperationException("Not supported yet."); 
-    }
+    public String getFilePattern() {return "Offer_[^_]+_([0-9]+)\\.xlsx";}
 
     /*
     These variables are used in call()
@@ -56,7 +42,7 @@ public class WeeklyReport extends AbstractXlsxJob {
     DateTimeFormatter yyyyMMdd = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     @Override
-    protected String getFilePrefix() {
+    public String getFilePrefix() {
         return String.format("Offer_%s", reportDate.format(yyyyMMdd));
     }
 

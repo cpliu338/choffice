@@ -34,8 +34,9 @@ public class MonthlyReport extends AbstractXlsxJob {
     CellStyle accountNameStyle, totalStyle, amountStyle, // from template to get style from
             sur_def_Style; // surplus or deficit name 
     
-    public MonthlyReport(ApplicationBean srv, Document config) {
-        super(srv, config);
+    @Override
+    public void init() {
+        super.init();
         endDate = LocalDate.parse(config.getString("end"), DateTimeFormatter.ISO_DATE);
         bundle_zh = ResourceBundle.getBundle("monthlyReportLegend", Locale.CHINESE);
     }
@@ -45,10 +46,10 @@ public class MonthlyReport extends AbstractXlsxJob {
      * for jobs producing downloadables
      * @return regex string, one single matcher group representing the timestamp in ms
      */
-    public static String getFilePattern() {return "PandL_[^_]+_([0-9]+)\\.xlsx";}
+    public String getFilePattern() {return "PandL_[^_]+_([0-9]+)\\.xlsx";}
 
     @Override
-    protected String getFilePrefix() {
+    public String getFilePrefix() {
         return String.format("PandL_%s", DateTimeFormatter.ofPattern("yyyyMM").format(endDate));
     }
 
@@ -283,5 +284,5 @@ public class MonthlyReport extends AbstractXlsxJob {
             LOG.log(Level.SEVERE, null, ex);
         }
     }
-    
+
 }

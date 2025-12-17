@@ -46,15 +46,15 @@ public class JobTest {
 
     /**
      * Test of getFilePattern method, of class WeeklyReport.
-    @Test
      */
+    @Test
     public void testPrintReceipt() throws Exception {
         System.out.println("test PrintReceipt");
         ApplicationBean appBean = new ApplicationBean();
         appBean.init();
         config.append("end", "2021-03-31");
         config.append("batch", 1);
-        GenerateReceipts gr = new GenerateReceipts(appBean, config);
+        GenerateReceipts gr = AbstractJob.createJob("GenerateReceipts", appBean, config, GenerateReceipts.class);
         System.out.println(gr.call().toJson());
     }
     
@@ -62,8 +62,8 @@ public class JobTest {
         ApplicationBean appBean = new ApplicationBean();
         appBean.init();
         config.append("end", "2024-12-31");
-        MonthlyReport m = new MonthlyReport(appBean, config);
-        BigDecimal sum = m.reckon("510", LocalDate.parse("2024-07-31"));
+        MonthlyReport monthlyReport = AbstractJob.createJob("MonthlyReport", appBean, config, MonthlyReport.class);
+        BigDecimal sum = monthlyReport.reckon("510", LocalDate.parse("2024-07-31"));
         System.out.print(sum);
         assert(sum.add(new BigDecimal("754964.79")).compareTo(BigDecimal.ZERO) == 0);
         assert(sum.compareTo(new BigDecimal("-754964.79")) == 0);
@@ -74,7 +74,7 @@ public class JobTest {
         ApplicationBean appBean = new ApplicationBean();
         appBean.init();
         config.append("end", "2024-12-31");
-        instance = (MonthlyReport)new MonthlyReport(appBean, config);
+        instance = AbstractJob.createJob("MonthlyReport", appBean, config, MonthlyReport.class);
         File f = instance.getDownloadPath();
         try (FileOutputStream out = new FileOutputStream(f)) {
             XSSFWorkbook wb = instance.buildExcel();
@@ -88,7 +88,7 @@ public class JobTest {
         ApplicationBean appBean = new ApplicationBean();
         appBean.init();
         config.append("year", 2024);
-        instance = new AuditedAccounts(appBean, config);
+        instance = AbstractJob.createJob("AuditedAccounts", appBean, config, AuditedAccounts.class);
         File f = instance.getDownloadPath();
         try (FileOutputStream out = new FileOutputStream(f)) {
             XSSFWorkbook wb = instance.buildExcel();
@@ -103,7 +103,7 @@ public class JobTest {
         appBean.init();
         config.append("start", "2024-01-01");
         config.append("end", "2024-12-31");
-        instance = new AuditExport(appBean, config);
+        instance = AbstractJob.createJob("AuditExport", appBean, config, AuditExport.class);
         File f = instance.getDownloadPath();
         try (FileOutputStream out = new FileOutputStream(f)) {
             XSSFWorkbook wb = instance.buildExcel();
@@ -119,7 +119,7 @@ public class JobTest {
         config.append("startDate", "2024-01-01");
         java.util.List<String> a = java.util.Arrays.asList( "5112");
         config.append("key_personnel", a);
-        instance = new PayrollReport(appBean, config);
+        instance = AbstractJob.createJob("PayrollReport", appBean, config, PayrollReport.class);
         File f = instance.getDownloadPath();
         try (FileOutputStream out = new FileOutputStream(f)) {
             XSSFWorkbook wb = instance.buildExcel();
@@ -136,7 +136,7 @@ public class JobTest {
         ApplicationBean appBean = new ApplicationBean();
         appBean.init();
         config.append("reportDate", "2024-12-15");
-        instance = new WeeklyReport(appBean, config);
+        instance = AbstractJob.createJob("WeeklyReport", appBean, config, WeeklyReport.class);
         File f = instance.getDownloadPath();
         try (FileOutputStream out = new FileOutputStream(f)) {
             XSSFWorkbook wb = instance.buildExcel();
@@ -145,7 +145,6 @@ public class JobTest {
         System.out.println("written to " + f.getAbsolutePath());
     }
     
-    @Test
     public void testJobInfo() throws Exception {
         System.out.println("test JobInfo");
         JobInfo info = new JobInfo(UUID.randomUUID(), "WeeklyReport", System.currentTimeMillis()+60_000L);

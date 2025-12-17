@@ -13,4 +13,8 @@ public interface Job extends Callable<Document> {
     public void setType(String type);
     public long getCreate_ts();
     public void setCreate_ts(long ts);
+    public String getFilePattern();
+    public String getFilePrefix();
+    public String getFileExtension();
+    public String getFileDesc();
 }

@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import org.bson.Document;
+import org.therismos.job.AbstractJob;
 import org.therismos.job.Job;
 import org.therismos.job.JobInfo;
 
@@ -34,9 +35,11 @@ public class Jobs {
         Document requestBody = Document.parse(body);
         String type = requestBody.getString("type");
         Class clazz;
-        try {
+        try {/*
             clazz = Class.forName("org.therismos.job." + type);
             Job jobCallable =(Job)(clazz.getDeclaredConstructor(ApplicationBean.class, Document.class).newInstance(applicationBean, requestBody));
+            */
+            Job jobCallable = AbstractJob.createJob(type, applicationBean, requestBody, AbstractJob.class);
             UUID jobId = applicationBean.submit(
                 type,
                 jobCallable,
@@ -45,7 +48,7 @@ public class Jobs {
             return Response.accepted()
                        .entity(Map.of("jobId", jobId))
                        .build();
-        } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+        } catch (Exception ex) {
             System.getLogger(Jobs.class.getName()).log(System.Logger.Level.DEBUG, (String) null, ex);
             Document doc = new Document();
             doc.append("exception-class", ex.getClass().getName());

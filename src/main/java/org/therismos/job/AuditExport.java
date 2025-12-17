@@ -30,8 +30,9 @@ public class AuditExport extends AbstractXlsxJob {
     LocalDate startDate, endDate;
     CellStyle centerTextStyle, textStyle, amountStyle, dateStyle; // from template to get style from
 
-    public AuditExport(ApplicationBean srv, Document config) {
-        super(srv, config);
+    @Override
+    public void init() {
+        super.init();
         startDate = LocalDate.parse(config.getString(START), DateTimeFormatter.ISO_DATE);
         endDate = LocalDate.parse(config.getString(END), DateTimeFormatter.ISO_DATE);
     }
@@ -41,7 +42,7 @@ public class AuditExport extends AbstractXlsxJob {
      * for jobs producing downloadables
      * @return regex string, one single matcher group representing the timestamp in ms
      */
-    public static String getFilePattern() {return "Audit_[^_]+_([0-9]+)\\.xlsx";}
+    public String getFilePattern() {return "Audit_[^_]+_([0-9]+)\\.xlsx";}
     
     @Override
     protected XSSFWorkbook buildExcel() throws Exception {
@@ -124,10 +125,10 @@ public class AuditExport extends AbstractXlsxJob {
     }
 
     @Override
-    protected String getFilePrefix() {
+    public String getFilePrefix() {
         return String.format("Audit_%s", DateTimeFormatter.ISO_DATE.format(startDate));
     }
-    
+   
     public static class Entry {
         private String transref;
         private String code;

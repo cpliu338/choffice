@@ -23,16 +23,15 @@ public abstract class AbstractXlsxJob extends AbstractJob {
     protected XSSFWorkbook workbook;
     protected Sheet srcSheet /* template sheet */, sheet /* target sheet */;
     
-    
-    protected AbstractXlsxJob(ApplicationBean srv, Document config) {
-        super(srv, config);
+    @Override
+    protected void init() {
         try {
             templateXlsx = new XSSFWorkbook(new FileInputStream(getTemplateFilePath()));
         } catch (IOException ex) {
             templateXlsx = null;
         }
     }
-
+    
     protected abstract XSSFWorkbook buildExcel() throws Exception;
     
     protected XSSFWorkbook buildExcel(String sheetName) throws Exception {
@@ -54,7 +53,7 @@ public abstract class AbstractXlsxJob extends AbstractJob {
     }
     
     @Override
-    protected String getFileExtension() {
+    public String getFileExtension() {
         return "xlsx";
     }
     

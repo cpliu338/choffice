@@ -11,8 +11,7 @@ import java.util.logging.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.omnifaces.util.Faces;
 import org.therismos.bean.ApplicationBean;
-import org.therismos.job.MonthlyReport;
-import org.therismos.job.WeeklyReport;
+import org.therismos.job.*;
 
 /**
  * Call a report of a subtype of AbstractJob, often require a LocalDate type argument
@@ -45,12 +44,13 @@ public class DateReportBean implements WebBean, java.io.Serializable {
         final String className = "WeeklyReport";
         Document config = new Document("type", className);
         config.append("reportDate", date.format(DateTimeFormatter.ISO_DATE));
-        WeeklyReport instance = new WeeklyReport(appBean, config);
-        File f = instance.getDownloadPath();
-        try (FileOutputStream out = new FileOutputStream(f)) {
-            XSSFWorkbook wb = instance.buildExcel();
-            wb.write(out);
-            //addMessage(FacesMessage.SEVERITY_INFO, f.getAbsolutePath(), config.toJson());
+        try {
+            WeeklyReport instance = AbstractJob.createJob("WeeklyReport", appBean, config, WeeklyReport.class);
+            File f = instance.getDownloadPath();
+            try (FileOutputStream out = new FileOutputStream(f)) {
+                XSSFWorkbook wb = instance.buildExcel();
+                wb.write(out);
+            }
             Faces.redirect("file-system/download.jsf?type=%s", className);
         } catch (Exception ex) {
             getLog().log(Level.SEVERE, (String) null, ex);
@@ -62,15 +62,17 @@ public class DateReportBean implements WebBean, java.io.Serializable {
         final String className = "MonthlyReport";
         Document config = new Document("type", className);
         config.append("end", date.format(DateTimeFormatter.ISO_DATE));
-        MonthlyReport instance = new MonthlyReport(appBean, config);
-        File f = instance.getDownloadPath();
-        try (FileOutputStream out = new FileOutputStream(f)) {
-            XSSFWorkbook wb = instance.buildExcel();
-            wb.write(out);
-            Faces.redirect("file-system/download.jsf?type=%s", className);
+        try {
+            MonthlyReport instance = AbstractJob.createJob("MonthlyReport", appBean, config, MonthlyReport.class);
+            File f = instance.getDownloadPath();
+            try (FileOutputStream out = new FileOutputStream(f)) {
+                XSSFWorkbook wb = instance.buildExcel();
+                wb.write(out);
+                Faces.redirect("file-system/download.jsf?type=%s", className);
+            }
         } catch (Exception ex) {
             getLog().log(Level.SEVERE, (String) null, ex);
-            addMessage(FacesMessage.SEVERITY_ERROR, "IO Exception", ex.getMessage());
+            addMessage(FacesMessage.SEVERITY_ERROR, ex.getClass().getName(), ex.getMessage());
         }        
     }
     

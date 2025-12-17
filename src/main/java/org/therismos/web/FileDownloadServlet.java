@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author cp_liu
  */
-@WebServlet("/file")
+@WebServlet("/download")
 public class FileDownloadServlet extends HttpServlet {
     
     @jakarta.annotation.Resource
@@ -34,6 +34,12 @@ public class FileDownloadServlet extends HttpServlet {
             throws ServletException, IOException {
         try ( OutputStream os = response.getOutputStream()) {
             String filename = request.getParameter("file");
+            String ext = filename.substring(filename.lastIndexOf('.') + 1);
+            switch (ext) {
+                case "pdf" -> response.setContentType("application/pdf");
+                case "xlsx" -> response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                default -> response.setContentType("application/octet-stream");
+            }
             Path path = Paths.get(datapath, DOWNLOADDIR, filename);
             Files.copy(path, os);
         }
