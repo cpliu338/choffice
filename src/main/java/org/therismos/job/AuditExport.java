@@ -33,8 +33,14 @@ public class AuditExport extends AbstractXlsxJob {
     @Override
     public void init() {
         super.init();
-        startDate = LocalDate.parse(config.getString(START), DateTimeFormatter.ISO_DATE);
-        endDate = LocalDate.parse(config.getString(END), DateTimeFormatter.ISO_DATE);
+        try {
+            startDate = LocalDate.parse(config.getString(START), DateTimeFormatter.ISO_DATE);
+            endDate = LocalDate.parse(config.getString(END), DateTimeFormatter.ISO_DATE);
+        }
+        catch (RuntimeException ex) {
+            endDate = LocalDate.now();
+            startDate = endDate.minusMonths(3);
+        }
     }
     
     /**

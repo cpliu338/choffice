@@ -197,20 +197,15 @@ public class DownloadBean implements DownloadFile, Serializable {
     private void refreshFiles() {
         final StringBuilder pattern = new StringBuilder();
         try {
-            Class<?> clazz = Class.forName(selectedClassName);
-
-            // Get the method (no parameters)
-            Method m = clazz.getDeclaredMethod("getFilePattern");
-
-            // Invoke the static method (null for instance)
-            Object result = m.invoke(null);
-
-            // Cast to String
-            pattern.append((String) result);
+            Class<AbstractJob> clazz = (Class<AbstractJob>) Class.forName(selectedClassName);
+            AbstractJob job = AbstractJob.createJob(clazz.getSimpleName(), appBean, new org.bson.Document(), clazz);
+            getLog().log(Level.FINE, "{0} pattern {1}", new String[]{clazz.getSimpleName(), job.getFilePattern()});
+            pattern.append(job.getFilePattern());
         } catch (Exception ex) {
             getLog().log(Level.SEVERE, (String) null, ex);
         }
         files = getModels(downloadDir, pattern.toString(), System.currentTimeMillis()-getMs2keep());
+        getLog().log(Level.FINE, "files size {0}", files.size());
     }
     
     public String getDebug() {

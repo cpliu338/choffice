@@ -46,8 +46,8 @@ public class JobTest {
 
     /**
      * Test of getFilePattern method, of class WeeklyReport.
-     */
     @Test
+     */
     public void testPrintReceipt() throws Exception {
         System.out.println("test PrintReceipt");
         ApplicationBean appBean = new ApplicationBean();

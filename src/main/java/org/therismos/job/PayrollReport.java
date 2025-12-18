@@ -44,7 +44,12 @@ public class PayrollReport extends AbstractXlsxJob {
     @Override
     public void init() {
         super.init();
-        startDate = LocalDate.parse(config.getString("startDate"), DateTimeFormatter.ISO_DATE);
+        try {
+            startDate = LocalDate.parse(config.getString("startDate"), DateTimeFormatter.ISO_DATE);
+        }
+        catch (RuntimeException ex) {
+            startDate = LocalDate.now().minusYears(1).withMonth(4).withDayOfMonth(1);
+        }
         yearMonth = new ArrayList<>();
         remarks = new ArrayList<>();
         yyyyMM = DateTimeFormatter.ofPattern("yyyy-MM");

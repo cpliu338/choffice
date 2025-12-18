@@ -37,7 +37,12 @@ public class MonthlyReport extends AbstractXlsxJob {
     @Override
     public void init() {
         super.init();
-        endDate = LocalDate.parse(config.getString("end"), DateTimeFormatter.ISO_DATE);
+        try {
+            endDate = LocalDate.parse(config.getString("end"), DateTimeFormatter.ISO_DATE);
+        }
+        catch (RuntimeException ex) {
+            endDate = LocalDate.now().minusMonths(3).withDayOfMonth(1).minusDays(1);
+        }
         bundle_zh = ResourceBundle.getBundle("monthlyReportLegend", Locale.CHINESE);
     }
 

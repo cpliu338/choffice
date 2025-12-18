@@ -17,10 +17,8 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.xssf.usermodel.*;
 import org.bson.Document;
-import org.therismos.bean.ApplicationBean;
 
 /**
  * Expected POST body

@@ -23,8 +23,13 @@ public class WeeklyReport extends AbstractXlsxJob {
     @Override
     public void init() {
         super.init();
-        reportDate = LocalDate.parse(config.getString("reportDate"), 
+        try {
+            reportDate = LocalDate.parse(config.getString("reportDate"), 
                 DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        }
+        catch (RuntimeException ex) {
+            reportDate = LocalDate.now().minusWeeks(3);
+        }
     }
 
     /**
