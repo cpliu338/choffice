@@ -11,8 +11,7 @@
         <param-value>server</param-value>
     </context-param>
     <context-param>
-        <description>the version in pom.xml
-</description>
+        <description>the version in pom.xml</description>
         <param-name>choffice.version</param-name>
         <param-value>${project.version}</param-value>
     </context-param>

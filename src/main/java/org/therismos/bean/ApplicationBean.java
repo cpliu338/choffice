@@ -73,6 +73,9 @@ public class ApplicationBean implements java.io.Serializable {
         return id;
     }
     
+    public void removeJob(String str_uuid) {
+        jobs.remove(UUID.fromString(str_uuid));
+    }
     /**
      * This method is lock-free, non-blocking, container-safe, extremely cheap
      * No background threads required.
@@ -91,6 +94,10 @@ public class ApplicationBean implements java.io.Serializable {
         });
 
         return List.copyOf(jobs.values());
+    }
+    
+    public JobInfo getJob(String uuid) {
+        return jobs.get(UUID.fromString(uuid));
     }
         
     /**

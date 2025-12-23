@@ -168,7 +168,8 @@
         </releases>
         <snapshots>
             <enabled>false</enabled>
-        </snapshots>      </repository>
+        </snapshots>
+      </repository>
     </repositories>
 
 

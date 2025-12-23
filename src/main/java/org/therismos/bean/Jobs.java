@@ -34,11 +34,7 @@ public class Jobs {
     public Response submitJob(String body) {
         Document requestBody = Document.parse(body);
         String type = requestBody.getString("type");
-        Class clazz;
-        try {/*
-            clazz = Class.forName("org.therismos.job." + type);
-            Job jobCallable =(Job)(clazz.getDeclaredConstructor(ApplicationBean.class, Document.class).newInstance(applicationBean, requestBody));
-            */
+        try {
             Job jobCallable = AbstractJob.createJob(type, applicationBean, requestBody, AbstractJob.class);
             UUID jobId = applicationBean.submit(
                 type,

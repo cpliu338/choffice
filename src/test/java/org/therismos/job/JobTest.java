@@ -13,7 +13,9 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import org.therismos.bean.FilesResource;
+import org.therismos.web.JobDownloadServlet;
 
 /**
  *
@@ -149,5 +151,47 @@ public class JobTest {
         System.out.println("test JobInfo");
         JobInfo info = new JobInfo(UUID.randomUUID(), "WeeklyReport", System.currentTimeMillis()+60_000L);
         System.out.print(info.toJson());
-    }    
+    }
+    
+    //@Test
+    public void testExpiredTempFileFilter() throws Exception {
+        System.out.println("ExpiredTempFileFilter");
+        ApplicationBean appBean = new ApplicationBean();
+        appBean.init();
+        File tempDir = new File(appBean.getDatapath(), "downloads");
+        // Only delete files that are older than 12 hours
+        //File[] oldFiles = tempDir.listFiles(new FilenameFilter()));
+        for (File file : tempDir.listFiles(new FileFilter(){
+            public boolean accept(File file) {
+                long maximumTimestamp = System.currentTimeMillis() - TimeUnit.HOURS.toMillis(12);
+                if (!file.isFile()) {
+                    return false; // Only consider files
+                }
+                String fileName = file.getName();
+                System.out.println(fileName);
+                // Extract timestamp from filename (assuming timestamp is separated by hyphens)
+                int timestampStartIndex = fileName.lastIndexOf('_');
+                        //fileName.indexOf('-', 5); // Start after "emis-"
+                int timestampEndIndex = fileName.lastIndexOf('.');
+                if (timestampStartIndex < 0 || timestampEndIndex <= timestampStartIndex) {
+                    return false; // Invalid filename format
+                }
+
+                String timestampString = fileName.substring(timestampStartIndex + 1, timestampEndIndex);
+                System.out.println(timestampString);
+                long fileTimestamp;
+                try {
+                    fileTimestamp = Long.parseLong(timestampString);
+                } catch (NumberFormatException e) {
+                    return false; // Invalid timestamp format
+                }
+
+                return fileTimestamp < maximumTimestamp; // Accept files older than the max timestamp
+            }
+        })) {
+            System.out.println(file.getName());
+        }
+    }
+    
+    
 }
