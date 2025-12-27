@@ -1,5 +1,6 @@
 package org.therismos.job;
 
+import java.io.File;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
@@ -30,6 +31,10 @@ public class JobInfo {
 
     public void markSuccess(Document result) {
         this.result = result;
+        if (result.containsKey("download-path")) {
+            this.result.put("filename", new File(result.getString("download-path")).getName());
+            this.result.remove("download-path");
+        }
         this.status = Status.SUCCESS;
     }
 

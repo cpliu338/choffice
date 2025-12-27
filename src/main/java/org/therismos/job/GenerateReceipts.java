@@ -64,7 +64,7 @@ public class GenerateReceipts extends AbstractJob {
                 printRecord(record);
             }
             if (document != null) document.close();
-            getConfig().append("filename", f.getAbsolutePath());
+            getConfig().append("download-path", f.getAbsolutePath());
         }
         catch (DocumentException | SQLException| RuntimeException | IOException ex) {
             LOG.log(Level.SEVERE, null, ex);

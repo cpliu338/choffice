@@ -63,7 +63,7 @@ public class JobDownloadServlet extends HttpServlet {
         } else {
             try {
                 Document result = jobInfo.getResult();
-                File f = null;
+                /*File f = new File(result.getString("filename"));
                 if (result != null) {
                     if (result.containsKey("filename")) { // for GenerateReceipts
                         f = new File(result.getString("filename"));
@@ -72,8 +72,8 @@ public class JobDownloadServlet extends HttpServlet {
                         f = new File(result.getString("download-path"));
                         result.put("filename", result.getString("download-path"));
                     }
-                }
-                if (f == null) {
+                }*/
+                if (!result.containsKey("filename")) {
                     response.setStatus(400);
                 }
                 response.setContentType("application/json");
