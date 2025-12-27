@@ -83,4 +83,20 @@
                 <it.test>${packageClassName}</it.test>
             </properties>
         </action>
+        <action>
+            <actionName>debug</actionName>
+            <packagings>
+                <packaging>war</packaging>
+                <packaging>ear</packaging>
+                <packaging>ejb</packaging>
+            </packagings>
+            <goals>
+                <goal>package</goal>
+            </goals>
+            <properties>
+                <netbeans.deploy.debugmode>true</netbeans.deploy.debugmode>
+                <netbeans.deploy>true</netbeans.deploy>
+                <Env.choffice>/home/cp_liu/Documents/java_dir</Env.choffice>
+            </properties>
+        </action>
     </actions>

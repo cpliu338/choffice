@@ -1,10 +1,20 @@
 package org.therismos.job;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.UUID;
+import org.bson.BsonWriter;
 import org.bson.Document;
+import org.bson.codecs.Encoder;
+import org.bson.codecs.EncoderContext;
+import org.bson.codecs.configuration.CodecConfigurationException;
+import org.bson.types.Decimal128;
+import org.bson.types.ObjectId;
 
 /**
  * Suggested by Open AI, best practice for async job management
@@ -72,7 +82,62 @@ public class JobInfo {
         }
         d.append("result", result);
         d.append("expires", java.time.Instant.ofEpochMilli(expiresAt).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
-        return d.toJson();
+        Encoder encoder = new Encoder<Document>(){
+            @Override
+            public void encode(BsonWriter writer, Document document, EncoderContext encoderContext) {
+                writer.writeStartDocument();
+                for (Map.Entry<String, Object> entry : document.entrySet()) {
+                    writer.writeName(entry.getKey());
+                    writeValue(writer, entry.getValue());
+                }
+                writer.writeEndDocument();
+            }
+
+            private void writeValue(BsonWriter writer, Object value) {
+                if (value == null) {
+                    writer.writeNull();
+                } else if (value instanceof String) {
+                    writer.writeString((String) value);
+                } else if (value instanceof Integer) {
+                    writer.writeInt32((Integer) value);
+                } else if (value instanceof Long) {
+                    writer.writeInt64((Long) value);
+                } else if (value instanceof Boolean) {
+                    writer.writeBoolean((Boolean) value);
+                } else if (value instanceof Double) {
+                    writer.writeDouble((Double) value);
+                } else if (value instanceof ObjectId) {
+                    writer.writeObjectId((ObjectId) value);
+                } else if (value instanceof LocalDate) {
+                    writer.writeString(((LocalDate) value).toString()); // ISO-8601 format
+                } else if (value instanceof YearMonth) {
+                    writer.writeString(((YearMonth) value).toString()); // ISO-8601 format
+                } else if (value instanceof Map) {
+                    writer.writeStartDocument();
+                    for (Map.Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
+                        writer.writeName(entry.getKey().toString());
+                        writeValue(writer, entry.getValue()); // Recursive call
+                    }
+                    writer.writeEndDocument();
+                } else if (value instanceof Iterable) {
+                    writer.writeStartArray();
+                    for (Object item : (Iterable<?>) value) {
+                        writeValue(writer, item); // Recursive call for nested items
+                    }
+                    writer.writeEndArray();
+               } else if (value instanceof BigDecimal) {
+                    writer.writeDecimal128(new Decimal128((BigDecimal) value));
+                } else {
+                    throw new CodecConfigurationException("Unsupported type: " + value.getClass());
+                }
+            }
+
+            @Override
+            public Class<Document> getEncoderClass() {
+                return Document.class;
+            }
+        };
+        return d.toJson(encoder);
     }
     
 }
