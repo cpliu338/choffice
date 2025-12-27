@@ -64,26 +64,28 @@ public class JobDownloadServlet extends HttpServlet {
             try {
                 Document result = jobInfo.getResult();
                 File f = null;
-                if (result.containsKey("filename")) { // for GenerateReceipts
-                    f = new File(result.getString("filename"));
-                }
-                else if (result.containsKey("download-path")) { // for AbstractXlsxJob
-                    f = new File(result.getString("download-path"));
+                if (result != null) {
+                    if (result.containsKey("filename")) { // for GenerateReceipts
+                        f = new File(result.getString("filename"));
+                    }
+                    else if (result.containsKey("download-path")) { // for AbstractXlsxJob
+                        f = new File(result.getString("download-path"));
+                        result.put("filename", result.getString("download-path"));
+                    }
                 }
                 if (f == null) {
                     response.setStatus(400);
-                    response.setContentType("application/json");
-                    response.getWriter().print(result.toJson());                    
                 }
-                else {
-                    response.setContentType("text/plain");
-                    response.getWriter().print(f.getName());   
-                }
+                response.setContentType("application/json");
+                response.getWriter().print(jobInfo.toJson()); 
                 appBean.removeJob(uuid); // Essential cleanup
             } catch (Exception e) {
                 response.setStatus(500);
                 response.setContentType("text/plain");
-                response.getWriter().print("Error: " + e.getCause().getMessage());
+                if (e.getCause() == null)
+                    response.getWriter().print("Error: " + e.getMessage());
+                else
+                    response.getWriter().print("Error: " + e.getCause().getMessage());
                 appBean.removeJob(uuid);
             }
         }

@@ -55,6 +55,17 @@ public class JobInfo {
         d.append("type", type);
         d.append("status", status.toString());
         d.append("error", error == null ? "null" : error.getMessage());
+        if (error != null) {
+            if (error.getCause() == null) {
+                d.append("exception-class", error.getClass().getName());
+            }
+            else {
+                Throwable cause = error.getCause();
+                d.append("exception-class", cause.getClass().getName());
+                d.append("exception-message", cause.getMessage());
+                System.getLogger(JobInfo.class.getName()).log(System.Logger.Level.ERROR, "", error);
+            }
+        }
         d.append("result", result);
         d.append("expires", java.time.Instant.ofEpochMilli(expiresAt).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
         return d.toJson();
