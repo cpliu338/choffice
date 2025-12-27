@@ -63,7 +63,6 @@ public class JobInfo {
                 Throwable cause = error.getCause();
                 d.append("exception-class", cause.getClass().getName());
                 d.append("exception-message", cause.getMessage());
-                System.getLogger(JobInfo.class.getName()).log(System.Logger.Level.ERROR, "", error);
             }
         }
         d.append("result", result);

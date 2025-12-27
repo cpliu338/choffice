@@ -31,8 +31,8 @@ public class SimpleDatasource {
         }
 
         // 2. Create and configure the MariaDbDataSource object
-        MariaDbDataSource dataSource = new MariaDbDataSource();
-        dataSource.setUrl(props.getProperty("db.url"));
+        MariaDbDataSource dataSource = new MariaDbDataSource(props.getProperty("db.url"));
+        //dataSource.setUrl();
         dataSource.setUser(props.getProperty("db.user"));
         dataSource.setPassword(props.getProperty("db.password"));
 

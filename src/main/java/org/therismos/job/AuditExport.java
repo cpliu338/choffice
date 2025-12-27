@@ -105,7 +105,9 @@ public class AuditExport extends AbstractXlsxJob {
                     + "accounts.name_chi, entries.amount, entries.detail "
                     + "FROM entries INNER JOIN accounts ON entries.account_id = accounts.id "
                     + "WHERE entries.date1 BETWEEN ? AND ? ORDER BY code, date1, transref", 
-                    new BeanListHandler<>(Entry.class), java.sql.Date.valueOf(startDate), java.sql.Date.valueOf(endDate));
+                    new BeanListHandler<>(Entry.class), startDate, endDate
+        // LocalDate is more reliable than java.sql.Date.valueOf(startDate), java.sql.Date.valueOf(endDate)
+        );
         for (Entry entry : a) {
             row = cloneRow(1, rowno++);
             Cell ce = row.createCell(0);
