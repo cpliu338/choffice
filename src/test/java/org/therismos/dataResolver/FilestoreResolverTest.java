@@ -112,6 +112,8 @@ public class FilestoreResolverTest {
         ApplicationBean appBean = new ApplicationBean();
         appBean.setDatapath("/home/cp_liu/Documents/java_dir");//System.getenv("choffice"));
         appBean.init();
+        appBean.setNaspath("/home/cp_liu/Documents/Therismos");
+        appBean.setNaspath2("/home/cp_liu/Documents/java_dir");
         FilestoreResolver resolver = new FilestoreResolver();
         resolver.setAppBean(appBean);
         Document param = resolver.getDefaults();

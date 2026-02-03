@@ -42,6 +42,20 @@ import org.therismos.job.JobInfo;
 @Singleton
 public class ApplicationBean implements java.io.Serializable {
 
+    /**
+     * @return the naspath2
+     */
+    public String getNaspath2() {
+        return naspath2;
+    }
+
+    /**
+     * @param naspath2 the naspath2 to set
+     */
+    public void setNaspath2(String naspath2) {
+        this.naspath2 = naspath2;
+    }
+
     private final Map<UUID, JobInfo> jobs = new ConcurrentHashMap<>();
 
     public UUID submit(
@@ -149,6 +163,8 @@ public class ApplicationBean implements java.io.Serializable {
     private String datapath;
     @jakarta.annotation.Resource
     private String naspath;
+    @jakarta.annotation.Resource
+    private String naspath2;
     @jakarta.annotation.Resource(name="churchDB")
     private DataSource dataSource;
     

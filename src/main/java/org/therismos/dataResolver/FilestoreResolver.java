@@ -35,7 +35,8 @@ public class FilestoreResolver implements Resolver {
     }
     
     /**
-     * HTTP GET /get-result?type={mandatory}&sort={default name}&direction={default desc}&page={default 1}&page_size={default 20}&path={optional}
+     * HTTP GET /webresources/get-data?type=Filestore&sort={default name}&direction={default desc}&page={default 1}&page_size={default 20}
+     * &root=[naspath|naspath2]&path={optional}
      * @param param Document with mandatory keys: "baseFolder"
      * @return A List of Maps, each representing an entry's attributes:
      * name, size, date, type, readable, writable
@@ -43,14 +44,12 @@ public class FilestoreResolver implements Resolver {
      */
     @Override
     public Map<String, Object> getData(Document param)  {
-        final String defaultFolder = appBean.getNaspath() != null ? appBean.getNaspath() : appBean.getDatapath();
         // 1. Convert the input string to a Path object.
-        final String baseFolder = param.get("root", defaultFolder);
-        Path folderPath = Paths.get(
-            (Arrays.stream(
-            appBean.getProperties().getProperty("nas.paths", defaultFolder).split(":") // String[] of nas paths
-            ).anyMatch(nas_path -> nas_path.equalsIgnoreCase(baseFolder))) ? baseFolder : defaultFolder // acceptable base folder
-                , param.get("path", ""));
+        String root = param.get("root", "naspath");
+        if (!root.equals("naspath") && !root.equals("naspath2")) root = "naspath";
+        final String baseFolder = root.equals("naspath2") ? appBean.getNaspath2() : appBean.getNaspath();
+        Path folderPath = Paths.get(baseFolder, param.get("path", ""));
+        System.getLogger(FilestoreResolver.class.getName()).log(System.Logger.Level.INFO, baseFolder);
         // Check if the path exists and is a directory.
         if (!Files.exists(folderPath) || !Files.isDirectory(folderPath)) {
             result.put(TOTALCOUNT, this.total_count);
