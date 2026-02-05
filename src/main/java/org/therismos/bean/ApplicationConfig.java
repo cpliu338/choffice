@@ -26,6 +26,7 @@ public class ApplicationConfig extends jakarta.ws.rs.core.Application {
         resources.add(org.therismos.bean.FilesResource.class);
         resources.add(org.therismos.bean.Jobs.class);
         resources.add(org.therismos.bean.NonSqlDatasource.class);
+        resources.add(org.therismos.bean.SmbResource.class);
     }
     
 }
