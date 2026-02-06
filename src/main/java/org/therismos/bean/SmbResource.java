@@ -8,6 +8,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import java.io.*;
 import org.bson.Document;
+import org.therismos.dataResolver.FSService;
 import org.therismos.dataResolver.SMBService;
 /**
  * SMB Service
@@ -39,7 +40,7 @@ public class SmbResource {
             fileName = path;
         }
         StreamingOutput streamingOutput = (OutputStream entityStream) -> {
-            // Call your service to get the source stream
+            // same method for readonly or smb share
             SMBService smbService = new SMBService();
             smbService.setAppBean(appBean);
             try (InputStream smbInputStream = smbService.getFile(root, path)) {
@@ -54,8 +55,8 @@ public class SmbResource {
     }
     /**
      * PUT method for updating or creating an instance of SmbResource
-     * @param args should contain server, shareName, user, pass, targetPath and newPath
-     * @param content representation for the resource
+     * @param map should contain server, shareName, user, pass, targetPath and newPath
+     * //param content representation for the resource
      * @return 
      */
     @PUT
@@ -63,15 +64,14 @@ public class SmbResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/rename")
     public Response rename(java.util.Map<String,Object> map) {
-        SMBService smbService = new SMBService();
-        smbService.setAppBean(appBean);
         boolean result = false;
         Document args = new Document(); args.putAll(map);
+        FSService service = args.containsKey("readonly") ? new FSService() : new SMBService();
+        service.setAppBean(appBean);
         try {
-            if (!args.containsKey("dryRun"))
-                result = smbService.renameFile(args.getString("server"), args.getString("shareName"), 
-                    args.getString("user"), args.getString("pass"), args.getString("targetPath"), args.getString("newPath"));
-        } catch (IOException ex) {
+            result = service.renameFile(args.getString("server"), args.getString("shareName"), 
+                args.getString("user"), args.getString("pass"), args.getString("targetPath"), args.getString("renameToPath"));
+        } catch (Exception ex) {
             System.getLogger(SmbResource.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
             args.put("exception_class", ex.getClass().getName());
             args.put("exception_message", ex.getMessage());
@@ -79,4 +79,48 @@ public class SmbResource {
         ResponseBuilder builder = (result) ? Response.accepted() : Response.status(400);
         return builder.entity(args).build();
     }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/store")
+    public Response store(java.util.Map<String,Object> map) {
+        boolean result = false;
+        Document args = new Document(); args.putAll(map);
+        FSService service = args.containsKey("readonly") ? new FSService() : new SMBService();
+        service.setAppBean(appBean);
+        try {
+            result = service.storeFileFromUrl
+            (args.getString("server"), args.getString("shareName"), 
+                args.getString("user"), args.getString("pass"), args.getString("targetPath"), args.getString("sourceUrl"));
+        } catch (Exception ex) {
+            System.getLogger(SmbResource.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            args.put("exception_class", ex.getClass().getName());
+            args.put("exception_message", ex.getMessage());
+        }
+        ResponseBuilder builder = (result) ? Response.accepted() : Response.status(400);
+        return builder.entity(args).build();
+    }
+    
+    @DELETE
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/store")
+    public Response delete(java.util.Map<String,Object> map) {
+        boolean result = false;
+        Document args = new Document(); args.putAll(map);
+        FSService service = args.containsKey("readonly") ? new FSService() : new SMBService();
+        service.setAppBean(appBean);
+        try {
+            result = service.deleteFile//(server, shareName, user, pass, path)
+            (args.getString("server"), args.getString("shareName"), 
+                args.getString("user"), args.getString("pass"), args.getString("targetPath"));
+        } catch (Exception ex) {
+            System.getLogger(SmbResource.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            args.put("exception_class", ex.getClass().getName());
+            args.put("exception_message", ex.getMessage());
+        }
+        ResponseBuilder builder = (result) ? Response.noContent() : Response.status(400);
+        return builder.entity(args).build();
+    }
+
 }

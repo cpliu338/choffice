@@ -20,8 +20,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
@@ -47,6 +45,10 @@ public class ApplicationBean implements java.io.Serializable {
      */
     public String getNaspath2() {
         return naspath2;
+    }
+    
+    public String getNasRoot(String root) {
+        return ("naspath2".equalsIgnoreCase(root)) ? naspath2 : naspath;
     }
 
     /**

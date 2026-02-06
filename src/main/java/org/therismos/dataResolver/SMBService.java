@@ -13,29 +13,12 @@ import com.hierynomus.mssmb2.SMB2ShareAccess;
 import java.io.*;
 import java.net.URL;
 import java.util.EnumSet;
-import org.therismos.bean.ApplicationBean;
 
 /**
  * Manage an SMB share, but with a dry-run option when smbd is not reachable
  * @author cp_liu
  */
-public class SMBService {
-
-    /**
-     * @return the appBean
-     */
-    public ApplicationBean getAppBean() {
-        return appBean;
-    }
-
-    /**
-     * @param appBean the appBean to set
-     */
-    public void setAppBean(ApplicationBean appBean) {
-        this.appBean = appBean;
-    }
-
-    private ApplicationBean appBean;
+public class SMBService extends FSService {
     
     public static void main(String[] args) {
         java.util.Properties props = new java.util.Properties();
@@ -77,13 +60,9 @@ public class SMBService {
             System.err.println(ex.getMessage());
         }
     }
-    
-    public InputStream getFile(String root, String path) throws IOException {
-        String rootFolder = "pastors".equals(root) ? appBean.getNaspath() : appBean.getNaspath2();
-        return java.nio.file.Files.newInputStream(java.nio.file.Paths.get(rootFolder, path));
-    }
 
     // Method for @POST: Downloads from URL and uploads to SMB
+    @Override
     public boolean storeFileFromUrl(String server, String shareName, String user, String pass, 
                                  String targetPath, String sourceUrl) throws IOException {
         SMBClient client = new SMBClient();
@@ -112,6 +91,7 @@ public class SMBService {
     }
 
     // Method for @PUT: Renames a remoteFile
+    @Override
     public boolean renameFile(String server, String shareName, String user, String pass, 
                            String oldPath, String newPath) throws IOException {
         SMBClient client = new SMBClient();
@@ -143,6 +123,7 @@ public class SMBService {
     }
 
     // Method for @DELETE: Deletes a remoteFile
+    @Override
     public boolean deleteFile(String server, String shareName, String user, String pass, 
                            String path) throws IOException {
         SMBClient client = new SMBClient();
