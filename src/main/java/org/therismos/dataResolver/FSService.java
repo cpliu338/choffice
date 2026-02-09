@@ -52,11 +52,18 @@ public class FSService {
 
     public boolean renameFile(String server, String shareName, String user, String pass, 
                            String oldPath, String newPath) throws IOException {
-        throw new java.lang.UnsupportedOperationException();
+        String rootFolder = appBean.getNasRoot(shareName);
+        Path targetPath = Paths.get(rootFolder, oldPath);
+        Path renameToPath = Paths.get(rootFolder, newPath);
+        Files.move(targetPath, renameToPath);
+        return true;
     }
 
     public boolean deleteFile(String server, String shareName, String user, String pass, 
                            String path) throws IOException {
-        throw new java.lang.UnsupportedOperationException();
+        String rootFolder = appBean.getNasRoot(shareName);
+        Path targetPath = Paths.get(rootFolder, path);
+        Files.delete(targetPath);
+        return true;
     }
 }
