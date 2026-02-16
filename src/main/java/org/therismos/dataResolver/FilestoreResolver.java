@@ -171,7 +171,7 @@ System.getLogger(FilestoreResolver.class.getName()).log(System.Logger.Level.INFO
                 .map((entry) -> {
                     Map<String, Object> attributes = new HashMap<>();
                 // Get filename (name)
-                attributes.put("name", entry.getFileName().toString());
+                attributes.put(NAME, entry.getFileName().toString());
 
                 // Fetch BasicFileAttributes in one atomic operation (efficient).
                 // This gets size, timestamps, and file type efficiently.
@@ -179,10 +179,10 @@ System.getLogger(FilestoreResolver.class.getName()).log(System.Logger.Level.INFO
                 try {
                     basicAttr = Files.readAttributes(entry, BasicFileAttributes.class);
                 // Size (Bytes)
-                attributes.put("size", basicAttr.size());
+                attributes.put(SIZE, basicAttr.size());
                 
                 // Date (Last Modified)
-                attributes.put("date", basicAttr.lastModifiedTime().toString());
+                attributes.put(DATE, basicAttr.lastModifiedTime().toString());
                         //.toInstant());
                 
                 // Date (Creation Time)
@@ -224,7 +224,7 @@ System.getLogger(FilestoreResolver.class.getName()).log(System.Logger.Level.INFO
                 */
                 } catch (IOException ex) {
                     System.getLogger(FilestoreResolver.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-                    attributes.put(DATE, FileTime.fromMillis(0));
+                    attributes.put(DATE, FileTime.fromMillis(0).toString());
                     attributes.put(SIZE, 0);
                     attributes.put("type", "IO Exception");
                 }                
