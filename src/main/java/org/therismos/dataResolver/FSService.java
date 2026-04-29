@@ -35,8 +35,9 @@ public class FSService {
      * @return
      * @throws IOException 
      */
-    public InputStream getFile(String root, String path) throws IOException {
-        String rootFolder = appBean.getNasRoot(root);
+    public InputStream getFile(String ip, String shareName, String path, String user, String pass) throws IOException {
+        //(String root, String path) throws IOException {
+        String rootFolder = appBean.getNasRoot(shareName);
         return java.nio.file.Files.newInputStream(java.nio.file.Paths.get(rootFolder, path));
     }
     

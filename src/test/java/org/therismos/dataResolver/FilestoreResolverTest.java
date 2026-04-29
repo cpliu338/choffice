@@ -14,7 +14,7 @@ import com.hierynomus.smbj.share.File;
 import com.mongodb.client.model.Filters;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
@@ -131,12 +131,28 @@ public class FilestoreResolverTest {
     }
 
     //@Test 
-    public void testSmb() {
-        // --- EDIT THESE PLACEHOLDERS ---
-        String server = "IP";
+    public void testDL() throws IOException {
+        String server = "192.168.1.123";
         String shareName = "share";
         String user = "user";
-        String password = "pwd";
+        String password = "pass";
+        String domain = ""; // Leave empty if not on a domain
+        FSService smbService = new SMBService();
+        try (InputStream is = smbService.getFile(server, shareName, "test.pdf", user, password);
+        OutputStream os = new FileOutputStream("/home/cp_liu/Downloads/test.pdf")
+        ) {
+            is.transferTo(
+            os
+            );
+        }
+    }
+    
+    public void testSmb() {
+        // --- EDIT THESE PLACEHOLDERS ---
+        String server = "192.168.1.123";
+        String shareName = "share";
+        String user = "user";
+        String password = "pass";
         String domain = ""; // Leave empty if not on a domain
         // -------------------------------
 

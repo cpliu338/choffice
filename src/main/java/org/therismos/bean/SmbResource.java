@@ -3,6 +3,7 @@ package org.therismos.bean;
 import jakarta.ws.rs.core.*;
 import jakarta.ws.rs.*;
 import jakarta.enterprise.context.RequestScoped;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
@@ -21,6 +22,8 @@ public class SmbResource {
 
     @jakarta.inject.Inject
     ApplicationBean appBean;
+    @Context
+    HttpServletRequest req;    
 
     /**
      * Creates a new instance of SmbResource
@@ -31,7 +34,7 @@ public class SmbResource {
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("/download")
-    public Response downloadFile(@QueryParam("path") String path, @QueryParam("root") String root) {
+    public Response downloadFile(@QueryParam("targetPath") String path) {
         // Extract filename for Content-Disposition
         String fileName = "download";
         if (path != null && path.contains("/")) {
@@ -41,9 +44,13 @@ public class SmbResource {
         }
         StreamingOutput streamingOutput = (OutputStream entityStream) -> {
             // same method for readonly or smb share
-            SMBService smbService = new SMBService();
-            smbService.setAppBean(appBean);
-            try (InputStream smbInputStream = smbService.getFile(root, path)) {
+            FSService smbService = req.getParameter("readonly") != null ? new FSService() : new SMBService();
+            smbService.setAppBean(appBean); 
+            try (InputStream smbInputStream = smbService.getFile(
+                 req.getParameter("server"), req.getParameter("shareName"),
+                path, 
+                req.getParameter("user"), req.getParameter("pass")
+            )) {
                 // Pipe the data directly to the HTTP response
                 smbInputStream.transferTo(entityStream);
                 entityStream.flush();

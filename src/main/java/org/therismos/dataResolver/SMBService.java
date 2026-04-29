@@ -139,4 +139,33 @@ public class SMBService extends FSService {
             }
         }
     }
+    
+    @Override
+    public InputStream getFile(String server, String shareName, String path, String user, String pass) throws IOException {
+        SMBClient client = new SMBClient();
+        
+        // Connect and Authenticate
+        Connection connection = client.connect(server);
+        Session session = connection.authenticate(new AuthenticationContext(user, pass.toCharArray(), ""));
+        
+        // Connect to the specific Share
+        DiskShare share = (DiskShare) session.connectShare(shareName);
+
+        // Open the file for Reading
+        // Note: SMBJ File objects are NOT AutoCloseable in version 0.13.0
+        com.hierynomus.smbj.share.File remoteFile = share.openFile(
+                path,
+                EnumSet.of(AccessMask.FILE_READ_DATA),
+                null,
+                SMB2ShareAccess.ALL,
+                SMB2CreateDisposition.FILE_OPEN,
+                null
+        );
+
+        // Return the stream
+        // CAUTION: You must close the remoteFile, share, session, and connection 
+        // AFTER the stream has been fully consumed.
+        return remoteFile.getInputStream();
+    }
+
 }
